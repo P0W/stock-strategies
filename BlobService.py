@@ -16,7 +16,7 @@ class BlobService:
         self.blob_service_client = BlobServiceClient.from_connection_string(
             connection_string
         )
-        self.container_name = "momenum-strategy"
+        self.container_name = "momentum-strategy"
         self.container_client = self.blob_service_client.get_container_client(
             self.container_name
         )
