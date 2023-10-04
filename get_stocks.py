@@ -2,8 +2,10 @@
 
 import json
 import logging
+import math
 import pathlib
 import datetime
+import concurrent.futures
 
 import requests
 from bs4 import BeautifulSoup
@@ -81,6 +83,48 @@ def calculate_vwap(data_points):
     return vwap
 
 
+# @brief Method to calculate z score
+# @param data: list of data points
+# @return normalized data
+def z_score_normalize(data):
+    mean = sum(data) / len(data)
+    std_dev = (sum((x - mean) ** 2 for x in data) / len(data)) ** 0.5
+    return [(x - mean) / std_dev for x in data]
+
+
+## @brief Method to calculate composite score
+## @param returns: list of returns
+## @return composite_score: calculated composite score
+## @return normalized_returns: normalized returns
+## @return normalized_vwap: normalized vwap
+## @return normalized_rsi: normalized rsi
+def composite_score(returns):
+    # Define weights for each metric
+    weight_returns = 0.4
+    weight_vwap = 0.2
+    weight_rsi = 0.4
+    normalized_returns = [
+        returns["1y"]["return"],
+        returns["1mo"]["return"] * 12,
+        returns["1w"]["return"] * 52,
+    ]
+    normalized_vwap = z_score_normalize(
+        [returns["1y"]["vwap"], returns["1mo"]["vwap"], returns["1w"]["vwap"]]
+    )
+    normalized_rsi = z_score_normalize(
+        [returns["1y"]["rsi"], returns["1mo"]["rsi"], returns["1w"]["rsi"]]
+    )
+
+    # Calculate the composite score
+    composite_score = (
+        weight_returns * sum(normalized_returns)
+        + weight_vwap * sum(normalized_vwap)
+        + weight_rsi * sum(normalized_rsi)
+    )
+
+    return composite_score, normalized_returns, normalized_vwap, normalized_rsi
+
+
 ## @brief Method to get list of stocks from tickertape
 ## @param baseUrl: base url to fetch list of stocks
 ## @return results: list of stocks
@@ -106,7 +150,7 @@ def getStockList(
 
             for duration in ["1y", "1mo", "1w"]:
                 apiUrl = f"{base_api_url}?duration={duration}"
-                logging.info(f"Fetching data for {apiUrl}")
+                logging.info(f"Fetching data for {sTag.text} last {duration}")
                 res = tickerRequest.get(apiUrl)
 
                 if res.ok:
@@ -121,12 +165,18 @@ def getStockList(
                 else:
                     logging.info(f"Failed to get data for {apiTicker}")
 
+            score, ret, v, rsi = composite_score(returns)
+
             results.append(
                 {
                     "stock": aTag.text,
                     "symbol": sTag.text,
                     "returns": returns,
                     "price": current_price,
+                    "composite_score": score,
+                    "normalized_returns": ret,
+                    "normalized_vwap": v,
+                    "normalized_rsi": rsi,
                 }
             )
 
@@ -136,20 +186,7 @@ def getStockList(
         for s in subTables:
             fetch_stock_data(s)
 
-        results = sorted(
-            results,
-            key=lambda x: (
-                -x["returns"]["1y"]["return"],
-                -x["returns"]["1mo"]["return"],
-                -x["returns"]["1w"]["return"],
-                -x["returns"]["1w"]["vwap"],
-                -x["returns"]["1mo"]["vwap"],
-                -x["returns"]["1y"]["vwap"],
-                -(x["returns"]["1w"]["rsi"] > 55),
-                -(x["returns"]["1mo"]["rsi"] > 55),
-                -(x["returns"]["1y"]["rsi"] > 55),
-            ),
-        )
+        results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
     else:
         logging.info("Failed to get data from %s", baseUrl)
         ### show error message
@@ -323,7 +360,8 @@ if __name__ == "__main__":
         nifty200_symbols = getStockList()
         with open(fileName, "w") as fh:
             json.dump(nifty200_symbols, fh, indent=2)
-    portfolio = load_portfolio(fileName=get_file_name("portfolio-on"))
+    fileName = get_file_name("portfolio-on")
+    portfolio = load_portfolio(fileName)
     if portfolio:
         logging.info("Portfolio loaded from file")
     else:
