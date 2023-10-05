@@ -14,7 +14,7 @@ app = func.FunctionApp()
 
 ## Run the momentum strategy time triggered
 @app.schedule(
-    schedule="0 17 * * 1-5", arg_name="myTimer", run_on_startup=False, use_monitor=False
+    schedule="0 3 * * 1-5", arg_name="myTimer", run_on_startup=False, use_monitor=False
 )
 def momentum_strategy(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
@@ -179,11 +179,10 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
             portfolio_value += item["investment"]
 
         # Add the portfolio value paragraph with styling
-        table_html += f"<tr><td colspan='17'><p class='portfolio-value'>Portfolio value: {round_off(portfolio_value)} | {portfolio_blob_name}</p></td></tr>"
+        table_html += f"<tr><td colspan='17'><p class='portfolio-value'>Portfolio value: {round_off(portfolio_value)} INR | {portfolio_blob_name.split('.')[0]}</p></td></tr>"
 
         table_html += "</table>"
 
-        # return table_html, 200, {'Content-Type': 'text/html; charset=utf-8'}
         return func.HttpResponse(
             table_html, status_code=200, charset="utf-8", mimetype="text/html"
         )
