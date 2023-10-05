@@ -354,7 +354,8 @@ def rebalance_portfolio(
     ##  so that the "no change" items come first, followed by "sold" items, and then "bought" items.
     result["stocks"] = sorted(
         result["stocks"],
-        key=lambda x: (x["shares"] == 0, x["shares"] < 0, x["shares"] > 0),
+        key=lambda x: (x["shares"] == 0, x["shares"] < 0, -x["amount"]),
+        reverse=True,
     )
 
     result["capital_incurred"] = capital_incurred
@@ -390,7 +391,7 @@ if __name__ == "__main__":
             previous_day_portfolio = json.load(fh)
             display_portfolio(previous_day_portfolio, "Previous Day Portfolio")
             rebalance_file_name = get_file_name("rebalance-on")
-            if not pathlib.Path(rebalance_file_name).exists():
+            if True or not pathlib.Path(rebalance_file_name).exists():
                 rebalance = rebalance_portfolio(
                     previous_day_portfolio,
                     portfolio,
