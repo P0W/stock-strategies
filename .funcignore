@@ -8,3 +8,4 @@ test
 .venv
 portfolio-on-*.json
 stocks-nifty-*.json
+rebalance-on-*.json

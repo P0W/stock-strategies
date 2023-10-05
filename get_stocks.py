@@ -196,9 +196,10 @@ def getStockList(
 
 ## @brief Method to display portfolio
 ## @param data_items: list of stocks
-def display_portfolio(data_items):
+def display_portfolio(data_items, name="Portfolio"):
     N = len(data_items)
     ## display header
+    logging.info(f"{name} ({N} stocks)")
     logging.info(
         "{:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(
             "Symbol",
@@ -239,7 +240,7 @@ def display_portfolio(data_items):
         )
 
     ## calculate total investment
-    total = sum([stock["shares"] * stock["price"] for stock in portfolio])
+    total = sum([stock["shares"] * stock["price"] for stock in data_items])
     logging.info(f"Total investment: {total}")
 
 
@@ -292,17 +293,27 @@ def build_portfolio(data_items, N=10, investment=100000):
     return portfolio
 
 
+## @brief Helper method to get price list of stocks
+## @param data_items: list of stocks
+## @return price_list: price list of stocks
+def build_price_list(data_items):
+    return {stock["symbol"]: stock["price"] for stock in data_items}
+
+
 ## @brief Helper method to rebalance portfolio previous day and current day
-## @param portfolio_1: previous day portfolio
-## @param portfolio_2: current day portfolio
-## @return diff_portfolio_info: difference in portfolio
-## @return buy_value: buy value
-## @return sell_value: sell value
-## @return comment: comment
-def rebalance_portfolio(portfolio_1, portfolio_2):
-    def get_stock_info(portfolio):
+## @param previous_day_portfolio: previous day portfolio
+## @param current_day_portfolio: current day portfolio
+## @return current_day_price_dict: latest price of stocks
+## @return diff_portfolio_info: difference in portfolio along with capital incurred
+def rebalance_portfolio(
+    previous_day_portfolio, current_day_portfolio, current_day_price_dict
+):
+    capital_incurred = 0
+    result = {"stocks": [], "capital_incurred": ""}
+
+    def get_stock_info(portfolio_data):
         stock_info = {}
-        for stock in portfolio:
+        for stock in portfolio_data:
             stock_info[stock["symbol"]] = {
                 "shares": stock["shares"],
                 "investment": stock["investment"],
@@ -310,43 +321,37 @@ def rebalance_portfolio(portfolio_1, portfolio_2):
             }
         return stock_info
 
-    diff_portfolio_info = {}
-    buy_value = 0.0
-    sell_value = 0.0
-    stock_info_1 = get_stock_info(portfolio_1)
-    stock_info_2 = get_stock_info(portfolio_2)
+    day1_stock_info = get_stock_info(previous_day_portfolio)
+    day2_stock_info = get_stock_info(current_day_portfolio)
+    # Calculate the current value of each stock on Day 2
+    for stock, info in day1_stock_info.items():
+        shares_day1 = info.get("shares", 0)
+        shares_day2 = day2_stock_info.get(stock, {}).get("shares", 0)
+        price_day2 = current_day_price_dict[stock]
+        amount = (shares_day2 - shares_day1) * price_day2
+        result["stocks"].append(
+            {
+                "symbol": stock,
+                "shares": shares_day2 - shares_day1,
+                "amount": amount,
+            }
+        )
+        # Calculate the profit or loss for this stock
+        capital_incurred += amount
 
-    ## find stock in portfolio_2 but not in portfolio
-    for stock in stock_info_2:
-        if stock not in stock_info_1:
-            diff_portfolio_info[stock] = stock_info_2[stock]["shares"]
-            buy_value += stock_info_2[stock]["shares"] * stock_info_2[stock]["price"]
-
-    ## find stock in portfolio but not in portfolio_2
-
-    for stock in stock_info_1:
-        if stock not in stock_info_2:
-            diff_portfolio_info[stock] = -stock_info_1[stock]["shares"]
-            sell_value += stock_info_1[stock]["shares"] * stock_info_1[stock]["price"]
-
-    ## find common stocks
-    for stock in stock_info_2:
-        if stock in stock_info_1:
-            diff_portfolio_info[stock] = (
-                stock_info_2[stock]["shares"] - stock_info_1[stock]["shares"]
+    # Calculate the new stocks to buy on Day 2
+    for stock, info in day2_stock_info.items():
+        if not stock in day1_stock_info:
+            shares_day2 = info.get("shares", 0)
+            price_day2 = current_day_price_dict[stock]
+            amount = shares_day2 * price_day2
+            result["stocks"].append(
+                {"symbol": stock, "shares": shares_day2, "amount": amount}
             )
-            if diff_portfolio_info[stock] > 0:
-                buy_value += diff_portfolio_info[stock] * stock_info_2[stock]["price"]
-            else:
-                sell_value += -diff_portfolio_info[stock] * stock_info_1[stock]["price"]
+            capital_incurred += amount  ## Buy new stocks
 
-    diff_amount = sell_value - buy_value
-    comment = ""
-    if diff_amount > 0:
-        comment = "Get %.2f" % diff_amount
-    else:
-        comment = "Invest %.2f" % -diff_amount
-    return diff_portfolio_info, buy_value, sell_value, comment
+    result["capital_incurred"] = capital_incurred
+    return result
 
 
 ## General testing and simulation
@@ -370,29 +375,23 @@ if __name__ == "__main__":
         )
         with open(fileName, "w") as fh:
             json.dump(portfolio, fh, indent=2)
-    display_portfolio(portfolio)
+    display_portfolio(portfolio, "Today's Portfolio")
 
     previous_day_file_name = get_file_name("portfolio-on", days=1)
     if pathlib.Path(previous_day_file_name).exists():
         with open(previous_day_file_name, "r") as fh:
             previous_day_portfolio = json.load(fh)
-            rebalance = rebalance_portfolio(previous_day_portfolio, portfolio)
-            with open(get_file_name("rebalance-on"), "w") as fh:
-                json.dump(rebalance, fh, indent=2)
+            display_portfolio(previous_day_portfolio, "Previous Day Portfolio")
+            rebalance_file_name = get_file_name("rebalance-on")
+            if not pathlib.Path(rebalance_file_name).exists():
+                rebalance = rebalance_portfolio(
+                    previous_day_portfolio,
+                    portfolio,
+                    build_price_list(nifty200_symbols),
+                )
+                with open(rebalance_file_name, "w") as fh:
+                    json.dump(rebalance, fh, indent=2)
+            else:
+                logging.info("Rebalance file already exists")
+                rebalance = json.load(open(rebalance_file_name, "r"))
             logging.info(json.dumps(rebalance, indent=2))
-
-    # ## get middle 5 stocks and first 5 stocks and last 5 stocks from nifty200_symbols
-    # middle = nifty200_symbols[100:105]
-    # first = nifty200_symbols[:8]
-    # last = nifty200_symbols[-2:]
-    # ## join all 3 lists
-    # data_items = middle + first + last
-    # portfolio_2 = build_portfolio(data_items=data_items, N=12, investment=1500000)
-    # display_portfolio(portfolio_2)
-    # diff_portfolio_info, buy_value, sell_value, comment = rebalance_portfolio(
-    #     portfolio, portfolio_2
-    # )
-    # logging.info(json.dumps(diff_portfolio_info, indent=2))
-    # logging.info(f"Buy value: {buy_value}")
-    # logging.info(f"Sell value: {sell_value}")
-    # logging.info(f"Comment: {comment}")

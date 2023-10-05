@@ -90,10 +90,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
             request_date = req_body.get("date")
 
     if request_date:
-        portfolio_blob_name = f"portfolio-on-{request_date}"
-        return func.HttpResponse(
-            f"Hello, {request_date}. This HTTP triggered function executed successfully."
-        )
+        portfolio_blob_name = f"portfolio-on-{request_date}.json"
     else:
         portfolio_blob_name = strategy.get_file_name("portfolio-on")
 
@@ -108,7 +105,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
             table {
                 border-collapse: collapse;
                 width: 100%;
-                font-family: Arial, sans-serif;
+                font-size: 16px;
             }
             th, td {
                 border: 1px solid #dddddd;
@@ -128,6 +125,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
                 color: #007bff; /* Blue color */
                 margin-top: 10px;
             }
+            .rebalance-updates { font-size: 18px; font-weight: bold; color: #007bff; margin-top: 10px; }
         </style>"""
         table_html += """
         <table>
@@ -182,6 +180,35 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
         table_html += f"<tr><td colspan='17'><p class='portfolio-value'>Portfolio value: {round_off(portfolio_value)} INR | {portfolio_blob_name.split('.')[0]}</p></td></tr>"
 
         table_html += "</table>"
+
+        ## Show a rebalance table updates, write a lable and style it
+        table_html += "<h3>Rebalance updates</h3>"
+        rebalance_blob_name = strategy.get_file_name("rebalances/rebalance-on")
+        rebalance = blob_service.get_blob_data_if_exists(rebalance_blob_name)
+        if rebalance:
+            capital_incurred = rebalance["capital_incurred"]
+            ## Display above as tabular format
+            table_html += """
+            <table>
+            <tr>
+                <th>Stock</th>
+                <th>Shares</th>
+                <th>Amount</th>
+            </tr>
+            """
+            for item in rebalance["stocks"]:
+                table_html += (
+                    f"<tr>"
+                    f"<td>{item['symbol']}</td>"
+                    f"<td>{item['shares']}</td>"
+                    f"<td>{round_off(item['amount'])}</td>"
+                    f"</tr>"
+                )
+            table_html += "</table>"
+            ## Display the capital incurred, style it
+            table_html += f"<p class='rebalance-updates'>Capital incurred: {round_off(capital_incurred)} INR</p>"
+        else:
+            table_html += "<p class='rebalance-updates'>No rebalance updates</p>"
 
         return func.HttpResponse(
             table_html, status_code=200, charset="utf-8", mimetype="text/html"
