@@ -125,7 +125,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
              .portfolio-value {
                 font-size: 18px;
                 font-weight: bold;
-                color: #007bff; /* Blue color, you can choose your preferred color */
+                color: #007bff; /* Blue color */
                 margin-top: 10px;
             }
         </style>"""
