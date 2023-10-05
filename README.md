@@ -7,6 +7,9 @@ calculate financial metrics, build and rebalance investment portfolios, and disp
 
 It is designed to run as an Azure Function, making it easy to automate daily/weekly/monthly portfolio updates.
 
+[**`Live Hosted on Azure`**](https://stock-strategies.azurewebsites.net/api/portfolio?code=hUPt2tOHNPrEsmBzyKlU5klzWbNP2Jf3EAnMUkqbIMVHAzFu4U_qhg%3D%3D)
+
+
 Key Features
 -------------
 * Fetches stock data from a web source (tickertape.in).
@@ -14,3 +17,33 @@ Key Features
 * Builds and rebalances portfolios based on momentum score.
 * Stores portfolio results in an Azure Storage Account.
 * Supports automated daily portfolio updates using Azure Functions.
+
+
+Composite Score Calculation
+----------------------------
+The heart of the Momentum Picking Strategy lies in the calculation of a composite score for each stock. This score is derived from three crucial financial metrics, each assigned a predefined weight:
+
+* Returns: This metric assesses a stock's historical returns over different time frames, typically one year, one month, and one week. The returns are normalized to ensure comparability.
+* VWAP (Volume-Weighted Average Price): VWAP reflects the average price of a stock over a specific period, giving more weight to prices with higher trading volumes. Normalized VWAP values are considered.
+* RSI (Relative Strength Index): RSI is a momentum oscillator measuring the speed and change of price movements. Normalized RSI values are used.
+
+Weighting
+---------
+Each of the three metrics (Returns, VWAP, and RSI) is assigned a weight that represents its importance in the composite score. These weights are customizable, allowing investors to adjust the strategy based on their preferences.
+
+Normalization
+--------------
+To ensure that all metrics are on a consistent scale, they are normalized. This process scales the values so that they have similar ranges, making them directly comparable.
+
+Composite Score Calculation
+----------------------------
+The composite score for a stock is calculated as a weighted sum of the normalized values of the three metrics. The formula is as follows:
+```
+Composite Score = (Weight_Returns * Sum(Normalized_Returns))
+               + (Weight_VWAP * Sum(Normalized_VWAP))
+               + (Weight_RSI * Sum(Normalized_RSI))
+```
+
+Interpretation
+--------------
+Stocks with higher composite scores are considered to have stronger momentum. Investors can use this score to identify potential candidates for their portfolios, focusing on stocks with higher scores as they have exhibited stronger recent performance based on the selected metrics.
