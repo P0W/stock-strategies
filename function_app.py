@@ -194,14 +194,21 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
                 <th>Stock</th>
                 <th>Shares</th>
                 <th>Amount</th>
+                <th>Action</th>
             </tr>
             """
             for item in rebalance["stocks"]:
+                action = "HOLD"
+                if item["shares"] > 0:
+                    action = "BUY"
+                elif item["shares"] < 0:
+                    action = "SELL"
                 table_html += (
                     f"<tr>"
                     f"<td>{item['symbol']}</td>"
                     f"<td>{item['shares']}</td>"
                     f"<td>{round_off(item['amount'])}</td>"
+                    f"<td>{action}</td>"
                     f"</tr>"
                 )
             table_html += "</table>"
