@@ -372,6 +372,15 @@ if __name__ == "__main__":
             json.dump(portfolio, fh, indent=2)
     display_portfolio(portfolio)
 
+    previous_day_file_name = get_file_name("portfolio-on", days=1)
+    if pathlib.Path(previous_day_file_name).exists():
+        with open(previous_day_file_name, "r") as fh:
+            previous_day_portfolio = json.load(fh)
+            rebalance = rebalance_portfolio(previous_day_portfolio, portfolio)
+            with open(get_file_name("rebalance-on"), "w") as fh:
+                json.dump(rebalance, fh, indent=2)
+            logging.info(json.dumps(rebalance, indent=2))
+
     # ## get middle 5 stocks and first 5 stocks and last 5 stocks from nifty200_symbols
     # middle = nifty200_symbols[100:105]
     # first = nifty200_symbols[:8]
