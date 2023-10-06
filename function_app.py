@@ -65,7 +65,11 @@ def momentum_strategy(myTimer: func.TimerRequest) -> None:
         rebalance = blob_service.get_blob_data_if_exists(blob_name)
         if rebalance is None:
             logging.info("%s blob does not exist", blob_name)
-            rebalance = strategy.rebalance_portfolio(previous_day_portfolio, portfolio)
+            rebalance = strategy.rebalance_portfolio(
+                previous_day_portfolio=previous_day_portfolio,
+                current_day_portfolio=portfolio,
+                current_day_portfolio=strategy.build_price_list(nifty200_symbols),
+            )
             ## Upload the rebalance json
             blob_service.upload_blob(rebalance, blob_name)
 
