@@ -7,7 +7,7 @@ calculate financial metrics, build and rebalance investment portfolios, and disp
 
 It is designed to run as an Azure Function, making it easy to automate daily/weekly/monthly portfolio updates.
 
-[**`Live Hosted on Azure`**](https://stock-strategies.azurewebsites.net/api/portfolio?code=hUPt2tOHNPrEsmBzyKlU5klzWbNP2Jf3EAnMUkqbIMVHAzFu4U_qhg%3D%3D)
+[**`Live Hosted on Azure`**](https://stock-strategies.azurewebsites.net/api/portfolio?code=SGlRabiYiyBpcpxaypjc8-sQqt6xY0fhMs2-lje-8joGAzFuM0z4yQ%3D%3D)
 
 
 Key Features
