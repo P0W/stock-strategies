@@ -183,8 +183,24 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
 
         ## Show a rebalance table updates, write a lable and style it
         table_html += "<h3>Rebalance updates</h3>"
-        rebalance_blob_name = strategy.get_file_name("rebalances/rebalance-on")
-        rebalance = blob_service.get_blob_data_if_exists(rebalance_blob_name)
+        rebalance = None
+        if not request_date:
+            rebalance_blob_name = strategy.get_file_name("rebalances/rebalance-on")
+            rebalance = blob_service.get_blob_data_if_exists(rebalance_blob_name)
+        else:
+            ## do a manual rebalance with todays portfolio
+            logging.info("Manual rebalance with todays portfolio")
+            current_portfolio = blob_service.get_blob_data_if_exists(strategy.get_file_name("portfolio-on"))
+            if current_portfolio:
+                blob_name = strategy.get_file_name("all_symbols/nifty200-symbols")
+                nifty200_symbols = blob_service.get_blob_data_if_exists(blob_name)
+                try:
+                    rebalance = strategy.rebalance_portfolio(portfolio,current_portfolio,strategy.build_price_list(nifty200_symbols))
+                except Exception as e:
+                    logging.error(e)
+                    rebalance = None
+            else:
+                logging.error("Current portfolio not found")
         if rebalance:
             capital_incurred = rebalance["capital_incurred"]
             ## Display above as tabular format
