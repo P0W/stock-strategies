@@ -65,7 +65,11 @@ def momentum_strategy(myTimer: func.TimerRequest) -> None:
         rebalance = blob_service.get_blob_data_if_exists(blob_name)
         if rebalance is None:
             logging.info("%s blob does not exist", blob_name)
-            rebalance = strategy.rebalance_portfolio(previous_day_portfolio, portfolio, strategy.build_price_list(nifty200_symbols))
+            rebalance = strategy.rebalance_portfolio(
+                previous_day_portfolio,
+                portfolio,
+                strategy.build_price_list(nifty200_symbols),
+            )
             ## Upload the rebalance json
             blob_service.upload_blob(rebalance, blob_name)
 
@@ -190,12 +194,18 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
         else:
             ## do a manual rebalance with todays portfolio
             logging.info("Manual rebalance with todays portfolio")
-            current_portfolio = blob_service.get_blob_data_if_exists(strategy.get_file_name("portfolio-on"))
+            current_portfolio = blob_service.get_blob_data_if_exists(
+                strategy.get_file_name("portfolio-on")
+            )
             if current_portfolio:
                 blob_name = strategy.get_file_name("all_symbols/nifty200-symbols")
                 nifty200_symbols = blob_service.get_blob_data_if_exists(blob_name)
                 try:
-                    rebalance = strategy.rebalance_portfolio(portfolio,current_portfolio,strategy.build_price_list(nifty200_symbols))
+                    rebalance = strategy.rebalance_portfolio(
+                        portfolio,
+                        current_portfolio,
+                        strategy.build_price_list(nifty200_symbols),
+                    )
                 except Exception as e:
                     logging.error(e)
                     rebalance = None
