@@ -14,7 +14,7 @@ app = func.FunctionApp()
 
 ## Run the momentum strategy time triggered
 @app.schedule(
-    schedule="0 3 * * 1-5", arg_name="myTimer", run_on_startup=False, use_monitor=False
+    schedule="0 3 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False
 )
 def momentum_strategy(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
