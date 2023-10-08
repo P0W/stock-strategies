@@ -9,3 +9,4 @@ test
 portfolio-on-*.json
 stocks-nifty-*.json
 rebalance-on-*.json
+backtest/*
