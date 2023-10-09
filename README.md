@@ -9,6 +9,12 @@ It is designed to run as an Azure Function, making it easy to automate daily/wee
 
 [**`Live Hosted on Azure`**](https://stock-strategies.azurewebsites.net/api/portfolio?code=SGlRabiYiyBpcpxaypjc8-sQqt6xY0fhMs2-lje-8joGAzFuM0z4yQ%3D%3D)
 
+Backtesting
+------------
+* Used only returns values over last 1y, 1mo, 1w, 1d
+* Negative total_incurred amount represent inflow of money to trading account (profit)
+* Detailed csv report permuted over various time frames for rebalances, investement amount, number of stocks can be seen here [``Backtest Report``](https://github.com/P0W/stock-strategies/blob/main/backtest/output.csv)
+* Rebalances for given period,number of stocked picked, investment amount can be seen here [``Rebalances Reports``](https://github.com/P0W/stock-strategies/blob/main/backtest/temp)
 
 Key Features
 -------------
@@ -47,3 +53,4 @@ Composite Score = (Weight_Returns * Sum(Normalized_Returns))
 Interpretation
 --------------
 Stocks with higher composite scores are considered to have stronger momentum. Investors can use this score to identify potential candidates for their portfolios, focusing on stocks with higher scores as they have exhibited stronger recent performance based on the selected metrics.
+
