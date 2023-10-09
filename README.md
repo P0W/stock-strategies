@@ -13,7 +13,11 @@ Backtesting
 ------------
 * Used only returns values over last 1y, 1mo, 1w, 1d
 * Negative total_incurred amount represent inflow of money to trading account (profit)
-* Detailed csv report permuted over various time frames for rebalances, investement amount, number of stocks can be seen here [``Backtest Report``](https://github.com/P0W/stock-strategies/blob/main/backtest/output.csv)
+* Detailed csv report permuted over various parameters can be seen here [``Backtest Report``](https://github.com/P0W/stock-strategies/blob/main/backtest/output.csv)
+  - time frames for rebalances
+  - investement amount
+  - number of stocks
+* The report is sorted with max draw down parameter (lowest first)
 * Rebalances for given period,number of stocked picked, investment amount can be seen here [``Rebalances Reports``](https://github.com/P0W/stock-strategies/blob/main/backtest/temp)
 
 Key Features
