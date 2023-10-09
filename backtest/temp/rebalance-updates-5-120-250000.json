@@ -1,0 +1,168 @@
+{
+  "2022-09-23": {
+    "stocks": [
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -270,
+        "amount": -104112.0
+      },
+      {
+        "symbol": "HAL",
+        "shares": -67,
+        "amount": -81699.8
+      },
+      {
+        "symbol": "ATGL",
+        "shares": -23,
+        "amount": -81540.75
+      },
+      {
+        "symbol": "TATACOMM",
+        "shares": -40,
+        "amount": -46754.0
+      },
+      {
+        "symbol": "OIL",
+        "shares": -209,
+        "amount": -38644.1
+      },
+      {
+        "symbol": "LALPATHLAB",
+        "shares": 19,
+        "amount": 47783.1
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": 75,
+        "amount": 49571.25
+      },
+      {
+        "symbol": "AMBUJACEM",
+        "shares": 92,
+        "amount": 49620.200000000004
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "shares": 54,
+        "amount": 49739.4
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": 18,
+        "amount": 49902.299999999996
+      }
+    ],
+    "capital_incurred": -106134.4,
+    "start_date": "2022-03-31",
+    "end_date": "2022-09-23"
+  },
+  "2023-03-20": {
+    "stocks": [
+      {
+        "symbol": "SUNPHARMA",
+        "shares": -54,
+        "amount": -51904.8
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": -18,
+        "amount": -45750.6
+      },
+      {
+        "symbol": "LALPATHLAB",
+        "shares": -19,
+        "amount": -34004.3
+      },
+      {
+        "symbol": "AMBUJACEM",
+        "shares": -92,
+        "amount": -33616.799999999996
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": -19,
+        "amount": -16902.4
+      },
+      {
+        "symbol": "HINDUNILVR",
+        "shares": 19,
+        "amount": 47712.799999999996
+      },
+      {
+        "symbol": "ADANIGREEN",
+        "shares": 58,
+        "amount": 49221.7
+      },
+      {
+        "symbol": "HINDPETRO",
+        "shares": 201,
+        "amount": 49767.6
+      },
+      {
+        "symbol": "BPCL",
+        "shares": 139,
+        "amount": 49991.35
+      }
+    ],
+    "capital_incurred": 14514.550000000047,
+    "start_date": "2022-09-23",
+    "end_date": "2023-03-20"
+  },
+  "2023-09-14": {
+    "stocks": [
+      {
+        "symbol": "KPITTECH",
+        "shares": -56,
+        "amount": -65475.200000000004
+      },
+      {
+        "symbol": "ADANIGREEN",
+        "shares": -58,
+        "amount": -57060.399999999994
+      },
+      {
+        "symbol": "HINDPETRO",
+        "shares": -201,
+        "amount": -51958.5
+      },
+      {
+        "symbol": "BPCL",
+        "shares": -139,
+        "amount": -49866.25
+      },
+      {
+        "symbol": "HINDUNILVR",
+        "shares": -19,
+        "amount": -47515.200000000004
+      },
+      {
+        "symbol": "NMDC",
+        "shares": 332,
+        "amount": 49866.399999999994
+      },
+      {
+        "symbol": "RVNL",
+        "shares": 292,
+        "amount": 49917.399999999994
+      },
+      {
+        "symbol": "IRFC",
+        "shares": 615,
+        "amount": 49968.75
+      },
+      {
+        "symbol": "NHPC",
+        "shares": 894,
+        "amount": 49974.6
+      },
+      {
+        "symbol": "BANKINDIA",
+        "shares": 466,
+        "amount": 49978.5
+      }
+    ],
+    "capital_incurred": -22169.899999999994,
+    "start_date": "2023-03-20",
+    "end_date": "2023-09-14"
+  }
+}

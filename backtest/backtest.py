@@ -69,7 +69,7 @@ def scrip_master():
     return scrip_dict
 
 
-def get_historical_prices():
+def get_historical_prices(first_N=math.inf, no_of_years=3):
     d = scrip_master()
     client_connection = Client()
     client = client_connection.login()
@@ -85,7 +85,9 @@ def get_historical_prices():
 
     today = datetime.datetime.now()
     today = today.strftime("%Y-%m-%d")
-    six_months_before = datetime.datetime.now() - datetime.timedelta(days=365 * 2)
+    six_months_before = datetime.datetime.now() - datetime.timedelta(
+        days=365 * no_of_years
+    )
     results = {}
     count = 0
     for scrip_name, scrip_code in d.items():
@@ -108,8 +110,8 @@ def get_historical_prices():
             if count % 10 == 0:
                 logging.info(f"Completed {count} stocks")
             count += 1
-            # if count > 15:
-            #     break
+            if count > first_N:
+                break
 
         except Exception as e:
             logging.error(e)
@@ -134,12 +136,48 @@ def get_historical_prices():
     logging.info(f"Total days {len(date_list)}")
     for days, days_str in [(1, "1d"), (7, "1w"), (30, "1mo"), (365, "1y")]:
         count_days = 0
+        last_friday = None
+        last_thrusday = None
         for current_date, stocks in per_day_data.items():
-            diff = count_days - days
-            try:
-                if count_days >= days and diff >= 0:
-                    past_day = date_list[diff]
-                    previous_date = per_day_data[past_day]
+            day_of_week = datetime.datetime.strptime(current_date, "%Y-%m-%d").weekday()
+
+            if False and days == 7:
+                calculate_weekly = None
+                if last_thrusday and last_friday and day_of_week == 3:
+                    ## find the index from date_list
+                    index = date_list.index(current_date)
+                    # if the next day is Friday then use that
+                    if (
+                        datetime.datetime.strptime(
+                            date_list[index + 1], "%Y-%m-%d"
+                        ).weekday()
+                        != 4
+                    ):
+                        ## closer to last_frday or last_thrusday
+                        diff1 = abs(
+                            datetime.datetime.strptime(last_friday, "%Y-%m-%d")
+                            - datetime.datetime.strptime(current_date, "%Y-%m-%d")
+                        ).days
+                        diff2 = abs(
+                            datetime.datetime.strptime(last_thrusday, "%Y-%m-%d")
+                            - datetime.datetime.strptime(current_date, "%Y-%m-%d")
+                        ).days
+                        last_friday = last_friday if diff1 < diff2 else last_thrusday
+                        logging.info(
+                            f"Using Thrusday  {date_list[index]} with {last_friday}"
+                        )
+                        calculate_weekly = current_date
+                elif last_friday and day_of_week == 4:
+                    calculate_weekly = current_date
+
+                ## if current_date is Friday
+                if day_of_week == 4:
+                    last_friday = current_date
+                if day_of_week == 3:
+                    last_thrusday = current_date
+
+                if calculate_weekly:
+                    previous_date = per_day_data[last_friday]
                     for stock, data in stocks.items():
                         ## calculate returns
                         try:
@@ -148,12 +186,28 @@ def get_historical_prices():
                             ) / previous_date[stock]["lp"]
                         except Exception as e:
                             logging.error(e)
-                    # logging.info(f"Now setting previous day to {count_days}")
-            except Exception as e:
-                logging.error(e)
-                logging.error(f"count_days {count_days} diff {diff} {days_str}")
+                    continue
 
-            count_days += 1
+            else:
+                diff = count_days - days
+                try:
+                    if count_days >= days and diff >= 0:
+                        past_day = date_list[diff]
+                        previous_date = per_day_data[past_day]
+                        for stock, data in stocks.items():
+                            ## calculate returns
+                            try:
+                                data["returns"][days_str] = (
+                                    data["lp"] - previous_date[stock]["lp"]
+                                ) / previous_date[stock]["lp"]
+                            except Exception as e:
+                                logging.error(e)
+                        # logging.info(f"Now setting previous day to {count_days}")
+                except Exception as e:
+                    logging.error(e)
+                    logging.error(f"count_days {count_days} diff {diff} {days_str}")
+
+                count_days += 1
 
     ## write to file
     with open("historical-prices.json", "w") as f:
@@ -200,7 +254,7 @@ def rebalance_portfolio(day1_stock_info, day2_stock_info, current_day_price_dict
     )
 
     result["capital_incurred"] = capital_incurred
-    return capital_incurred
+    return result
 
 
 def run(top_n=25, investment_amount=250000, rebalance_days=15, historical_prices=None):
@@ -270,6 +324,8 @@ def run(top_n=25, investment_amount=250000, rebalance_days=15, historical_prices
                 rebalance_updates[date] = rebalance_portfolio(
                     previous_day_portfolio, current_day_portfolio, price_dict
                 )
+                rebalance_updates[date]["start_date"] = prev_date
+                rebalance_updates[date]["end_date"] = date
                 # logging.info(f"Rebalancing on {date} with {prev_date} Captital Incurred: {rebalance_updates[date]}")
                 previous_day_portfolio = current_day_portfolio
                 prev_date = date
@@ -277,13 +333,21 @@ def run(top_n=25, investment_amount=250000, rebalance_days=15, historical_prices
                 prev_date = date
                 previous_day_portfolio = current_day_portfolio
     ## write to file
-    # with open("historical-prices-sorted.json", "w") as f:
-    #     json.dump(results, f, indent=2)
-    # with open("rebalance-updates.json", "w") as f:
-    #     json.dump(rebalance_updates, f, indent=2)
-    ## sum keys of rebalance_updates
-    total_capital_incurred = sum(rebalance_updates.values())
-    ## logging.info(f"Total capital incurred {total_capital_incurred}")
+    with open(
+        f"temp/historical-prices-sorted-{top_n}-{rebalance_days}-{investment_amount}.json",
+        "w",
+    ) as f:
+        json.dump(results, f, indent=2)
+    with open(
+        f"temp/rebalance-updates-{top_n}-{rebalance_days}-{investment_amount}.json", "w"
+    ) as f:
+        json.dump(rebalance_updates, f, indent=2)
+    # sum keys of rebalance_updates
+    total_capital_incurred = sum(
+        [x["capital_incurred"] for x in rebalance_updates.values()]
+    )
+    ## calculate drawdown
+    max_drawdown = max([x["capital_incurred"] for x in rebalance_updates.values()])
     ## calculate cagr
     ## get first and last date
     first_date = list(rebalance_updates.keys())[0]
@@ -293,24 +357,43 @@ def run(top_n=25, investment_amount=250000, rebalance_days=15, historical_prices
         datetime.datetime.strptime(last_date, "%Y-%m-%d")
         - datetime.datetime.strptime(first_date, "%Y-%m-%d")
     ).days + rebalance_days
-    cagr = math.pow((investment_amount - total_capital_incurred) / investment_amount,  365.0 / days) - 1
+    cagr = (
+        math.pow(
+            (investment_amount - total_capital_incurred) / investment_amount,
+            365.0 / days,
+        )
+        - 1
+    )
 
-    return total_capital_incurred, round(cagr * 100.0, 2), days
+    return (
+        total_capital_incurred,
+        round(cagr * 100.0, 2),
+        max_drawdown,
+        first_date,
+        last_date,
+    )
 
 
 def run_with_parameters(parameters):
     top_n, rebalance_days, investment_amount = parameters
-    total_capital_incurred, cagr, days = run(
+    total_capital_incurred, cagr, max_drawdown, first_date, last_date = run(
         top_n=top_n,
         rebalance_days=rebalance_days,
         investment_amount=investment_amount,
     )
-    return top_n, rebalance_days, investment_amount, total_capital_incurred, cagr, days
+    return (
+        top_n,
+        rebalance_days,
+        investment_amount,
+        total_capital_incurred,
+        cagr,
+        max_drawdown,
+        first_date,
+        last_date,
+    )
 
 
-if __name__ == "__main__":
-    get_historical_prices()
-
+def backtest():
     ## permute top_n, investment_amount, rebalance_days
     # top_n = [10, 15, 20, 25]
     # rebalance_days = [1, 7, 15, 30]
@@ -336,7 +419,9 @@ if __name__ == "__main__":
         # Use the Pool.map function to execute run_with_parameters in parallel
         results = pool.map(run_with_parameters, parameter_combinations)
 
-    sorted_results = sorted(results, key=lambda x: x[4], reverse=True)
+    sorted_results = sorted(
+        results, key=lambda x: x[5]
+    )  ## sort by max_drawdown , lowest first
 
     # Define the CSV file name
     csv_file = "output.csv"
@@ -352,10 +437,17 @@ if __name__ == "__main__":
                 "investment_amount",
                 "total_capital_incurred",
                 "cagr",
-                "days",
+                "max_drawdown",
+                "first_date",
+                "last_date",
             ]
         )
         # Write the results rows
         csv_writer.writerows([r for r in sorted_results])
 
     print(f"Results have been written to {csv_file}")
+
+
+if __name__ == "__main__":
+    # get_historical_prices(no_of_years=3)
+    backtest()

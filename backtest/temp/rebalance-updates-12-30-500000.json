@@ -1,0 +1,1406 @@
+{
+  "2022-05-17": {
+    "stocks": [
+      {
+        "symbol": "HAL",
+        "shares": -56,
+        "amount": -46806.48
+      },
+      {
+        "symbol": "ADANIENT",
+        "shares": -20,
+        "amount": -43697.0
+      },
+      {
+        "symbol": "ABB",
+        "shares": -19,
+        "amount": -43592.65
+      },
+      {
+        "symbol": "AUBANK",
+        "shares": -66,
+        "amount": -43408.200000000004
+      },
+      {
+        "symbol": "CONCOR",
+        "shares": -61,
+        "amount": -38323.25
+      },
+      {
+        "symbol": "JINDALSTEL",
+        "shares": -78,
+        "amount": -37736.4
+      },
+      {
+        "symbol": "FORTIS",
+        "shares": -143,
+        "amount": -34455.85
+      },
+      {
+        "symbol": "TATACOMM",
+        "shares": -33,
+        "amount": -33260.7
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -77,
+        "amount": -21613.899999999998
+      },
+      {
+        "symbol": "ATGL",
+        "shares": -3,
+        "amount": -7501.5
+      },
+      {
+        "symbol": "OIL",
+        "shares": -2,
+        "amount": -483.1
+      },
+      {
+        "symbol": "LTTS",
+        "shares": 11,
+        "amount": 40469.0
+      },
+      {
+        "symbol": "VEDL",
+        "shares": 129,
+        "amount": 41409.0
+      },
+      {
+        "symbol": "TATAPOWER",
+        "shares": 172,
+        "amount": 41477.8
+      },
+      {
+        "symbol": "COROMANDEL",
+        "shares": 44,
+        "amount": 41481.0
+      },
+      {
+        "symbol": "COALINDIA",
+        "shares": 225,
+        "amount": 41523.75
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": 152,
+        "amount": 41526.4
+      },
+      {
+        "symbol": "HINDALCO",
+        "shares": 97,
+        "amount": 41554.799999999996
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": 142,
+        "amount": 41563.4
+      },
+      {
+        "symbol": "TATASTEEL",
+        "shares": 350,
+        "amount": 41604.5
+      }
+    ],
+    "capital_incurred": 21730.61999999998,
+    "start_date": "2022-03-31",
+    "end_date": "2022-05-17"
+  },
+  "2022-06-29": {
+    "stocks": [
+      {
+        "symbol": "COALINDIA",
+        "shares": -225,
+        "amount": -42468.75
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -148,
+        "amount": -39967.4
+      },
+      {
+        "symbol": "ATGL",
+        "shares": -16,
+        "amount": -37563.2
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": -142,
+        "amount": -35656.2
+      },
+      {
+        "symbol": "TATAPOWER",
+        "shares": -172,
+        "amount": -35655.6
+      },
+      {
+        "symbol": "LTTS",
+        "shares": -11,
+        "amount": -33963.6
+      },
+      {
+        "symbol": "HINDALCO",
+        "shares": -97,
+        "amount": -33382.549999999996
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": -152,
+        "amount": -32862.4
+      },
+      {
+        "symbol": "TATASTEEL",
+        "shares": -350,
+        "amount": -30856.0
+      },
+      {
+        "symbol": "VEDL",
+        "shares": -129,
+        "amount": -29934.45
+      },
+      {
+        "symbol": "OIL",
+        "shares": -13,
+        "amount": -3400.8
+      },
+      {
+        "symbol": "COROMANDEL",
+        "shares": -1,
+        "amount": -964.3
+      },
+      {
+        "symbol": "BOSCHLTD",
+        "shares": 2,
+        "amount": 31046.0
+      },
+      {
+        "symbol": "ADANIENSOL",
+        "shares": 17,
+        "amount": 39914.3
+      },
+      {
+        "symbol": "TVSMOTOR",
+        "shares": 49,
+        "amount": 40834.15
+      },
+      {
+        "symbol": "CUMMINSIND",
+        "shares": 40,
+        "amount": 40884.0
+      },
+      {
+        "symbol": "TATAELXSI",
+        "shares": 5,
+        "amount": 40931.75
+      },
+      {
+        "symbol": "TRENT",
+        "shares": 37,
+        "amount": 41042.25
+      },
+      {
+        "symbol": "APLAPOLLO",
+        "shares": 47,
+        "amount": 41268.35
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": 23,
+        "amount": 41372.4
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": 79,
+        "amount": 41431.55
+      },
+      {
+        "symbol": "ONGC",
+        "shares": 270,
+        "amount": 41620.5
+      }
+    ],
+    "capital_incurred": 43670.00000000005,
+    "start_date": "2022-05-17",
+    "end_date": "2022-06-29"
+  },
+  "2022-08-12": {
+    "stocks": [
+      {
+        "symbol": "ADANIENSOL",
+        "shares": -17,
+        "amount": -60105.2
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": -23,
+        "amount": -51506.200000000004
+      },
+      {
+        "symbol": "TRENT",
+        "shares": -37,
+        "amount": -51161.75
+      },
+      {
+        "symbol": "CUMMINSIND",
+        "shares": -40,
+        "amount": -49990.0
+      },
+      {
+        "symbol": "TVSMOTOR",
+        "shares": -49,
+        "amount": -46674.95
+      },
+      {
+        "symbol": "COROMANDEL",
+        "shares": -43,
+        "amount": -46270.15
+      },
+      {
+        "symbol": "ONGC",
+        "shares": -270,
+        "amount": -37584.0
+      },
+      {
+        "symbol": "BOSCHLTD",
+        "shares": -2,
+        "amount": -34521.9
+      },
+      {
+        "symbol": "OIL",
+        "shares": -159,
+        "amount": -30265.649999999998
+      },
+      {
+        "symbol": "APLAPOLLO",
+        "shares": -10,
+        "amount": -11199.5
+      },
+      {
+        "symbol": "TATAELXSI",
+        "shares": -1,
+        "amount": -10238.05
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": -6,
+        "amount": -3419.1000000000004
+      },
+      {
+        "symbol": "FLUOROCHEM",
+        "shares": 11,
+        "amount": 39094.0
+      },
+      {
+        "symbol": "BHARATFORG",
+        "shares": 52,
+        "amount": 41090.4
+      },
+      {
+        "symbol": "ATGL",
+        "shares": 12,
+        "amount": 41104.8
+      },
+      {
+        "symbol": "TORNTPOWER",
+        "shares": 71,
+        "amount": 41123.200000000004
+      },
+      {
+        "symbol": "IGL",
+        "shares": 96,
+        "amount": 41313.600000000006
+      },
+      {
+        "symbol": "TATACHEM",
+        "shares": 37,
+        "amount": 41399.3
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": 133,
+        "amount": 41449.45
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": 142,
+        "amount": 41506.6
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": 130,
+        "amount": 41606.5
+      }
+    ],
+    "capital_incurred": -63248.59999999994,
+    "start_date": "2022-06-29",
+    "end_date": "2022-08-12"
+  },
+  "2022-09-28": {
+    "stocks": [
+      {
+        "symbol": "MAZDOCK",
+        "shares": -133,
+        "amount": -57023.75
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": -73,
+        "amount": -47114.2
+      },
+      {
+        "symbol": "ATGL",
+        "shares": -12,
+        "amount": -41376.600000000006
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": -142,
+        "amount": -41123.200000000004
+      },
+      {
+        "symbol": "IGL",
+        "shares": -96,
+        "amount": -40747.2
+      },
+      {
+        "symbol": "TATACHEM",
+        "shares": -37,
+        "amount": -38774.15
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": -130,
+        "amount": -37966.5
+      },
+      {
+        "symbol": "APLAPOLLO",
+        "shares": -37,
+        "amount": -37878.75
+      },
+      {
+        "symbol": "BHARATFORG",
+        "shares": -52,
+        "amount": -36098.4
+      },
+      {
+        "symbol": "TORNTPOWER",
+        "shares": -71,
+        "amount": -35070.45
+      },
+      {
+        "symbol": "TATAELXSI",
+        "shares": -4,
+        "amount": -33689.8
+      },
+      {
+        "symbol": "FLUOROCHEM",
+        "shares": -1,
+        "amount": -3878.7
+      },
+      {
+        "symbol": "DRREDDY",
+        "shares": 9,
+        "amount": 38427.299999999996
+      },
+      {
+        "symbol": "ASIANPAINT",
+        "shares": 11,
+        "amount": 39277.15
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": 15,
+        "amount": 39628.5
+      },
+      {
+        "symbol": "LALPATHLAB",
+        "shares": 15,
+        "amount": 40415.25
+      },
+      {
+        "symbol": "UBL",
+        "shares": 24,
+        "amount": 40492.8
+      },
+      {
+        "symbol": "MUTHOOTFIN",
+        "shares": 39,
+        "amount": 40897.350000000006
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "shares": 45,
+        "amount": 41303.25
+      },
+      {
+        "symbol": "ABFRL",
+        "shares": 126,
+        "amount": 41548.5
+      },
+      {
+        "symbol": "LUPIN",
+        "shares": 62,
+        "amount": 41552.4
+      },
+      {
+        "symbol": "RAMCOCEM",
+        "shares": 56,
+        "amount": 41568.799999999996
+      },
+      {
+        "symbol": "MARICO",
+        "shares": 76,
+        "amount": 41602.4
+      }
+    ],
+    "capital_incurred": -4028.0000000000873,
+    "start_date": "2022-08-12",
+    "end_date": "2022-09-28"
+  },
+  "2022-11-15": {
+    "stocks": [
+      {
+        "symbol": "LUPIN",
+        "shares": -62,
+        "amount": -46720.1
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "shares": -45,
+        "amount": -45722.25
+      },
+      {
+        "symbol": "UBL",
+        "shares": -24,
+        "amount": -40207.2
+      },
+      {
+        "symbol": "DRREDDY",
+        "shares": -9,
+        "amount": -39903.299999999996
+      },
+      {
+        "symbol": "ABFRL",
+        "shares": -126,
+        "amount": -39387.600000000006
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": -15,
+        "amount": -38156.25
+      },
+      {
+        "symbol": "MARICO",
+        "shares": -76,
+        "amount": -37844.2
+      },
+      {
+        "symbol": "RAMCOCEM",
+        "shares": -56,
+        "amount": -37226.0
+      },
+      {
+        "symbol": "LALPATHLAB",
+        "shares": -15,
+        "amount": -37222.5
+      },
+      {
+        "symbol": "FLUOROCHEM",
+        "shares": -10,
+        "amount": -34036.0
+      },
+      {
+        "symbol": "ASIANPAINT",
+        "shares": -11,
+        "amount": -33872.3
+      },
+      {
+        "symbol": "MUTHOOTFIN",
+        "shares": -2,
+        "amount": -2240.1
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": 49,
+        "amount": 41115.9
+      },
+      {
+        "symbol": "BALKRISIND",
+        "shares": 21,
+        "amount": 41227.200000000004
+      },
+      {
+        "symbol": "LODHA",
+        "shares": 84,
+        "amount": 41344.799999999996
+      },
+      {
+        "symbol": "APOLLOTYRE",
+        "shares": 139,
+        "amount": 41380.299999999996
+      },
+      {
+        "symbol": "JINDALSTEL",
+        "shares": 79,
+        "amount": 41399.95
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": 153,
+        "amount": 41401.8
+      },
+      {
+        "symbol": "CGPOWER",
+        "shares": 153,
+        "amount": 41417.1
+      },
+      {
+        "symbol": "CANBK",
+        "shares": 134,
+        "amount": 41446.200000000004
+      },
+      {
+        "symbol": "GUJGASLTD",
+        "shares": 81,
+        "amount": 41585.4
+      },
+      {
+        "symbol": "IGL",
+        "shares": 96,
+        "amount": 41635.2
+      },
+      {
+        "symbol": "RVNL",
+        "shares": 687,
+        "amount": 41666.549999999996
+      }
+    ],
+    "capital_incurred": 23082.600000000028,
+    "start_date": "2022-09-28",
+    "end_date": "2022-11-15"
+  },
+  "2022-12-28": {
+    "stocks": [
+      {
+        "symbol": "JINDALSTEL",
+        "shares": -79,
+        "amount": -45677.8
+      },
+      {
+        "symbol": "APOLLOTYRE",
+        "shares": -139,
+        "amount": -44723.25
+      },
+      {
+        "symbol": "BALKRISIND",
+        "shares": -21,
+        "amount": -43939.35
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": -153,
+        "amount": -42748.2
+      },
+      {
+        "symbol": "CGPOWER",
+        "shares": -153,
+        "amount": -40935.15
+      },
+      {
+        "symbol": "MUTHOOTFIN",
+        "shares": -37,
+        "amount": -39891.55
+      },
+      {
+        "symbol": "IGL",
+        "shares": -96,
+        "amount": -39465.600000000006
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": -49,
+        "amount": -39182.85
+      },
+      {
+        "symbol": "GUJGASLTD",
+        "shares": -81,
+        "amount": -38831.4
+      },
+      {
+        "symbol": "LODHA",
+        "shares": -8,
+        "amount": -4336.0
+      },
+      {
+        "symbol": "RVNL",
+        "shares": -63,
+        "amount": -4202.1
+      },
+      {
+        "symbol": "CANBK",
+        "shares": -3,
+        "amount": -948.3000000000001
+      },
+      {
+        "symbol": "ATGL",
+        "shares": 11,
+        "amount": 39663.8
+      },
+      {
+        "symbol": "FLUOROCHEM",
+        "shares": 13,
+        "amount": 40885.65
+      },
+      {
+        "symbol": "TVSMOTOR",
+        "shares": 38,
+        "amount": 41142.6
+      },
+      {
+        "symbol": "TITAN",
+        "shares": 16,
+        "amount": 41282.4
+      },
+      {
+        "symbol": "FACT",
+        "shares": 128,
+        "amount": 41395.2
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": 137,
+        "amount": 41428.799999999996
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": 146,
+        "amount": 41449.399999999994
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": 137,
+        "amount": 41579.5
+      },
+      {
+        "symbol": "BANKBARODA",
+        "shares": 229,
+        "amount": 41632.200000000004
+      }
+    ],
+    "capital_incurred": -14422.00000000003,
+    "start_date": "2022-11-15",
+    "end_date": "2022-12-28"
+  },
+  "2023-02-10": {
+    "stocks": [
+      {
+        "symbol": "RVNL",
+        "shares": -624,
+        "amount": -44678.399999999994
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": -137,
+        "amount": -41216.450000000004
+      },
+      {
+        "symbol": "TVSMOTOR",
+        "shares": -38,
+        "amount": -40863.299999999996
+      },
+      {
+        "symbol": "TITAN",
+        "shares": -16,
+        "amount": -39496.0
+      },
+      {
+        "symbol": "BANKBARODA",
+        "shares": -229,
+        "amount": -38769.700000000004
+      },
+      {
+        "symbol": "FLUOROCHEM",
+        "shares": -13,
+        "amount": -38595.049999999996
+      },
+      {
+        "symbol": "CANBK",
+        "shares": -131,
+        "amount": -38500.899999999994
+      },
+      {
+        "symbol": "LODHA",
+        "shares": -76,
+        "amount": -37968.08
+      },
+      {
+        "symbol": "FACT",
+        "shares": -128,
+        "amount": -34912.0
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": -146,
+        "amount": -33572.7
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -137,
+        "amount": -22495.399999999998
+      },
+      {
+        "symbol": "ATGL",
+        "shares": -11,
+        "amount": -13809.400000000001
+      },
+      {
+        "symbol": "NAVINFLUOR",
+        "shares": 9,
+        "amount": 39115.35
+      },
+      {
+        "symbol": "PEL",
+        "shares": 46,
+        "amount": 40986.0
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": 48,
+        "amount": 41061.600000000006
+      },
+      {
+        "symbol": "ESCORTS",
+        "shares": 20,
+        "amount": 41156.0
+      },
+      {
+        "symbol": "ABB",
+        "shares": 13,
+        "amount": 41161.9
+      },
+      {
+        "symbol": "SRF",
+        "shares": 18,
+        "amount": 41209.200000000004
+      },
+      {
+        "symbol": "AUROPHARMA",
+        "shares": 88,
+        "amount": 41258.8
+      },
+      {
+        "symbol": "CUMMINSIND",
+        "shares": 26,
+        "amount": 41620.799999999996
+      },
+      {
+        "symbol": "CGPOWER",
+        "shares": 127,
+        "amount": 41636.950000000004
+      },
+      {
+        "symbol": "VOLTAS",
+        "shares": 49,
+        "amount": 41642.65
+      },
+      {
+        "symbol": "INDUSTOWER",
+        "shares": 248,
+        "amount": 41664.0
+      }
+    ],
+    "capital_incurred": 27635.869999999915,
+    "start_date": "2022-12-28",
+    "end_date": "2023-02-10"
+  },
+  "2023-03-28": {
+    "stocks": [
+      {
+        "symbol": "AUROPHARMA",
+        "shares": -88,
+        "amount": -45007.6
+      },
+      {
+        "symbol": "ABB",
+        "shares": -13,
+        "amount": -43402.450000000004
+      },
+      {
+        "symbol": "SRF",
+        "shares": -18,
+        "amount": -42845.4
+      },
+      {
+        "symbol": "CUMMINSIND",
+        "shares": -26,
+        "amount": -41918.5
+      },
+      {
+        "symbol": "VOLTAS",
+        "shares": -49,
+        "amount": -39805.15
+      },
+      {
+        "symbol": "NAVINFLUOR",
+        "shares": -9,
+        "amount": -37553.85
+      },
+      {
+        "symbol": "CGPOWER",
+        "shares": -127,
+        "amount": -36772.85
+      },
+      {
+        "symbol": "INDUSTOWER",
+        "shares": -248,
+        "amount": -35699.6
+      },
+      {
+        "symbol": "PEL",
+        "shares": -46,
+        "amount": -29193.899999999998
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": -2,
+        "amount": -1777.9
+      },
+      {
+        "symbol": "ESCORTS",
+        "shares": 2,
+        "amount": 3772.5
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": 16,
+        "amount": 40620.0
+      },
+      {
+        "symbol": "BDL",
+        "shares": 45,
+        "amount": 41028.75
+      },
+      {
+        "symbol": "TORNTPOWER",
+        "shares": 81,
+        "amount": 41419.35
+      },
+      {
+        "symbol": "INDUSINDBK",
+        "shares": 40,
+        "amount": 41446.0
+      },
+      {
+        "symbol": "OIL",
+        "shares": 161,
+        "amount": 41449.45
+      },
+      {
+        "symbol": "UPL",
+        "shares": 58,
+        "amount": 41449.7
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": 148,
+        "amount": 41477.0
+      },
+      {
+        "symbol": "INDHOTEL",
+        "shares": 133,
+        "amount": 41509.3
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": 147,
+        "amount": 41512.799999999996
+      },
+      {
+        "symbol": "BANKINDIA",
+        "shares": 582,
+        "amount": 41642.1
+      }
+    ],
+    "capital_incurred": 63349.74999999997,
+    "start_date": "2023-02-10",
+    "end_date": "2023-03-28"
+  },
+  "2023-05-17": {
+    "stocks": [
+      {
+        "symbol": "INDHOTEL",
+        "shares": -133,
+        "amount": -48877.5
+      },
+      {
+        "symbol": "POONAWALLA",
+        "shares": -147,
+        "amount": -48296.85
+      },
+      {
+        "symbol": "BANKINDIA",
+        "shares": -582,
+        "amount": -44552.1
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": -16,
+        "amount": -43318.4
+      },
+      {
+        "symbol": "TORNTPOWER",
+        "shares": -81,
+        "amount": -43290.450000000004
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": -46,
+        "amount": -42924.9
+      },
+      {
+        "symbol": "OIL",
+        "shares": -161,
+        "amount": -42769.649999999994
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": -148,
+        "amount": -42594.4
+      },
+      {
+        "symbol": "UPL",
+        "shares": -58,
+        "amount": -39312.399999999994
+      },
+      {
+        "symbol": "INDUSINDBK",
+        "shares": -7,
+        "amount": -8653.050000000001
+      },
+      {
+        "symbol": "BDL",
+        "shares": -7,
+        "amount": -7527.449999999999
+      },
+      {
+        "symbol": "ESCORTS",
+        "shares": -3,
+        "amount": -6348.900000000001
+      },
+      {
+        "symbol": "HAL",
+        "shares": 26,
+        "amount": 40740.700000000004
+      },
+      {
+        "symbol": "ASTRAL",
+        "shares": 24,
+        "amount": 41276.399999999994
+      },
+      {
+        "symbol": "VBL",
+        "shares": 52,
+        "amount": 41281.76
+      },
+      {
+        "symbol": "MAXHEALTH",
+        "shares": 79,
+        "amount": 41285.4
+      },
+      {
+        "symbol": "JUBLFOOD",
+        "shares": 86,
+        "amount": 41374.6
+      },
+      {
+        "symbol": "DEEPAKNTR",
+        "shares": 21,
+        "amount": 41430.9
+      },
+      {
+        "symbol": "FACT",
+        "shares": 131,
+        "amount": 41474.600000000006
+      },
+      {
+        "symbol": "FORTIS",
+        "shares": 147,
+        "amount": 41490.75
+      },
+      {
+        "symbol": "RVNL",
+        "shares": 341,
+        "amount": 41550.85
+      }
+    ],
+    "capital_incurred": -46560.09000000005,
+    "start_date": "2023-03-28",
+    "end_date": "2023-05-17"
+  },
+  "2023-06-30": {
+    "stocks": [
+      {
+        "symbol": "FACT",
+        "shares": -131,
+        "amount": -56906.399999999994
+      },
+      {
+        "symbol": "HAL",
+        "shares": -26,
+        "amount": -49302.5
+      },
+      {
+        "symbol": "ASTRAL",
+        "shares": -24,
+        "amount": -47581.2
+      },
+      {
+        "symbol": "MAXHEALTH",
+        "shares": -79,
+        "amount": -47356.55
+      },
+      {
+        "symbol": "DEEPAKNTR",
+        "shares": -21,
+        "amount": -45648.75
+      },
+      {
+        "symbol": "JUBLFOOD",
+        "shares": -86,
+        "amount": -43107.5
+      },
+      {
+        "symbol": "ESCORTS",
+        "shares": -19,
+        "amount": -42719.6
+      },
+      {
+        "symbol": "BDL",
+        "shares": -38,
+        "amount": -42569.5
+      },
+      {
+        "symbol": "VBL",
+        "shares": -52,
+        "amount": -41732.6
+      },
+      {
+        "symbol": "RVNL",
+        "shares": -341,
+        "amount": -41567.9
+      },
+      {
+        "symbol": "FORTIS",
+        "shares": -15,
+        "amount": -4725.75
+      },
+      {
+        "symbol": "INDUSINDBK",
+        "shares": -3,
+        "amount": -4123.950000000001
+      },
+      {
+        "symbol": "M&M",
+        "shares": 28,
+        "amount": 40700.799999999996
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "shares": 39,
+        "amount": 41012.399999999994
+      },
+      {
+        "symbol": "HDFCAMC",
+        "shares": 18,
+        "amount": 41321.700000000004
+      },
+      {
+        "symbol": "MFSL",
+        "shares": 51,
+        "amount": 41353.35
+      },
+      {
+        "symbol": "M&MFIN",
+        "shares": 123,
+        "amount": 41383.35
+      },
+      {
+        "symbol": "BIOCON",
+        "shares": 156,
+        "amount": 41418.0
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": 142,
+        "amount": 41542.1
+      },
+      {
+        "symbol": "BEL",
+        "shares": 331,
+        "amount": 41623.25
+      },
+      {
+        "symbol": "L&TFH",
+        "shares": 326,
+        "amount": 41630.200000000004
+      },
+      {
+        "symbol": "SHRIRAMFIN",
+        "shares": 24,
+        "amount": 41644.8
+      }
+    ],
+    "capital_incurred": -53712.24999999994,
+    "start_date": "2023-05-17",
+    "end_date": "2023-06-30"
+  },
+  "2023-08-14": {
+    "stocks": [
+      {
+        "symbol": "HDFCAMC",
+        "shares": -18,
+        "amount": -44904.6
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "shares": -39,
+        "amount": -44235.75
+      },
+      {
+        "symbol": "SHRIRAMFIN",
+        "shares": -24,
+        "amount": -43525.2
+      },
+      {
+        "symbol": "M&M",
+        "shares": -28,
+        "amount": -43311.799999999996
+      },
+      {
+        "symbol": "BEL",
+        "shares": -331,
+        "amount": -43195.5
+      },
+      {
+        "symbol": "MFSL",
+        "shares": -51,
+        "amount": -43133.25
+      },
+      {
+        "symbol": "INDUSINDBK",
+        "shares": -30,
+        "amount": -41667.0
+      },
+      {
+        "symbol": "FORTIS",
+        "shares": -132,
+        "amount": -41428.200000000004
+      },
+      {
+        "symbol": "L&TFH",
+        "shares": -326,
+        "amount": -40228.4
+      },
+      {
+        "symbol": "BIOCON",
+        "shares": -156,
+        "amount": -39717.6
+      },
+      {
+        "symbol": "M&MFIN",
+        "shares": -123,
+        "amount": -34550.7
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": -36,
+        "amount": -14081.4
+      },
+      {
+        "symbol": "POLYCAB",
+        "shares": 8,
+        "amount": 37957.6
+      },
+      {
+        "symbol": "MPHASIS",
+        "shares": 17,
+        "amount": 40248.350000000006
+      },
+      {
+        "symbol": "TRENT",
+        "shares": 21,
+        "amount": 40521.6
+      },
+      {
+        "symbol": "HAL",
+        "shares": 21,
+        "amount": 40728.03
+      },
+      {
+        "symbol": "VBL",
+        "shares": 47,
+        "amount": 40803.049999999996
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": 22,
+        "amount": 40988.2
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": 119,
+        "amount": 41322.75
+      },
+      {
+        "symbol": "ZEEL",
+        "shares": 153,
+        "amount": 41524.2
+      },
+      {
+        "symbol": "BANKINDIA",
+        "shares": 464,
+        "amount": 41620.8
+      },
+      {
+        "symbol": "IRFC",
+        "shares": 819,
+        "amount": 41646.15
+      },
+      {
+        "symbol": "NMDC",
+        "shares": 351,
+        "amount": 41663.700000000004
+      }
+    ],
+    "capital_incurred": -24954.97,
+    "start_date": "2023-06-30",
+    "end_date": "2023-08-14"
+  },
+  "2023-09-28": {
+    "stocks": [
+      {
+        "symbol": "IRFC",
+        "shares": -819,
+        "amount": -61302.149999999994
+      },
+      {
+        "symbol": "NMDC",
+        "shares": -351,
+        "amount": -49806.9
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": -119,
+        "amount": -49563.5
+      },
+      {
+        "symbol": "BANKINDIA",
+        "shares": -464,
+        "amount": -48743.2
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": -22,
+        "amount": -48075.5
+      },
+      {
+        "symbol": "VBL",
+        "shares": -47,
+        "amount": -44457.299999999996
+      },
+      {
+        "symbol": "INDIANB",
+        "shares": -106,
+        "amount": -43873.399999999994
+      },
+      {
+        "symbol": "TRENT",
+        "shares": -21,
+        "amount": -43355.55
+      },
+      {
+        "symbol": "POLYCAB",
+        "shares": -8,
+        "amount": -42292.0
+      },
+      {
+        "symbol": "MPHASIS",
+        "shares": -17,
+        "amount": -40558.600000000006
+      },
+      {
+        "symbol": "HAL",
+        "shares": -21,
+        "amount": -39672.15
+      },
+      {
+        "symbol": "ZEEL",
+        "shares": -153,
+        "amount": -38869.65
+      },
+      {
+        "symbol": "LT",
+        "shares": 13,
+        "amount": 39130.0
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": 36,
+        "amount": 41126.4
+      },
+      {
+        "symbol": "POLICYBZR",
+        "shares": 54,
+        "amount": 41129.1
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": 110,
+        "amount": 41294.0
+      },
+      {
+        "symbol": "FACT",
+        "shares": 76,
+        "amount": 41340.200000000004
+      },
+      {
+        "symbol": "LODHA",
+        "shares": 52,
+        "amount": 41366.0
+      },
+      {
+        "symbol": "CHOLAFIN",
+        "shares": 34,
+        "amount": 41473.2
+      },
+      {
+        "symbol": "OIL",
+        "shares": 142,
+        "amount": 41499.5
+      },
+      {
+        "symbol": "FORTIS",
+        "shares": 121,
+        "amount": 41533.25
+      },
+      {
+        "symbol": "CROMPTON",
+        "shares": 136,
+        "amount": 41582.0
+      },
+      {
+        "symbol": "RECLTD",
+        "shares": 148,
+        "amount": 41632.4
+      },
+      {
+        "symbol": "NYKAA",
+        "shares": 272,
+        "amount": 41656.8
+      }
+    ],
+    "capital_incurred": -55807.05000000005,
+    "start_date": "2023-08-14",
+    "end_date": "2023-09-28"
+  }
+}

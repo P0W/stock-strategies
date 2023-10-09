@@ -1,0 +1,220 @@
+{
+  "2022-08-10": {
+    "stocks": [
+      {
+        "symbol": "ATGL",
+        "shares": -23,
+        "amount": -77082.2
+      },
+      {
+        "symbol": "HAL",
+        "shares": -67,
+        "amount": -72638.05
+      },
+      {
+        "symbol": "TATACOMM",
+        "shares": -40,
+        "amount": -43344.0
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -123,
+        "amount": -41789.25
+      },
+      {
+        "symbol": "OIL",
+        "shares": -209,
+        "amount": -39062.1
+      },
+      {
+        "symbol": "TATACHEM",
+        "shares": 46,
+        "amount": 49410.9
+      },
+      {
+        "symbol": "HINDALCO",
+        "shares": 113,
+        "amount": 49731.3
+      },
+      {
+        "symbol": "IGL",
+        "shares": 131,
+        "amount": 49753.8
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": 155,
+        "amount": 49786.0
+      }
+    ],
+    "capital_incurred": -75233.59999999998,
+    "start_date": "2022-03-31",
+    "end_date": "2022-08-10"
+  },
+  "2022-12-22": {
+    "stocks": [
+      {
+        "symbol": "IGL",
+        "shares": -131,
+        "amount": -55602.95
+      },
+      {
+        "symbol": "HINDALCO",
+        "shares": -113,
+        "amount": -51471.5
+      },
+      {
+        "symbol": "TATACHEM",
+        "shares": -46,
+        "amount": -43251.5
+      },
+      {
+        "symbol": "JSWENERGY",
+        "shares": -155,
+        "amount": -41857.75
+      },
+      {
+        "symbol": "ADANIPOWER",
+        "shares": -147,
+        "amount": -40572.0
+      },
+      {
+        "symbol": "MAXHEALTH",
+        "shares": 111,
+        "amount": 49639.2
+      },
+      {
+        "symbol": "JUBLFOOD",
+        "shares": 93,
+        "amount": 49643.399999999994
+      },
+      {
+        "symbol": "KPITTECH",
+        "shares": 70,
+        "amount": 49773.5
+      },
+      {
+        "symbol": "LUPIN",
+        "shares": 65,
+        "amount": 49809.5
+      },
+      {
+        "symbol": "RECLTD",
+        "shares": 444,
+        "amount": 49950.0
+      }
+    ],
+    "capital_incurred": 16059.89999999998,
+    "start_date": "2022-08-10",
+    "end_date": "2022-12-22"
+  },
+  "2023-05-09": {
+    "stocks": [
+      {
+        "symbol": "KPITTECH",
+        "shares": -70,
+        "amount": -61638.5
+      },
+      {
+        "symbol": "RECLTD",
+        "shares": -444,
+        "amount": -58585.799999999996
+      },
+      {
+        "symbol": "MAXHEALTH",
+        "shares": -111,
+        "amount": -53424.3
+      },
+      {
+        "symbol": "LUPIN",
+        "shares": -65,
+        "amount": -48460.75
+      },
+      {
+        "symbol": "JUBLFOOD",
+        "shares": -93,
+        "amount": -43114.8
+      },
+      {
+        "symbol": "TATAELXSI",
+        "shares": 7,
+        "amount": 48943.65
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": 18,
+        "amount": 48982.5
+      },
+      {
+        "symbol": "TATACOMM",
+        "shares": 38,
+        "amount": 49388.6
+      },
+      {
+        "symbol": "VBL",
+        "shares": 66,
+        "amount": 49680.18
+      },
+      {
+        "symbol": "FACT",
+        "shares": 157,
+        "amount": 49933.85
+      }
+    ],
+    "capital_incurred": -18295.37000000003,
+    "start_date": "2022-12-22",
+    "end_date": "2023-05-09"
+  },
+  "2023-09-15": {
+    "stocks": [
+      {
+        "symbol": "TATACOMM",
+        "shares": -38,
+        "amount": -73252.6
+      },
+      {
+        "symbol": "VBL",
+        "shares": -66,
+        "amount": -60432.9
+      },
+      {
+        "symbol": "TIINDIA",
+        "shares": -18,
+        "amount": -59743.799999999996
+      },
+      {
+        "symbol": "TATAELXSI",
+        "shares": -7,
+        "amount": -50642.549999999996
+      },
+      {
+        "symbol": "FACT",
+        "shares": -69,
+        "amount": -39109.2
+      },
+      {
+        "symbol": "BAJAJ-AUTO",
+        "shares": 9,
+        "amount": 46174.5
+      },
+      {
+        "symbol": "MAZDOCK",
+        "shares": 22,
+        "amount": 49940.0
+      },
+      {
+        "symbol": "ICICIPRULI",
+        "shares": 84,
+        "amount": 49980.0
+      },
+      {
+        "symbol": "IDEA",
+        "shares": 4273,
+        "amount": 49994.1
+      }
+    ],
+    "capital_incurred": -87092.44999999998,
+    "start_date": "2023-05-09",
+    "end_date": "2023-09-15"
+  }
+}
