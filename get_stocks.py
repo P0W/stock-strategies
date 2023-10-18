@@ -6,6 +6,7 @@ import math
 import pathlib
 import datetime
 import concurrent.futures
+import queue
 
 import requests
 from bs4 import BeautifulSoup
@@ -134,13 +135,20 @@ def getStockList(
     tickerRequest = TickerRequest()
     res = tickerRequest.get(baseUrl)
     results = []
+    retries = {}
 
     if res.ok:
         soup = BeautifulSoup(res.content, features="html.parser")
-        mainTable = soup.select_one(".constituent-list-container")
-        subTables = mainTable.find_all("div", {"class": "constituent-data-row"})
+        mainTable = soup.select_one(".constituent-list-wrapper")
+        if not mainTable:
+            logging.info("Failed to get data from %s", baseUrl)
+            return results
+        subTables = mainTable.find_all("tr", {"class": "constituent-data-row"})
 
-        def fetch_stock_data(s):
+        ## display number of stocks
+        logging.info(f"Number of stocks: {len(subTables)}")
+
+        def fetch_stock_data(s, retry=False):
             aTag = s.find("a", href=True)
             sTag = s.find("span", {"class": "typography-caption-medium"})
             apiTicker = aTag["href"].split("-")[-1]
@@ -151,19 +159,34 @@ def getStockList(
             for duration in ["1y", "1mo", "1w"]:
                 apiUrl = f"{base_api_url}?duration={duration}"
                 logging.info(f"Fetching data for {sTag.text} last {duration}")
-                res = tickerRequest.get(apiUrl)
+                try:
+                    res = tickerRequest.get(apiUrl)
 
-                if res.ok:
-                    res_json = res.json()
-                    returns[duration] = {"return": res_json["data"][0]["r"]}
-                    data_points = res_json["data"][0]["points"]
-                    returns[duration]["vwap"] = calculate_vwap(data_points)
-                    returns[duration]["rsi"] = calculate_rsi(data_points)
+                    if res.ok:
+                        res_json = res.json()
+                        returns[duration] = {"return": res_json["data"][0]["r"]}
+                        data_points = res_json["data"][0]["points"]
+                        returns[duration]["vwap"] = calculate_vwap(data_points)
+                        returns[duration]["rsi"] = calculate_rsi(data_points)
 
-                    if duration == "1w":
-                        current_price = data_points[-1]["lp"]
-                else:
-                    logging.info(f"Failed to get data for {apiTicker}")
+                        if duration == "1w":
+                            current_price = data_points[-1]["lp"]
+                        if retry:
+                            logging.info(f"Success Retrying {sTag.text} {duration}")
+                            retries[s] = 0
+                    else:
+                        logging.info(f"Reponse failed to get data for {apiTicker}")
+                except Exception as e:
+                    logging.error(e)
+                    logging.error(f"Failed to get data for {apiTicker}")
+                    ## add to retry queue
+                    if not retry:
+                        retries[s] = 3
+                    else:
+                        retries[s] -= 1
+                        logging.info(
+                            f"Again will retry {sTag.text} {retries[s]} time(s)"
+                        )
 
             score, ret, v, rsi = composite_score(returns)
 
@@ -185,6 +208,13 @@ def getStockList(
         #     executor.map(fetch_stock_data, subTables)
         for s in subTables:
             fetch_stock_data(s)
+
+        ## retry failed requests
+        for s in retries:
+            if retries[s] > 0:
+                fetch_stock_data(s, retry=True)
+            else:
+                logging.info(f"Failed to fetch data for {s.text} after 3 retries")
 
         results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
     else:

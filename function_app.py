@@ -85,6 +85,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
 
     request_date = req.params.get("date")
+    
     if not request_date:
         try:
             req_body = req.get_json()
@@ -92,6 +93,8 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
             pass
         else:
             request_date = req_body.get("date")
+    else:
+        logging.info("Got date from param : %s", request_date)
 
     if request_date:
         portfolio_blob_name = f"portfolio-on-{request_date}.json"
