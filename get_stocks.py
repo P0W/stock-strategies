@@ -2,11 +2,9 @@
 
 import json
 import logging
-import math
+import sys
 import pathlib
 import datetime
-import concurrent.futures
-import queue
 
 import requests
 from bs4 import BeautifulSoup
@@ -19,6 +17,7 @@ class TickerRequest:
         self.cookies = {}
         self.headers = {}
         try:
+            # No need to use credentials if you are using public login
             with open("cred.json", "r") as fh:
                 creds = json.load(fh)
                 self.cookies = creds["cookies"]
@@ -330,6 +329,20 @@ def build_price_list(data_items):
     return {stock["symbol"]: stock["price"] for stock in data_items}
 
 
+## @brief Helper method to get stock info
+## @param portfolio_data: portfolio data
+## @return stock_info: stock info
+def get_stock_info(portfolio_data):
+    stock_info = {}
+    for stock in portfolio_data:
+        stock_info[stock["symbol"]] = {
+            "shares": stock["shares"],
+            "investment": stock["investment"],
+            "price": stock["price"],
+        }
+    return stock_info
+
+
 ## @brief Helper method to rebalance portfolio previous day and current day
 ## @param previous_day_portfolio: previous day portfolio
 ## @param current_day_portfolio: current day portfolio
@@ -340,16 +353,6 @@ def rebalance_portfolio(
 ):
     capital_incurred = 0
     result = {"stocks": [], "capital_incurred": ""}
-
-    def get_stock_info(portfolio_data):
-        stock_info = {}
-        for stock in portfolio_data:
-            stock_info[stock["symbol"]] = {
-                "shares": stock["shares"],
-                "investment": stock["investment"],
-                "price": stock["price"],
-            }
-        return stock_info
 
     day1_stock_info = get_stock_info(previous_day_portfolio)
     day2_stock_info = get_stock_info(current_day_portfolio)
@@ -394,22 +397,31 @@ def rebalance_portfolio(
 
 ## General testing and simulation
 if __name__ == "__main__":
+    date_provided = len(sys.argv) == 2
+    if date_provided:
+        logging.info(f"Date provided: {sys.argv[1]}")
+        fileName = f"nifty200-symbols-{sys.argv[1]}.json"
     ## filename : stocks-nifty-200-YYYY-MM-DD.json
-    fileName = get_file_name()
+    else:
+        fileName = get_file_name()
     if pathlib.Path(fileName).exists():
         with open(fileName, "r") as fh:
             nifty200_symbols = json.load(fh)
     else:
+        logging.info("File not found: %s, fetching data from tickertape", fileName)
         nifty200_symbols = getStockList()
         with open(fileName, "w") as fh:
             json.dump(nifty200_symbols, fh, indent=2)
-    fileName = get_file_name("portfolio-on")
+    if date_provided:
+        fileName = f"portfolio-on-{sys.argv[1]}.json"
+    else:
+        fileName = get_file_name("portfolio-on")
     portfolio = load_portfolio(fileName)
     if portfolio:
         logging.info("Portfolio loaded from file")
     else:
         portfolio = build_portfolio(
-            data_items=nifty200_symbols, N=12, investment=250000
+            data_items=nifty200_symbols, N=15, investment=500000
         )
         with open(fileName, "w") as fh:
             json.dump(portfolio, fh, indent=2)
@@ -420,7 +432,10 @@ if __name__ == "__main__":
         with open(previous_day_file_name, "r") as fh:
             previous_day_portfolio = json.load(fh)
             display_portfolio(previous_day_portfolio, "Previous Day Portfolio")
-            rebalance_file_name = get_file_name("rebalance-on")
+            if date_provided:
+                rebalance_file_name = f"rebalance-on-{sys.argv[1]}.json"
+            else:
+                rebalance_file_name = get_file_name("rebalance-on")
             if True or not pathlib.Path(rebalance_file_name).exists():
                 rebalance = rebalance_portfolio(
                     previous_day_portfolio,

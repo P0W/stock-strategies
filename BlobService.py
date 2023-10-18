@@ -1,10 +1,28 @@
 import json
 import logging
+import functools
 
 from azure.storage.blob import BlobServiceClient
 
 logging.basicConfig(level=logging.INFO)
 
+## @method cache_results
+## @brief Cache results of a function
+## @param func: function to cache
+## @return wrapper: wrapper function
+def cache_results(func):
+    cache = {}
+    @functools.wraps(func)
+    def wrapper(*args):
+        if args in cache:
+            logging.info("cache hit for %s", func.__name__)
+            return cache[args]
+        logging.info("cache miss for %s", func.__name__)
+        result = func(*args)
+        cache[args] = result
+        return result
+
+    return wrapper
 
 ## @classname BlobService
 ## @brief Class to handle blob storage
@@ -30,6 +48,7 @@ class BlobService:
     ## @brief Get blob data if exists
     ## @param blob_name: name of the blob
     ## @return blob_data: blob data if exists else None
+    @cache_results
     def get_blob_data_if_exists(self, blob_name: str):
         blob_client = self.container_client.get_blob_client(blob_name)
         if blob_client.exists():
@@ -46,3 +65,11 @@ class BlobService:
     def upload_blob(self, blob_data: dict, blob_name: str):
         blob_client = self.container_client.get_blob_client(blob_name)
         blob_client.upload_blob(json.dumps(blob_data, indent=2), overwrite=True)
+
+    ## @classmethod list_blobs
+    ## @brief List all blobs
+    ## @return blob_list: list of all blobs
+    def list_blobs(self, file_prefix: str = None):
+        blob_list = self.container_client.list_blobs(name_starts_with=file_prefix)
+        ## just return the blob name
+        return [blob.name for blob in blob_list]

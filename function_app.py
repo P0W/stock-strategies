@@ -1,6 +1,7 @@
 ## Azure Function app to run the momentum strategy
 ## Author: Prashant Srivastava
 
+import datetime
 import os
 import logging
 
@@ -80,12 +81,44 @@ def round_off(value: float) -> float:
     return round(value, 2)
 
 
+def get_portfolio_value(blob_service: BlobService, this_date: str):
+    logging.info("Getting portfolio change for %s", this_date)
+    ## add 1 day to the present date
+    next_day = datetime.datetime.strptime(this_date, "%Y-%m-%d") + datetime.timedelta(
+        days=1
+    )
+    next_day = next_day.strftime("%Y-%m-%d")
+    next_day_nifty200_symbols = blob_service.get_blob_data_if_exists(
+        f"all_symbols/nifty200-symbols-{next_day}.json"
+    )
+    this_day_portfolio = blob_service.get_blob_data_if_exists(
+        f"portfolio-on-{this_date}.json"
+    )
+    if next_day_nifty200_symbols and this_day_portfolio:
+        price_list = strategy.build_price_list(next_day_nifty200_symbols)
+        today_value = sum(
+            [
+                stock["shares"] * price_list[stock["symbol"]]
+                for stock in this_day_portfolio
+            ]
+        )
+        previous_date_value = sum(
+            [stock["shares"] * stock["price"] for stock in this_day_portfolio]
+        )
+        logging.info("Today value: %s", today_value)
+        logging.info("Previous date value: %s", previous_date_value)
+        ## return percentage change
+        return round_off(
+            (today_value - previous_date_value) / previous_date_value * 100
+        )
+
+
 @app.route(route="portfolio", auth_level=func.AuthLevel.FUNCTION)
 def portfolio(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
 
     request_date = req.params.get("date")
-    
+
     if not request_date:
         try:
             req_body = req.get_json()
@@ -133,8 +166,26 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
                 margin-top: 10px;
             }
             .rebalance-updates { font-size: 18px; font-weight: bold; color: #007bff; margin-top: 10px; }
+            
+            .returns { font-size: 18px; }
+            
+            .date-button { background: #0074cc; color: white; border: none; padding: 5px 10px; margin-bottom: 5px; }
+            
+            .percentage-change-container { margin-left: 20px; }
+            
+            .change-item { font-family: Arial, sans-serif; }
         </style>"""
         table_html += """
+        <script>
+            function toggleData(button) {
+                var dataContainer = button.nextElementSibling;
+                if (dataContainer.style.display === 'none') {
+                    dataContainer.style.display = 'block';
+                } else {
+                    dataContainer.style.display = 'none';
+                }
+            }
+        </script>
         <table>
         <tr>
             <th>S.No.</th>
@@ -245,6 +296,118 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
             table_html += f"<p class='rebalance-updates'>Capital incurred: {round_off(capital_incurred)} INR</p>"
         else:
             table_html += "<p class='rebalance-updates'>No rebalance updates</p>"
+
+        ## Fetch all capital_incurred from the rebalance history
+        ## Todays till the last strategy.get_file_name("rebalances/rebalance-on") available
+        end_date = current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        ## Loop while the rebalance history blob exists
+        history = {}
+        # get list of last 30 dates in the format YYYY-MM-DD
+        logging.info("Showing rebalances history")
+        current_portfolio = blob_service.get_blob_data_if_exists(
+            strategy.get_file_name("portfolio-on")
+        )
+        blob_name = strategy.get_file_name("all_symbols/nifty200-symbols")
+        nifty200_symbols = blob_service.get_blob_data_if_exists(blob_name)
+        while current_portfolio and nifty200_symbols:
+            ## Keep going back in time in YYYY-MM-DD format
+            current_date = datetime.datetime.strptime(
+                current_date, "%Y-%m-%d"
+            ) - datetime.timedelta(days=1)
+            current_date = current_date.strftime("%Y-%m-%d")
+            try:
+                portfolio_blob_name = f"portfolio-on-{current_date}.json"
+                logging.info("Fetching for %s", portfolio_blob_name)
+                portfolio = blob_service.get_blob_data_if_exists(portfolio_blob_name)
+                if portfolio:
+                    logging.info("Portfolio found for %s", current_date)
+                    rebalance = strategy.rebalance_portfolio(
+                        portfolio,
+                        current_portfolio,
+                        strategy.build_price_list(nifty200_symbols),
+                    )
+                    logging.info("Rebalancing for %s", current_date)
+                    history[current_date] = {
+                        "capital_incurred": rebalance["capital_incurred"],
+                        "start_date": current_date,
+                        "end_date": end_date,
+                        "num_days": (
+                            datetime.datetime.strptime(end_date, "%Y-%m-%d")
+                            - datetime.datetime.strptime(current_date, "%Y-%m-%d")
+                        ).days,
+                    }
+                else:
+                    logging.error("Portfolio not found for %s | Stopped", current_date)
+                    break
+            except Exception as e:
+                logging.error(e)
+                break
+
+        ## valid current_date is one day before
+        current_date = datetime.datetime.strptime(
+            current_date, "%Y-%m-%d"
+        ) + datetime.timedelta(days=1)
+        current_date = current_date.strftime("%Y-%m-%d")
+        ## For all porfolio from current_date till end_date calculate daily returns for each of them and store day wise
+        daily_returns = {}
+        while current_date != end_date:
+            ## pick the portfolio for current_date
+            this_date = current_date
+            while this_date != end_date:
+                portfolio_blob_name = f"portfolio-on-{this_date}.json"
+                logging.info("Fetching for %s", portfolio_blob_name)
+                portfolio = blob_service.get_blob_data_if_exists(portfolio_blob_name)
+                if portfolio:
+                    ## for all days from current_date till end_date calculate daily returns
+                    logging.info("Portfolio found for %s", this_date)
+                    per_change = get_portfolio_value(blob_service, this_date)
+                    if current_date not in daily_returns:
+                        daily_returns[current_date] = []
+                    daily_returns[current_date].append(
+                        {"per_change": per_change, "date": this_date}
+                    )
+                this_date = datetime.datetime.strptime(
+                    this_date, "%Y-%m-%d"
+                ) + datetime.timedelta(days=1)
+                this_date = this_date.strftime("%Y-%m-%d")
+            current_date = datetime.datetime.strptime(
+                current_date, "%Y-%m-%d"
+            ) + datetime.timedelta(days=1)
+            current_date = current_date.strftime("%Y-%m-%d")
+
+        ## Display the capital incurred history, style it
+        table_html += "<p class='rebalance-updates'>Capital Incurred History</p>"
+        table_html += """
+        <table>
+        <tr>
+            <th>Purchased on</th>
+            <th>End Date</th>
+            <th>Num of Days</th>
+            <th>Capital incurred</th>
+        </tr>
+        """
+        for date, items in history.items():
+            table_html += (
+                f"<tr>"
+                f"<td>{date}</td>"
+                f"<td>{items['end_date']}</td>"
+                f"<td>{items['num_days']}</td>"
+                f"<td>{round_off(items['capital_incurred'])}</td>"
+                f"</tr>"
+            )
+        table_html += "</table>"
+
+        # Create an HTML structure in Python
+        table_html += "<div class='returns'>Daily Returns</div>"
+        for date, items in daily_returns.items():
+            table_html += f"<div class='date-button' onclick=\"toggleData(this)\">{date}</div>"
+            table_html += (
+                "<div class='percentage-change-container' style='display: none;'>"
+            )
+            for subitem in items:
+                formatted_text = f"Date: {subitem['date']}, Return: {round_off(subitem['per_change'])}"
+                table_html += f"<div class='change-item'>{formatted_text}</div>"
+            table_html += "</div>"
 
         return func.HttpResponse(
             table_html, status_code=200, charset="utf-8", mimetype="text/html"
