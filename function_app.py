@@ -2,6 +2,7 @@
 ## Author: Prashant Srivastava
 
 import datetime
+import json
 import os
 import logging
 
@@ -81,36 +82,28 @@ def round_off(value: float) -> float:
     return round(value, 2)
 
 
-def get_portfolio_value(blob_service: BlobService, this_date: str):
+def get_portfolio_value(blob_service: BlobService, portfolio, this_date: str):
     logging.info("Getting portfolio change for %s", this_date)
     ## add 1 day to the present date
-    next_day = datetime.datetime.strptime(this_date, "%Y-%m-%d") + datetime.timedelta(
-        days=1
-    )
-    next_day = next_day.strftime("%Y-%m-%d")
+    this_date = datetime.datetime.strptime(this_date, "%Y-%m-%d")
+    this_date = this_date.strftime("%Y-%m-%d")
     next_day_nifty200_symbols = blob_service.get_blob_data_if_exists(
-        f"all_symbols/nifty200-symbols-{next_day}.json"
+        f"all_symbols/nifty200-symbols-{this_date}.json"
     )
-    this_day_portfolio = blob_service.get_blob_data_if_exists(
-        f"portfolio-on-{this_date}.json"
-    )
-    if next_day_nifty200_symbols and this_day_portfolio:
+
+    if next_day_nifty200_symbols and portfolio:
         price_list = strategy.build_price_list(next_day_nifty200_symbols)
         today_value = sum(
-            [
-                stock["shares"] * price_list[stock["symbol"]]
-                for stock in this_day_portfolio
-            ]
+            [stock["shares"] * price_list[stock["symbol"]] for stock in portfolio]
         )
         previous_date_value = sum(
-            [stock["shares"] * stock["price"] for stock in this_day_portfolio]
+            [stock["shares"] * stock["price"] for stock in portfolio]
         )
         logging.info("Today value: %s", today_value)
         logging.info("Previous date value: %s", previous_date_value)
         ## return percentage change
-        return round_off(
-            (today_value - previous_date_value) / previous_date_value * 100
-        )
+        pc = round_off((today_value - previous_date_value) / previous_date_value * 100)
+        return pc, today_value, previous_date_value
 
 
 @app.route(route="portfolio", auth_level=func.AuthLevel.FUNCTION)
@@ -353,27 +346,35 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
         while current_date != end_date:
             ## pick the portfolio for current_date
             this_date = current_date
-            while this_date != end_date:
-                portfolio_blob_name = f"portfolio-on-{this_date}.json"
-                logging.info("Fetching for %s", portfolio_blob_name)
-                portfolio = blob_service.get_blob_data_if_exists(portfolio_blob_name)
-                if portfolio:
-                    ## for all days from current_date till end_date calculate daily returns
-                    logging.info("Portfolio found for %s", this_date)
-                    per_change = get_portfolio_value(blob_service, this_date)
-                    if current_date not in daily_returns:
-                        daily_returns[current_date] = []
-                    daily_returns[current_date].append(
-                        {"per_change": per_change, "date": this_date}
-                    )
+            portfolio_blob_name = f"portfolio-on-{this_date}.json"
+            logging.info("Fetching for %s", portfolio_blob_name)
+            portfolio = blob_service.get_blob_data_if_exists(portfolio_blob_name)
+            while portfolio and this_date != end_date:
                 this_date = datetime.datetime.strptime(
                     this_date, "%Y-%m-%d"
                 ) + datetime.timedelta(days=1)
                 this_date = this_date.strftime("%Y-%m-%d")
+                if portfolio:
+                    ## for all days from current_date till end_date calculate daily returns
+                    per_change, d1_p, d2_p = get_portfolio_value(
+                        blob_service, portfolio, this_date
+                    )
+                    key = f"{current_date} | {round_off(d2_p)} INR"
+                    if key not in daily_returns:
+                        daily_returns[key] = []
+                    daily_returns[key].append(
+                        {
+                            "per_change": per_change,
+                            "date": this_date,
+                            "current_value": d1_p,
+                        }
+                    )
             current_date = datetime.datetime.strptime(
                 current_date, "%Y-%m-%d"
             ) + datetime.timedelta(days=1)
             current_date = current_date.strftime("%Y-%m-%d")
+
+        logging.info("Daily Returns : %s", json.dumps(daily_returns, indent=2))
 
         ## Display the capital incurred history, style it
         table_html += "<p class='rebalance-updates'>Capital Incurred History</p>"
@@ -400,13 +401,29 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
         # Create an HTML structure in Python
         table_html += "<div class='returns'>Daily Returns</div>"
         for date, items in daily_returns.items():
-            table_html += f"<div class='date-button' onclick=\"toggleData(this)\">{date}</div>"
+            table_html += (
+                f"<div class='date-button' onclick=\"toggleData(this)\">{date}</div>"
+            )
             table_html += (
                 "<div class='percentage-change-container' style='display: none;'>"
             )
+            table_html += (
+                f"<table>"
+                f"<tr>"
+                f"<th>Date</th>"
+                f"<th>Current Value</th>"
+                f"<th>Return</th>"
+            )
             for subitem in items:
-                formatted_text = f"Date: {subitem['date']}, Return: {round_off(subitem['per_change'])}"
-                table_html += f"<div class='change-item'>{formatted_text}</div>"
+                ## show as a table
+                table_html += (
+                    f"<tr>"
+                    f"<td>{subitem['date']}</td>"
+                    f"<td>{round_off(subitem['current_value'])}</td>"
+                    f"<td>{round_off(subitem['per_change'])} %</td>"
+                    f"</tr>"
+                )
+            table_html += "</table>"
             table_html += "</div>"
 
         return func.HttpResponse(
