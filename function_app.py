@@ -170,12 +170,121 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
         </style>"""
         table_html += """
         <script>
+            
             function toggleData(button) {
                 var dataContainer = button.nextElementSibling;
                 if (dataContainer.style.display === 'none') {
                     dataContainer.style.display = 'block';
                 } else {
                     dataContainer.style.display = 'none';
+                }
+            }
+            
+            function plotLineChartWithCircles(data, canvasId) {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext("2d");
+
+                canvas.width = 800;
+                canvas.height = 400;
+
+                const margin = 40;
+                const chartWidth = canvas.width - 2 * margin;
+                const chartHeight = canvas.height - 2 * margin;
+
+                const minDate = new Date(data[0].date);
+                const maxDate = new Date(data[data.length - 1].date);
+                const minValue = Math.min(...data.map((item) => item.per_change));
+                const maxValue = Math.max(...data.map((item) => item.per_change));
+
+                function dateToX(date) {
+                    return (
+                    ((date - minDate) / (maxDate - minDate)) * chartWidth + margin
+                    );
+                }
+
+                function valueToY(value) {
+                    return canvas.height - (((value - minValue) / (maxValue - minValue)) * chartHeight + margin);
+                }
+
+                // Draw X and Y axes
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(margin, margin);
+                ctx.lineTo(margin, canvas.height - margin);
+                ctx.lineTo(canvas.width - margin, canvas.height - margin);
+                ctx.stroke();
+
+                // Draw X-axis label
+                ctx.fillStyle = "black";
+                ctx.font = "16px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Date", canvas.width / 2, canvas.height - 10);
+
+                // Draw Y-axis label
+                ctx.save();
+                ctx.translate(10, canvas.height / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = "center";
+                ctx.fillText("Value", 0, 0);
+                ctx.restore();
+
+                // Draw X-axis tick marks and labels
+                ctx.fillStyle = "black";
+                ctx.font = "12px Arial";
+                ctx.textAlign = "center";
+                const xStep = chartWidth / 10;
+                for (let i = 1; i <= 10; i++) {
+                    const x = margin + i * xStep;
+                    ctx.beginPath();
+                    ctx.moveTo(x, canvas.height - margin - 5);
+                    ctx.lineTo(x, canvas.height - margin + 5);
+                    ctx.stroke();
+                    const date = new Date(minDate.getTime() + (i / 10) * (maxDate - minDate));
+                    ctx.fillText(date.toISOString().slice(0, 10), x, canvas.height - margin + 20);
+                }
+
+                // Draw Y-axis tick marks and labels
+                ctx.textAlign = "right";
+                const yStep = chartHeight / 10;
+                for (let i = 1; i <= 10; i++) {
+                    const y = canvas.height - margin - i * yStep;
+                    ctx.beginPath();
+                    ctx.moveTo(margin - 5, y);
+                    ctx.lineTo(margin + 5, y);
+                    ctx.stroke();
+                    const value = minValue + (i / 10) * (maxValue - minValue);
+                    ctx.fillText(value.toFixed(2), margin - 10, y);
+                }
+
+
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = 2;
+
+                for (let i = 1; i < data.length; i++) {
+                    const x1 = dateToX(new Date(data[i - 1].date));
+                    const y1 = valueToY(data[i - 1].per_change);
+                    const x2 = dateToX(new Date(data[i].date));
+                    const y2 = valueToY(data[i].per_change);
+
+                    // Draw a line connecting the data points
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    // Circle the data points
+                    ctx.beginPath();
+                    ctx.arc(x1, y1, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = "red";
+                    ctx.fill();
+
+                    // If you also want to circle the last data point
+                    if (i === data.length - 1) {
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    }
                 }
             }
         </script>
@@ -400,6 +509,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
 
         # Create an HTML structure in Python
         table_html += "<div class='returns'>Daily Returns</div>"
+        drawScript = ""
         for date, items in daily_returns.items():
             table_html += (
                 f"<div class='date-button' onclick=\"toggleData(this)\">{date}</div>"
@@ -424,7 +534,14 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
                     f"</tr>"
                 )
             table_html += "</table>"
+            canvasId = f"chart-canvas-{date}"
+            if len(items) >= 3:  ## Atleast 3 items to draw a line chart
+                table_html += f"<canvas id='{canvasId}'></canvas>"
+                drawScript += (
+                    f"plotLineChartWithCircles({json.dumps(items)}, '{canvasId}');"
+                )
             table_html += "</div>"
+        table_html += "<script>" + drawScript + "</script>"
 
         return func.HttpResponse(
             table_html, status_code=200, charset="utf-8", mimetype="text/html"
