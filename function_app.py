@@ -16,7 +16,7 @@ app = func.FunctionApp()
 
 ## Run the momentum strategy time triggered
 @app.schedule(
-    schedule="0 3 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False
+    schedule="* 14,2 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False
 )
 def momentum_strategy(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
@@ -134,6 +134,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
     if portfolio:
         # Generate an HTML table
         table_html = """
+            <title>Momentum Strategy</title>
             <style>
             table {
                 border-collapse: collapse;
@@ -226,7 +227,7 @@ def portfolio(req: func.HttpRequest) -> func.HttpResponse:
                 ctx.translate(10, canvas.height / 2);
                 ctx.rotate(-Math.PI / 2);
                 ctx.textAlign = "center";
-                ctx.fillText("Value", 0, 0);
+                ctx.fillText("Returns", 0, 0);
                 ctx.restore();
 
                 // Draw X-axis tick marks and labels
