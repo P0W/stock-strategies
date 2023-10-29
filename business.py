@@ -5,6 +5,7 @@ import logging
 import get_stocks as strategy
 from BlobService import BlobService
 
+logging = logging.getLogger(__name__)
 
 def round_off(value: float) -> float:
     return round(value, 2)
