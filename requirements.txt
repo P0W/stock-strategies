@@ -6,3 +6,4 @@ azure-functions==1.17.0
 requests==2.31.0
 beautifulsoup4==4.12.2
 azure-storage-blob==12.18.2
+flask==3.0.0
