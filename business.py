@@ -60,7 +60,7 @@ def build_todays_portfolio(
     return portfolio
 
 
-def view_portfolio(conn_string: str, request_date: str = None) -> str:
+def view_portfolio(conn_string: str, request_date: str = None, detailed_view:bool = True) -> str:
     blob_service = BlobService(conn_string)
     if request_date:
         portfolio_blob_name = f"portfolio-on-{request_date}.json"
@@ -336,6 +336,8 @@ def view_portfolio(conn_string: str, request_date: str = None) -> str:
             table_html += f"<p class='rebalance-updates'>Capital incurred: {round_off(capital_incurred)} INR</p>"
         else:
             table_html += "<p class='rebalance-updates'>No rebalance updates</p>"
+        if not detailed_view:
+            return table_html
 
         ## Fetch all capital_incurred from the rebalance history
         ## Todays till the last strategy.get_file_name("rebalances/rebalance-on") available
