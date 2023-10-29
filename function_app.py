@@ -16,7 +16,7 @@ app = func.FunctionApp()
 
 ## Run the momentum strategy time triggered
 @app.schedule(
-    schedule="* 14,2 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False
+    schedule="25 14,2 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False
 )
 def momentum_strategy(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
@@ -108,8 +108,6 @@ def get_portfolio_value(blob_service: BlobService, portfolio, this_date: str):
 
 @app.route(route="portfolio", auth_level=func.AuthLevel.FUNCTION)
 def portfolio(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Python HTTP trigger function processed a request.")
-
     request_date = req.params.get("date")
 
     if not request_date:
