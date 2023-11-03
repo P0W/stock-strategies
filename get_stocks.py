@@ -303,12 +303,19 @@ def load_portfolio(fileName):
 def build_portfolio(data_items, N=10, investment=100000):
     ## Take top N stocks, clone it
     portfolio = []
+    weight = round(100 / N, 2)
+    ## filter out stocks with price greater than investment amount
+    data_items = [
+        stock
+        for stock in data_items
+        if int(investment * weight / 100.0 / stock["price"]) > 0
+    ]
     for stock in data_items[:N]:
         portfolio.append(stock.copy())
 
     ## calculate weight
     for stock in portfolio:
-        stock["weight"] = round(100 / N, 2)
+        stock["weight"] = weight
 
     ## calculate number of shares
     for stock in portfolio:
