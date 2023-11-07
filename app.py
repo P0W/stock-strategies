@@ -32,7 +32,9 @@ def portfolio():
     except json.JSONDecodeError as e:
         logger.error("Error reading local.settings.json: %s", e)
     if conn_string:
-        table_html = business.view_portfolio(conn_string=conn_string, detailed_view=False)
+        table_html = business.view_portfolio(
+            conn_string=conn_string, detailed_view=False
+        )
         # table_html is string, return it as html
         if table_html:
             logger.info("Portfolio found")
@@ -68,4 +70,4 @@ def generate_portfolio():
 
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000)

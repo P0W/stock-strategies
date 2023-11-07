@@ -5,7 +5,7 @@ services:
       context: ./  # Use the current directory as the build context
       dockerfile: Dockerfile
     ports:
-      - "8000"  # Map container port 8000 to host
+      - "8000:8000"  # Map container port 8000 to host
 
   nginx:
     image: nginx
