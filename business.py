@@ -67,10 +67,10 @@ def get_portfolio(conn_string: str, request_date: str = None) -> str:
     else:
         portfolio_blob_name = strategy.get_file_name("portfolio-on")
     logging.info("Portfolio blob name: %s", portfolio_blob_name)
-    return blob_service.get_blob_data_if_exists(portfolio_blob_name)
+    return blob_service.get_blob_data_if_exists(portfolio_blob_name), portfolio_blob_name
 
 def view_portfolio(conn_string: str, request_date: str = None, detailed_view:bool = True) -> str:
-    portfolio = get_portfolio(conn_string, request_date)
+    portfolio, portfolio_blob_name = get_portfolio(conn_string, request_date)
     blob_service = BlobService(conn_string)
     if portfolio:
         # Generate an HTML table
