@@ -10,6 +10,8 @@ services:
   nginx:
     image: nginx
     volumes:
+    ## Generate cert.pem and key.pem with the following command:
+    ## openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
       - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
       - ./cert.pem:/etc/nginx/cert.pem:ro
       - ./key.pem:/etc/nginx/key.pem:ro
