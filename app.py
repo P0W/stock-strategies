@@ -5,13 +5,21 @@ This module defines a Flask app that serves a portfolio view.
 import json
 import logging
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify,send_from_directory
 
 from util import cache_results
 import business
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/build')
 logger = logging.getLogger(__name__)
+
+@app.route('/show')
+def index():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def static_file(path):
+    return send_from_directory(app.static_folder, path)
 
 
 @app.route("/", methods=["GET"])
