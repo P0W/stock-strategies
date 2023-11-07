@@ -5,8 +5,9 @@ This module defines a Flask app that serves a portfolio view.
 import json
 import logging
 
-from flask import Flask
+from flask import Flask, jsonify
 
+from util import cache_results
 import business
 
 app = Flask(__name__)
@@ -21,6 +22,37 @@ def portfolio():
     Returns:
         str: The HTML table as a string.
     """
+    conn_string = get_connection_string()
+    if conn_string:
+        table_html = business.view_portfolio(
+            conn_string=conn_string, detailed_view=False
+        )
+        # table_html is string, return it as html
+        if table_html:
+            logger.info("Portfolio found")
+            return table_html
+    return jsonify({"error": "No portfolio data found"}), 400
+
+
+@app.route("/json", methods=["GET"])
+def portfolio_json():
+    """
+    Returns a portfolio view as a JSON object.
+    """
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_portfolio(conn_string=conn_string)
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No portfolio data found"}), 400
+
+
+@cache_results
+def get_connection_string():
+    """
+    Returns the connection string from local.settings.json.
+    """
     conn_string = None
     try:
         # Read local.settings.json
@@ -31,15 +63,7 @@ def portfolio():
         logger.error("local.settings.json not found: %s", e)
     except json.JSONDecodeError as e:
         logger.error("Error reading local.settings.json: %s", e)
-    if conn_string:
-        table_html = business.view_portfolio(
-            conn_string=conn_string, detailed_view=False
-        )
-        # table_html is string, return it as html
-        if table_html:
-            logger.info("Portfolio found")
-            return table_html
-    return "Portfolio not found"
+    return conn_string
 
 
 def generate_portfolio():

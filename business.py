@@ -60,14 +60,18 @@ def build_todays_portfolio(
     return portfolio
 
 
-def view_portfolio(conn_string: str, request_date: str = None, detailed_view:bool = True) -> str:
+def get_portfolio(conn_string: str, request_date: str = None) -> str:
     blob_service = BlobService(conn_string)
     if request_date:
         portfolio_blob_name = f"portfolio-on-{request_date}.json"
     else:
         portfolio_blob_name = strategy.get_file_name("portfolio-on")
     logging.info("Portfolio blob name: %s", portfolio_blob_name)
-    portfolio = blob_service.get_blob_data_if_exists(portfolio_blob_name)
+    return blob_service.get_blob_data_if_exists(portfolio_blob_name)
+
+def view_portfolio(conn_string: str, request_date: str = None, detailed_view:bool = True) -> str:
+    portfolio = get_portfolio(conn_string, request_date)
+    blob_service = BlobService(conn_string)
     if portfolio:
         # Generate an HTML table
         table_html = """
