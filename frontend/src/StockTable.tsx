@@ -3,7 +3,7 @@ import { IStockData, SymbolRow } from "./SymbolRow";
 import './StockTable.css';
 
 
-const ENDPOINT = 'http://localhost:8000/json';
+const ENDPOINT = ' http://172.174.157.91:8080/json'; // 'http://localhost:8000/json';
 export const StockTable = (): React.ReactElement => {
     const [stocks, setStocks] = React.useState<IStockData[]>([]);
     const [loading, setLoading] = React.useState(true);
