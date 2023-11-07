@@ -4,8 +4,10 @@ FROM python:3.9-slim
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy all .py files
+COPY *.py /app
+# Copy requirements.txt
+COPY requirements.txt /app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
