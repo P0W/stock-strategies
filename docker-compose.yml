@@ -1,0 +1,20 @@
+version: '3'
+services:
+  app:
+    build:
+      context: ./  # Use the current directory as the build context
+      dockerfile: Dockerfile
+    ports:
+      - "8000"  # Map container port 8000 to host
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+      - ./cert.pem:/etc/nginx/cert.pem:ro
+      - ./key.pem:/etc/nginx/key.pem:ro
+    ports:
+      - "8080:8080"
+      - "443:443"
+    depends_on:
+      - app
