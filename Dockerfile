@@ -11,6 +11,9 @@ COPY requirements.txt /app/
 # Copy local.settings.json
 COPY local.settings.json /app/
 
+# COPY all frontend/build to app/frontend/build
+COPY frontend/build /app/frontend/build
+
 # Debugging inside container (curl, ps, etc.)
 RUN apt-get update && \
     apt-get install -y curl && \
