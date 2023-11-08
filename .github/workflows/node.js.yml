@@ -12,19 +12,19 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]  # Update to the desired Node.js version
+        node-version: [20.x]  # Update to the desired Node.js version
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Change to the frontend directory
+      - working-directory: ./frontend
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Change to the frontend directory
-        run: cd frontend
 
       - name: Install dependencies
         run: yarn install
