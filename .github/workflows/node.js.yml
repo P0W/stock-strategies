@@ -25,9 +25,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
+        cache: 'yarn'
+    #- run: yarn ci
+    - run: yarn run build --if-present
     - run: |
         git add frontend/build/*
         git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
