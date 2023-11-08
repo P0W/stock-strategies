@@ -34,6 +34,8 @@ jobs:
 
       - name: Commit and push
         run: |
+          git config user.name "P0W"
+          git config user.email "powprashant@gmail.com"
           git add build/* -f
           git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
