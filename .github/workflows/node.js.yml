@@ -40,11 +40,8 @@ jobs:
       #    git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
       #    git push
 
-      - uses: actions/checkout@v3
-      - run: |
-          date > generated.txt
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "generated"
-          git push
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Add the very useful text file'
+          add: 'build/* --force'
+          cwd: './frontend'
