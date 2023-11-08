@@ -40,8 +40,11 @@ jobs:
       #    git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
       #    git push
 
-      - uses: EndBug/add-and-commit@v9
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
         with:
-          message: 'Add the very useful text file'
+          author_name: P0W
+          author_email: powprashant@gmail.com
+          message: 'Created new build'
           add: 'build/* --force'
           cwd: './frontend'
