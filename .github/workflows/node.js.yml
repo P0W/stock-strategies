@@ -18,10 +18,10 @@ jobs:
         node-version: [20.x]  # Update to the desired Node.js version
 
     steps:
-      - name: Checkout code
+      - name: Checking out code
         uses: actions/checkout@v3
         
-      - name: Set up Node.js
+      - name: Setting up nodejs
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Build
+      - name: Starting Build
         run: yarn run build --if-present
 
       #- name: Commit and push
@@ -40,11 +40,13 @@ jobs:
       #    git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
       #    git push
 
-      - name: Commit changes
+      - name: Commit Changes
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: P0W
-          author_email: powprashant@gmail.com
+          #author_name: P0W
+          #author_email: powprashant@gmail.com
           message: 'Created new build'
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
           add: 'build/* --force'
           cwd: './frontend'
