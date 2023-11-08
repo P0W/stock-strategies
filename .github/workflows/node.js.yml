@@ -32,10 +32,18 @@ jobs:
       - name: Build
         run: yarn run build --if-present
 
-      - name: Commit and push
-        run: |
-          git config user.name "P0W"
-          git config user.email "powprashant@gmail.com"
-          git add build/* -f
-          git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          git push
+      #- name: Commit and push
+      #  run: |
+      #    git config user.name "P0W"
+      #    git config user.email "powprashant@gmail.com"
+      #    git add build/* -f
+      #    git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+      #    git push
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: P0W
+          author_email: powprashant@gmail.com
+          message: 'Build update'
+          add: build/*
