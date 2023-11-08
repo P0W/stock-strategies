@@ -6,14 +6,15 @@ RUN npm ci
 ## copy from frontend/*.* to /app
 COPY frontend/ /app
 RUN npm install
+RUN npm run build
 
 ## Stage 2: Build the backend
 FROM python:3.9-slim
 WORKDIR /app
 # Copy all .py files
-COPY *.py /app/
+COPY server/*.py /app/
 # Copy requirements.txt
-COPY requirements.txt /app/
+COPY server/requirements.txt /app/
 # Copy local.settings.json
 COPY local.settings.json /app/
 
