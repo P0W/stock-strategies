@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
 
     strategy:
       matrix:
@@ -18,9 +21,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Change to the frontend directory
-      - working-directory: ./frontend
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
