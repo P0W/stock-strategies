@@ -16,7 +16,7 @@ services:
       - ./cert.pem:/etc/nginx/cert.pem:ro
       - ./key.pem:/etc/nginx/key.pem:ro
     ports:
-      - "8080:8080"
+      - "8080:80"
       - "443:443"
     depends_on:
       - app
