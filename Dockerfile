@@ -12,9 +12,9 @@ RUN npm run build
 FROM python:3.9-slim
 WORKDIR /app
 # Copy all .py files
-COPY server/*.py /app/
+COPY backend/*.py /app/
 # Copy requirements.txt
-COPY server/requirements.txt /app/
+COPY backend/requirements.txt /app/
 # Copy local.settings.json
 COPY local.settings.json /app/
 
