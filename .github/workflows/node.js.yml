@@ -46,4 +46,4 @@ jobs:
           author_name: P0W
           author_email: powprashant@gmail.com
           message: 'Build update'
-          add: "build/"
+          add: build
