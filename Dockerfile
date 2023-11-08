@@ -1,12 +1,13 @@
 ## Stage 1: Build the frontend
 FROM node:21-slim AS frontEndBuild
 WORKDIR /app
-COPY frontend/package*.json .
-RUN npm ci
+#COPY frontend/package*.json .
+## RUN yarn ci
+RUN mkdir node_modules
 ## copy from frontend/*.* to /app
 COPY frontend/ /app
-RUN npm install
-RUN npm run build
+RUN yarn install
+RUN yarn run build
 
 ## Stage 2: Build the backend
 FROM python:3.9-slim
