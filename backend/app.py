@@ -34,7 +34,7 @@ def portfolio_json(datestr=None):
     """
     if datestr:
         try:
-            datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format
+            datetime.datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format
         except ValueError:
             return (
                 jsonify({"error": "Incorrect date format, should be YYYY-MM-DD"}),
