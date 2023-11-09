@@ -11,8 +11,9 @@ from flask import Flask, abort, jsonify, request, send_from_directory
 
 from util import cache_results
 import business
+import os
 
-app = Flask(__name__, static_folder="build")
+app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
 logger = logging.getLogger(__name__)
 
 
@@ -156,3 +157,4 @@ def validate_date(datestr):
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=8000)
+    #app.run(host="0.0.0.0", port=8000)
