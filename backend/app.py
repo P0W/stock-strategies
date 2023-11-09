@@ -57,7 +57,7 @@ def rebalance_json(todate=None, fromDate=None):
     conn_string = get_connection_string()
     if conn_string:
         json_result = business.get_rebalance(
-            conn_string=conn_string, todate=todate, fromDate=fromDate
+            conn_string=conn_string, from_date=todate, to_date=fromDate
         )
     if json_result:
         return jsonify(json_result), 200
