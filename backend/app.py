@@ -2,24 +2,54 @@
 This module defines a Flask app that serves a portfolio view.
 """
 
+import datetime
 import json
 import logging
 
-from flask import Flask, jsonify,send_from_directory
+from waitress import serve
+from flask import Flask, jsonify, send_from_directory
 
 from util import cache_results
 import business
 
-app = Flask(__name__, static_folder='frontend/build')
+app = Flask(__name__, static_folder="build")
 logger = logging.getLogger(__name__)
 
-@app.route('/show')
-def index():
-    return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/<path:path>')
+@app.route("/show")
+def index():
+    return send_from_directory(app.static_folder, "index.html")
+
+
+@app.route("/<path:path>")
 def static_file(path):
     return send_from_directory(app.static_folder, path)
+
+
+@app.route("/json", methods=["GET"])
+@app.route("/json/<datestr>", methods=["GET"])
+def portfolio_json(datestr=None):
+    """
+    Returns a portfolio view as a JSON object.
+    """
+    if datestr:
+        try:
+            datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format
+        except ValueError:
+            return (
+                jsonify({"error": "Incorrect date format, should be YYYY-MM-DD"}),
+                400,
+            )
+
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_portfolio(
+            conn_string=conn_string, request_date=datestr
+        )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No portfolio data found"}), 400
 
 
 @app.route("/", methods=["GET"])
@@ -39,20 +69,6 @@ def portfolio():
         if table_html:
             logger.info("Portfolio found")
             return table_html
-    return jsonify({"error": "No portfolio data found"}), 400
-
-
-@app.route("/json", methods=["GET"])
-def portfolio_json():
-    """
-    Returns a portfolio view as a JSON object.
-    """
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_portfolio(conn_string=conn_string)
-    if json_result:
-        return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
 
 
@@ -102,4 +118,4 @@ def generate_portfolio():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    serve(app, host="0.0.0.0", port=8000)

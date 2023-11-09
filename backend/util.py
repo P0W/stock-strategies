@@ -3,12 +3,14 @@ import functools
 
 logging = logging.getLogger(__name__)
 
+
 ## @method cache_results
 ## @brief Cache results of a function
 ## @param func: function to cache
 ## @return wrapper: wrapper function
 def cache_results(func):
     cache = {}
+
     @functools.wraps(func)
     def wrapper(*args):
         if args in cache:

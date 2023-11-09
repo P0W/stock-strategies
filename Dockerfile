@@ -12,14 +12,14 @@
 FROM python:3.9-slim
 WORKDIR /app
 # Copy all .py files
-COPY backend/*.py /app/
+COPY backend/*.py /app/backend/
 # Copy requirements.txt
-COPY backend/requirements.txt /app/
+COPY backend/requirements.txt /app/backend/
 # Copy local.settings.json
 COPY local.settings.json /app/
 
 # Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r backend/requirements.txt
 
 ## copy from frontend/build to /app/frontend/build
 COPY frontend/build /app/frontend/build
@@ -28,4 +28,4 @@ COPY frontend/build /app/frontend/build
 EXPOSE 8000
 
 # Run app.py when the container launches
-CMD ["python", "app.py"]
+CMD ["python", "backend/app.py"]
