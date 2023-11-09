@@ -1,7 +1,9 @@
 import React from "react";
+import { IHeader } from "./StockTable";
 
 
 export interface IStockData {
+    [key: string]: any;
     stock: string;
     symbol: string;
     price: number;
@@ -9,6 +11,7 @@ export interface IStockData {
     shares: number;
     investment: number;
     composite_score: number;
+
     returns: {
         '1y': {
             return: number;
@@ -30,18 +33,17 @@ export interface IStockData {
 
 interface ISymbolRow {
     rank: number;
-    item: IStockData
+    item: IStockData;
+    headers: IHeader[];
 };
 
-// Round to 2 decimal places
-const round_off = (num: number): number => {
-    return Math.round(num * 100) / 100;
-}
 
-export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item }): React.ReactElement => {
+const defaultCellTemplate = (item: number) => { item };
+
+export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item, headers }): React.ReactElement => {
     return (
         <tr>
-            <td>{rank}</td>
+            {/* <td>{rank}</td>
             <td className="stock-name">{item.stock}</td>
             <td>{item.symbol}</td>
             <td>{item.price}</td>
@@ -57,7 +59,24 @@ export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item }): React.ReactElem
             <td>{round_off(item.returns['1w'].vwap)}</td>
             <td>{round_off(item.returns['1y'].rsi)}</td>
             <td>{round_off(item.returns['1mo'].rsi)}</td>
-            <td>{round_off(item.returns['1w'].rsi)}</td>
+            <td>{round_off(item.returns['1w'].rsi)}</td> 
+
+            {headers?.map((header, index) => (
+                header.key in item && <td key={index}>{item[header.key]}</td>
+            ))}
+
+            */}
+
+
+            {headers.map((header, index) => {
+                const CellTemplate = header.cellTemplate || defaultCellTemplate;
+                return <>
+                    <td key={index}>
+                        CellTemplate(item[header.key])
+                    </td>
+                </>
+            })}
+
         </tr>
     );
 };

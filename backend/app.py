@@ -7,7 +7,7 @@ import json
 import logging
 
 from waitress import serve
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, abort, jsonify, request, send_from_directory
 
 from util import cache_results
 import business
@@ -26,20 +26,13 @@ def static_file(path):
     return send_from_directory(app.static_folder, path)
 
 
-@app.route("/json", methods=["GET"])
-@app.route("/json/<datestr>", methods=["GET"])
+@app.route("/portfolio", methods=["GET"])
+@app.route("/portfolio/<datestr>", methods=["GET"])
 def portfolio_json(datestr=None):
     """
     Returns a portfolio view as a JSON object.
     """
-    if datestr:
-        try:
-            datetime.datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format
-        except ValueError:
-            return (
-                jsonify({"error": "Incorrect date format, should be YYYY-MM-DD"}),
-                400,
-            )
+    validate_date(datestr)
 
     json_result = None
     conn_string = get_connection_string()
@@ -51,6 +44,42 @@ def portfolio_json(datestr=None):
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
 
+
+@app.route("/rebalance/<todate>/<fromDate>", methods=["GET"])
+def rebalance_json(todate=None, fromDate=None):
+    """
+    Returns a portfolio view as a JSON object.
+    """
+    validate_date(todate)
+    validate_date(fromDate)
+
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_rebalance(
+            conn_string=conn_string, todate=todate, fromDate=fromDate
+        )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No portfolio data found"}), 400
+
+@app.route("/nifty200", methods=["GET"])
+@app.route("/nifty200/<datestr>", methods=["GET"])
+def nifty200_json(datestr=None):
+    """
+    Returns the NIFTY 200 index as a JSON object.
+    """
+    validate_date(datestr)
+
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_nifty200(
+            conn_string=conn_string, request_date=datestr
+        )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No NIFTY 200 data found"}), 400
 
 @app.route("/", methods=["GET"])
 def portfolio():
@@ -115,6 +144,14 @@ def generate_portfolio():
         logger.info("Momentum strategy portfolio successfully built!")
     else:
         logger.error("Error building momentum strategy")
+
+
+def validate_date(datestr):
+    try:
+        if datestr:
+            datetime.datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format
+    except ValueError:
+        abort(400, description="Invalid date format. Expected YYYY-MM-DD.")
 
 
 if __name__ == "__main__":

@@ -23,3 +23,9 @@
 .react-datepicker-wrapper {
     margin: 20px 0;
 }
+
+.date-picker-container label {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
