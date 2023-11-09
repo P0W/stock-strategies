@@ -19,3 +19,39 @@ th {
     background-color: #4CAF50;
     color: white;
 }
+
+.returns {
+    position: relative;
+    background-color: #f0f0f0;
+    border:2px solid #ccc;
+    font-size: 13px;
+}
+
+.returns::after {
+    content: '%';
+    position: absolute;
+    margin-left: 5px;
+}
+
+.stock-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stock-table th, .stock-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.stock-table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}

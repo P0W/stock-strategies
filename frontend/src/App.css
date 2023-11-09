@@ -1,0 +1,25 @@
+.date-picker-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.date-picker-container label {
+    margin-right: 10px;
+}
+
+
+.react-datepicker__input-container input {
+    width: 200px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.react-datepicker-wrapper {
+    margin: 20px 0;
+}
