@@ -2,7 +2,7 @@ import json
 import logging
 
 from azure.storage.blob import BlobServiceClient
-from backend.util import cache_results
+from util import cache_results
 
 
 logging = logging.getLogger(__name__)
