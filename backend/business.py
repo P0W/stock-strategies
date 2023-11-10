@@ -3,8 +3,8 @@ import json
 import logging
 from typing import Dict
 
-import get_stocks as strategy
-from BlobService import BlobService
+import backend.get_stocks as strategy
+from backend.BlobService import BlobService
 
 logging = logging.getLogger(__name__)
 
