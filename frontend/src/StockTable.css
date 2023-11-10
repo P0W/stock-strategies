@@ -1,13 +1,12 @@
 table {
     border-collapse: collapse;
-    width: 100%;
-    font-size: 16px;
+    /* width: 100%; */
+    font-size: 12px;
 }
 
 th,
 td {
     border: 1px solid #dddddd;
-    text-align: left;
     padding: 8px;
 }
 
@@ -18,6 +17,7 @@ tr:nth-child(even) {
 th {
     background-color: #4CAF50;
     color: white;
+    text-align: center;
 }
 
 .returns {
@@ -33,25 +33,3 @@ th {
     margin-left: 5px;
 }
 
-.stock-name {
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.stock-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.stock-table th, .stock-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-
-.stock-table th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #4CAF50;
-    color: white;
-}

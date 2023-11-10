@@ -29,3 +29,81 @@
     font-weight: bold;
     color: #333;
 }
+
+.portfolio-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+    /* Blue color */
+    margin-top: 10px;
+}
+
+.profit {
+    font-size: 15px;
+    font-weight: bold;
+    background: green;
+    color: white;
+}
+
+.loss {
+    font-size: 15px;
+    font-weight: bold;
+    background: #dc3545;
+    /* Red color */
+    color: white;
+}
+
+.values {
+    text-align: center;
+    font-size: 12px;
+}
+
+.stock-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stock-symbol {
+    font-size: 12px;
+    font-weight: bold;
+    color: #999;
+}
+
+.stock-table-container {
+    width: '45%'; 
+    padding: '10px';
+}
+
+.Buy {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    /* text-decoration: none; */
+    /* display: inline-block; */
+    font-size: 12px;
+    /* border-radius: 4px; */
+}
+
+.Sell {
+    background-color: #f44336;
+    color: white;
+    /* padding: 5px 10px; */
+    text-align: center;
+    text-decoration: none;
+    /* display: inline-block; */
+    font-size: 12px;
+    /* border-radius: 4px; */
+}
+
+.Hold {
+    background-color: #ff9800;
+    color: white;
+    /* padding: 5px 10px; */
+    text-align: center;
+    /* text-decoration: none; */
+    /* display: inline-block; */
+    font-size: 12px;
+    /* border-radius: 4px; */
+}

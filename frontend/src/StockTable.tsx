@@ -2,10 +2,12 @@ import React from "react";
 import { IRebalanceData, IStockData, SymbolRow } from "./SymbolRow";
 import './StockTable.css';
 
+export type ItemType = string | number;
+
 export interface IHeader {
     display: string;
     key: string;
-    cellTemplate?: (item: number) => React.ReactElement | null;
+    cellTemplate?: (item: ItemType) => React.ReactElement | null;
 }
 
 interface IStockTable {

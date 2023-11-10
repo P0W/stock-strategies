@@ -1,78 +1,13 @@
-import { IHeader, StockTable } from './StockTable';
-import { StockDatePicker } from './StockDatePicker';
 import "./App.css";
 import React from 'react';
+
+import { StockTable } from './StockTable';
+import { StockDatePicker } from './StockDatePicker';
+
 import { IRebalanceData, IStockData } from './SymbolRow';
+import { mainTableHeader, rebalanceTableHeader } from './StockTableHeader';
+import { round_off } from './Utils';
 
-
-// Round to 2 decimal places
-const round_off = (num: number): number => {
-  return Math.round(num * 100) / 100;
-}
-
-const ReturnsTemplate = (item: number) => {
-  return <td className="returns">{round_off(item)}</td>;
-};
-
-const mainTableHeader: IHeader[] = [
-  {
-    display: 'S.No.',
-    key: 'rank'
-  },
-  {
-    display: 'Stock',
-    key: 'stock'
-  },
-  {
-    display: 'Symbol',
-    key: 'symbol'
-  },
-  {
-    display: 'Price',
-    key: 'price'
-  },
-  {
-    display: 'Weight',
-    key: 'weight'
-  },
-  {
-    display: 'Shares',
-    key: 'shares'
-  },
-  {
-    display: 'Investment',
-    key: 'investment'
-  },
-  {
-    display: 'Score',
-    key: 'composite_score',
-    cellTemplate: (item: number) => <td>{round_off(item)}</td>
-  }
-];
-
-const rebalanceTableHeader: IHeader[] = [
-  {
-    display: 'S.No.',
-    key: 'rank'
-  },
-  {
-    display: 'Symbol',
-    key: 'symbol'
-  },
-  {
-    display: 'Amount',
-    key: 'amount'
-  },
-  {
-    display: 'Shares',
-    key: 'shares'
-  },
-  {
-    display: 'Action',
-    key: 'shares',
-    cellTemplate: (item: number) => <td>{item === 0 ? 'Hold' : (item > 0 ? 'Buy' : 'Sell')}</td>
-  }
-];
 
 const useData = (toDateString: string, fromDateString: string) => {
   const [toDateStocks, setToDateStocks] = React.useState<IStockData[]>([]);
@@ -96,53 +31,68 @@ const useData = (toDateString: string, fromDateString: string) => {
 
 
   React.useEffect(() => {
+    if (!fromDateString || !toDateString) return;
     setLoading(true);
     const toFetch = fetchData('portfolio', toDateString);
     const fromFetch = fetchData('portfolio', fromDateString);
-    const nifty200Fetch = fetchData('nifty200', toDateString);
-    const rebalanceFetch = fetchData('rebalance', toDateString, fromDateString);
+    //const nifty200Fetch = fetchData('nifty200', toDateString);
+    const rebalanceFetch = fetchData('rebalance', fromDateString, toDateString);
 
-    Promise.all([toFetch, fromFetch, nifty200Fetch, rebalanceFetch])
+    Promise.all([toFetch, fromFetch, rebalanceFetch])
       .then(data => {
         setToDateStocks(data[0][0]);
         setFromDateStocks(data[1][0]);
-        setRebalanceData(data[3]["stocks"]);
-        setCapitalIncurred(data[3]["capital_incurred"]);
+        setRebalanceData(data[2]["stocks"]);
+        setCapitalIncurred(data[2]["capital_incurred"]);
         setLoading(false);
       })
       .catch(err => {
         console.log(err);
         setLoading(false);
       });
-  }, [toDateString, fromDateString]);
+  }, [fromDateString, toDateString]);
 
   return { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, loading };
 };
 
 export const App = () => {
-  const [toDateString, setToDateString] = React.useState<string>('2023-10-04');
-  const [fromDateString, setFromDateString] = React.useState<string>('2023-10-04');
+  const [fromDateString, setFromDateString] = React.useState<string>('');
+  const [toDateString, setToDateString] = React.useState<string>('');
 
   const { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, loading } = useData(toDateString, fromDateString);
-
   // Sum up the investment amount
-  const totalInvestment = toDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
+  const fromInvestment = fromDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
+  const toInvestment = toDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
 
   return (
     <div className="App">
       <div className="date-picker-container">
         <label>From:</label>
-        <StockDatePicker onDateChange={setFromDateString} />
+        <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
         <label>To:</label>
-        <StockDatePicker onDateChange={setToDateString} />
+        <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} />
       </div>
       {!loading ?
-        <div> <StockTable headers={mainTableHeader} stockData={toDateStocks} />
-          <h3> Total Investment: {round_off(totalInvestment)} INR</h3>
-          <h1> Rebalances</h1>
-          <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
-          <h3> Capital Incurred: {round_off(capitalIncurred)} INR</h3>
-        </div> : <div> Loading... </div>
+        <div>
+          <div style={{ display: 'flex', padding: '50px', justifyContent: 'space-between' }}>
+            <div className='stock-table-container'>
+              <h4>Holding On: {fromDateString}</h4>
+              <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
+              <p className='portfolio-value'>Total Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</p>
+            </div>
+            <div className='stock-table-container'>
+              <h4>Holding as on: {toDateString}</h4>
+              <StockTable headers={mainTableHeader} stockData={toDateStocks} />
+              <p className='portfolio-value'>Total Investment: {round_off(toInvestment)} INR | as on {toDateString}</p>
+            </div>
+          </div>
+          <div className='stock-table-container'>
+            <h4> Rebalances</h4>
+            <p className='portfolio-value'> Capital Incurred: {round_off(capitalIncurred)} INR | from {fromDateString} to {toDateString}</p>
+            <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
+
+          </div>
+        </div> : fromDateString != '' && toDateString != '' && <div> Loading... </div>
       }
     </div>
   );
