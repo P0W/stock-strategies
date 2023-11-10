@@ -1,5 +1,5 @@
 import React from "react";
-import { IRebalanceData, IStockData, SymbolRow } from "./SymbolRow";
+import { INifty200Data, IRebalanceData, IStockData, SymbolRow } from "./SymbolRow";
 import './StockTable.css';
 
 export type ItemType = string | number;
@@ -12,7 +12,7 @@ export interface IHeader {
 
 interface IStockTable {
     headers: IHeader[];
-    stockData: IStockData[] | IRebalanceData[];
+    stockData: IStockData[] | IRebalanceData[] | INifty200Data[];
 }
 
 

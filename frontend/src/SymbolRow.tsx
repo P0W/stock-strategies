@@ -32,7 +32,6 @@ export interface IStockData {
     }
 };
 
-
 export interface IRebalanceData {
     [key: string]: any;
     symbol: string;
@@ -40,16 +39,22 @@ export interface IRebalanceData {
     shares: number;
 };
 
+export interface INifty200Data {
+    [key: string]: any;
+    symbol: string;
+    price: number;
+};
+
 interface ISymbolRow {
     rank: number;
-    item: IStockData | IRebalanceData;
+    item: IStockData | IRebalanceData | INifty200Data;
     headers: IHeader[];
 };
 
 export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item, headers }): React.ReactElement => {
 
     return (
-        <tr>
+        <tr key = {rank}>
             {headers?.map((header, index) => {
                 if (header.key === 'rank') {
                     return <td key={index}>{rank}</td>
