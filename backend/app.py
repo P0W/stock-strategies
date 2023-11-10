@@ -9,8 +9,8 @@ import logging
 from waitress import serve
 from flask import Flask, abort, jsonify, request, send_from_directory
 
-from util import cache_results
-import business
+from backend.util import cache_results
+import backend.business as business
 import os
 
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
