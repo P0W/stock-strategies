@@ -43,6 +43,8 @@ export interface INifty200Data {
     [key: string]: any;
     symbol: string;
     price: number;
+    avg_price: number;
+    diff: number;
 };
 
 interface ISymbolRow {

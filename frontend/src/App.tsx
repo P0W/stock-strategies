@@ -7,13 +7,11 @@ import { StockDatePicker } from './StockDatePicker';
 import { INifty200Data, IRebalanceData, IStockData } from './SymbolRow';
 import { mainTableHeader, nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { round_off } from './Utils';
-import { set } from "date-fns";
-
 
 const useData = (toDateString: string, fromDateString: string) => {
   const [toDateStocks, setToDateStocks] = React.useState<IStockData[]>([]);
   const [fromDateStocks, setFromDateStocks] = React.useState<IStockData[]>([]);
-  const [currentPrices, setCurrentPrices] = React.useState<INifty200Data[]>([]); // TODO: use this to calculate the weight of each stock [nifty200
+  const [currentPrices, setCurrentPrices] = React.useState<INifty200Data[]>([]); 
   const [rebalanceData, setRebalanceData] = React.useState<IRebalanceData[]>([]);
   const [capitalIncurred, setCapitalIncurred] = React.useState<number>(0);
   const [loading, setLoading] = React.useState(true);
@@ -42,24 +40,31 @@ const useData = (toDateString: string, fromDateString: string) => {
 
     Promise.all([toFetch, fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
-        setToDateStocks(data[0][0]);
-        setFromDateStocks(data[1][0]);
-        setRebalanceData(data[2]["stocks"]);
-        setCapitalIncurred(data[2]["capital_incurred"]);
+        const pastStocksData =data[1][0] as IStockData[];
+        const presentStocksData = data[0][0] as IStockData[];
+        const rebalanceStocksData = data[2] as unknown as { [key: string]: any };
         const nifty200 = data[3] as { [key: string]: number };
-
+                
         // get the prices for the stocks in the fromDateStocks from nifty200
-        const currentStockPrice = fromDateStocks.map(stock => {
+        const currentStockPrice = pastStocksData.map(stock => {
           const thisStock = Object.keys(nifty200)?.find(niftyStock => niftyStock === stock.symbol);
           if (thisStock) {
-            return { symbol: stock.symbol, price: nifty200[thisStock] } as INifty200Data;
+            return {
+              symbol: stock.symbol,
+              price: nifty200[thisStock],
+              avg_price: stock.price,
+              diff: (nifty200[thisStock] - stock.price) / stock.price * 100
+            } as INifty200Data;
           }
-          return { symbol: stock.symbol, price: -1 } as INifty200Data;
+          return { symbol: stock.symbol, price: -1, avg_price: stock.price, diff: -1 } as INifty200Data;
         });
 
+        // Set states
+        setFromDateStocks(pastStocksData);
+        setToDateStocks(presentStocksData);
+        setRebalanceData(rebalanceStocksData["stocks"] as IRebalanceData[]);
+        setCapitalIncurred(rebalanceStocksData["capital_incurred"]);
         setCurrentPrices(currentStockPrice);
-
-
         setLoading(false);
       })
       .catch(err => {
