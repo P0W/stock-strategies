@@ -9,7 +9,7 @@ calculate financial metrics, build and rebalance investment portfolios, and disp
 
 It is designed to run as an Azure Function, making it easy to automate daily/weekly/monthly portfolio updates.
 
-[**`Live Hosted on Azure`**](http://172.174.157.91:8080/)
+[**`Live Hosted on Azure`**](https://172.174.157.91/show)
 
 Backtesting
 ------------
