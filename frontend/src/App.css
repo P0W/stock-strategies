@@ -30,12 +30,6 @@
     margin: 10px;
 }
 
-.date-picker-container input[type="number"] {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin: 10px 0px;
-}
-
 h4 {
     font-size: 1.2em;
     font-weight: bold;
@@ -119,4 +113,20 @@ h4 {
     color: white;
     text-align: center;
     font-size: 12px;
+}
+
+details {
+    margin: 10px 0px 0 25px;
+    font-size: 10px;
+}
+
+.config-label {
+    font-size: 12px;
+    margin: 50px;
+}
+
+.config-input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 5px 0px;
 }

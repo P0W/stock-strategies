@@ -37,7 +37,7 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
     const toFetch = fetchData(`/portfolio/${toDateString}/${numStocks}/${investmentValue}`);
     const fromFetch = fetchData(`/portfolio/${fromDateString}/${numStocks}/${investmentValue}`);
     const nifty200Fetch = fetchData(`/nifty200/${toDateString}`);
-    const rebalanceFetch = fetchData(`/rebalance/${fromDateString}/${toDateString}`);
+    const rebalanceFetch = fetchData(`/rebalance/${fromDateString}/${toDateString}/${numStocks}/${investmentValue}`);
 
     Promise.all([toFetch, fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
@@ -98,11 +98,14 @@ export const App = () => {
         <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
         <label>To:</label>
         <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} />
-        <label>Number of Stocks:</label>
-        <input type="number" min="1" max="20" defaultValue={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
-        <label>Investment Value:</label>
-        <input type="number" min="100000" max="1500000" defaultValue={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
       </div>
+      <details>
+          <summary>Configurations</summary>
+          <label className="config-label">Number of Stocks:</label>
+          <input className="config-input" type="number" min="1" max="20" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
+          <label className="config-label">Investment Value:</label>
+          <input className="config-input" type="number" min="100000" max="1500000" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
+        </details>
       {!loading ?
         <div>
           <div style={{ display: 'flex' }}>
