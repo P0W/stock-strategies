@@ -89,6 +89,7 @@ export const App = () => {
   const fromInvestment = fromDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
   const toInvestment = toDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
   const currentPortfolioValue = (currentPrices as IToFromData[]).reduce((acc, stock) => acc + stock.shares * stock.price, 0);
+  const gains = currentPortfolioValue - fromInvestment;
 
   return (
     <div className="App">
@@ -114,7 +115,7 @@ export const App = () => {
               <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
             </div>
             <div className='stock-table-container'>
-              <label className="portfolio-value">Current: {round_off(currentPortfolioValue)} INR | as on {toDateString}</label>
+              <label className={gains > 0 ? "profit" : "loss"}>Gain: {round_off(gains)} INR | as on {toDateString}</label>
               <StockTable headers={nifty200TableHeader} stockData={currentPrices} />
             </div>
             <div className='stock-table-container'>
