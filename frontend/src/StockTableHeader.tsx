@@ -1,5 +1,7 @@
-import { IHeader, ItemType } from "./StockTable";
+import { IHeader, ItemType } from "./StockDataTypes";
 import { round_off } from "./Utils";
+
+const NumericCell = (item: ItemType) => <td key={`price-${item}`} className='values'>{round_off(item as number)}</td>
 
 export const mainTableHeader: IHeader[] = [
     {
@@ -9,32 +11,32 @@ export const mainTableHeader: IHeader[] = [
     {
         display: 'Stock',
         key: 'stock',
-        cellTemplate: (item: ItemType) => <td className='stock-name'>{item}</td>
+        cellTemplate: (item: ItemType) => <td key={`stock-${item}`} className='stock-name'>{item}</td>
     },
     {
         display: 'Symbol',
         key: 'symbol',
-        cellTemplate: (item: ItemType) => <td className='stock-symbol'>{item}</td>
+        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
     },
     {
         display: 'Avg. Price',
         key: 'price',
-        cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
+        cellTemplate: NumericCell
     },
     {
         display: 'Weight',
         key: 'weight',
-        cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
+        cellTemplate: NumericCell
     },
     {
         display: 'Shares',
         key: 'shares',
-        cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
+        cellTemplate: NumericCell
     },
     {
         display: 'Investment',
         key: 'investment',
-        cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
+        cellTemplate: NumericCell
     },
     // {
     //     display: 'Score',
@@ -51,7 +53,7 @@ export const rebalanceTableHeader: IHeader[] = [
     {
         display: 'Symbol',
         key: 'symbol',
-        cellTemplate: (item: ItemType) => <td className='stock-symbol'>{item}</td>
+        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
     },
     {
         display: 'Amount',
@@ -59,7 +61,7 @@ export const rebalanceTableHeader: IHeader[] = [
         cellTemplate: (item: ItemType) => {
             // if capital incurred is negative, then its profit, use the .profit className else .loss
             const className = item as number < 0 ? 'profit' : 'loss';
-            return <td className={className}>{round_off(item as number)}</td>;
+            return <td key={`amount-${className}`} className={className}>{round_off(item as number)}</td>;
         }
     },
     {
@@ -72,7 +74,7 @@ export const rebalanceTableHeader: IHeader[] = [
         cellTemplate: (item: ItemType) => {
             // determin hold, buy or sell
             const action = (item as number) === 0 ? 'Hold' : ((item as number) > 0 ? 'Buy' : 'Sell');
-            return <td className={action}>{action}</td>;
+            return <td key={`shares-${action}`} className={action}>{action}</td>;
         }
     }
 ];
@@ -85,19 +87,19 @@ export const nifty200TableHeader: IHeader[] = [
     {
         display: 'Symbol',
         key: 'symbol',
-        cellTemplate: (item: ItemType) => <td className='stock-symbol'>{item}</td>
+        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
     },
     {
         display: 'Price',
         key: 'price',
-        cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
+        cellTemplate: NumericCell
     },
     {
         display: 'Change',
         key: 'diff',
         cellTemplate: (item: ItemType) => {
             const className = item as number < 0 ? 'loss' : 'profit';
-            return <td className={className}>{round_off(item as number)}</td>;
+            return <td key={`diff-${className}`} className={className}>{round_off(item as number)}</td>;
         }
     }
 ];

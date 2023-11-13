@@ -4,14 +4,15 @@ import React from 'react';
 import { StockTable } from './StockTable';
 import { StockDatePicker } from './StockDatePicker';
 
-import { INifty200Data, IRebalanceData, IStockData } from './SymbolRow';
+
 import { mainTableHeader, nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { round_off } from './Utils';
+import { INifty200Data, IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
 
 const useData = (toDateString: string, fromDateString: string) => {
   const [toDateStocks, setToDateStocks] = React.useState<IStockData[]>([]);
   const [fromDateStocks, setFromDateStocks] = React.useState<IStockData[]>([]);
-  const [currentPrices, setCurrentPrices] = React.useState<INifty200Data[]>([]); 
+  const [currentPrices, setCurrentPrices] = React.useState<INifty200Data[]>([]);
   const [rebalanceData, setRebalanceData] = React.useState<IRebalanceData[]>([]);
   const [capitalIncurred, setCapitalIncurred] = React.useState<number>(0);
   const [loading, setLoading] = React.useState(true);
@@ -40,11 +41,11 @@ const useData = (toDateString: string, fromDateString: string) => {
 
     Promise.all([toFetch, fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
-        const pastStocksData =data[1][0] as IStockData[];
+        const pastStocksData = data[1][0] as IStockData[];
         const presentStocksData = data[0][0] as IStockData[];
         const rebalanceStocksData = data[2] as unknown as { [key: string]: any };
         const nifty200 = data[3] as { [key: string]: number };
-                
+
         // get the prices for the stocks in the fromDateStocks from nifty200
         const currentStockPrice = pastStocksData.map(stock => {
           const thisStock = Object.keys(nifty200)?.find(niftyStock => niftyStock === stock.symbol);
@@ -53,7 +54,8 @@ const useData = (toDateString: string, fromDateString: string) => {
               symbol: stock.symbol,
               price: nifty200[thisStock],
               avg_price: stock.price,
-              diff: (nifty200[thisStock] - stock.price) / stock.price * 100
+              diff: (nifty200[thisStock] - stock.price) / stock.price * 100,
+              shares: stock.shares
             } as INifty200Data;
           }
           return { symbol: stock.symbol, price: -1, avg_price: stock.price, diff: -1 } as INifty200Data;
@@ -84,10 +86,11 @@ export const App = () => {
   // Sum up the investment amount
   const fromInvestment = fromDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
   const toInvestment = toDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
-
+  const currentPortfolioValue = (currentPrices as IToFromData[]).reduce((acc, stock) => acc + stock.shares * stock.price, 0);
 
   return (
     <div className="App">
+      <h3> Nifty-200 Momentum Strategy Analyzer</h3>
       <div className="date-picker-container">
         <label>From:</label>
         <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
@@ -96,20 +99,18 @@ export const App = () => {
       </div>
       {!loading ?
         <div>
-          <div style={{ display: 'flex', padding: '50px', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex' }}>
             <div className='stock-table-container'>
-              <label className="table-title">Holding as on: {fromDateString}</label>
+              <label className="table-title">Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</label>
               <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
-              <p className='portfolio-value'>Total Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</p>
             </div>
             <div className='stock-table-container'>
-              <label className="table-title">Current Stock Prices: {toDateString}</label>
+              <label className="table-title">Current: {round_off(currentPortfolioValue)} INR | as on {toDateString}</label>
               <StockTable headers={nifty200TableHeader} stockData={currentPrices} />
             </div>
             <div className='stock-table-container'>
-              <label className="table-title">Holding as on: {toDateString}</label>
+              <label className="table-title">New Investment: {round_off(toInvestment)} INR | as on {toDateString}</label>
               <StockTable headers={mainTableHeader} stockData={toDateStocks} />
-              <p className='portfolio-value'>Total Investment: {round_off(toInvestment)} INR | as on {toDateString}</p>
             </div>
 
           </div>

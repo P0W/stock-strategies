@@ -2,10 +2,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     max-width: 500px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 5px;
 }
 
 .date-picker-container label {
@@ -14,14 +13,13 @@
 
 
 .react-datepicker__input-container input {
-    width: 200px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
 .react-datepicker-wrapper {
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .date-picker-container label {
@@ -31,27 +29,38 @@
     margin: 10px;
 }
 
+
+h3 {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-top: 25px;
+    margin-left: 25px;
+}
+
 .portfolio-value {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: bold;
     color: #007bff;
-    /* Blue color */
     margin-top: 10px;
+    width: 50%;
 }
 
 .profit {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: bold;
     background: green;
     color: white;
+    align-items: center;
 }
 
 .loss {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: bold;
     background: #dc3545;
     /* Red color */
     color: white;
+    align-items: center;
 }
 
 .values {
@@ -60,7 +69,7 @@
 }
 
 .stock-name {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     color: #333;
 }
@@ -72,8 +81,8 @@
 }
 
 .stock-table-container {
-    width: '45%';
-    padding: '10px';
+    padding: 10px;
+    margin-left: 25px;
 }
 
 .table-title {
@@ -88,30 +97,20 @@
     color: white;
     padding: 5px 10px;
     text-align: center;
-    /* text-decoration: none; */
-    /* display: inline-block; */
     font-size: 12px;
-    /* border-radius: 4px; */
 }
 
 .Sell {
     background-color: #f44336;
     color: white;
-    /* padding: 5px 10px; */
     text-align: center;
     text-decoration: none;
-    /* display: inline-block; */
     font-size: 12px;
-    /* border-radius: 4px; */
 }
 
 .Hold {
     background-color: #ff9800;
     color: white;
-    /* padding: 5px 10px; */
     text-align: center;
-    /* text-decoration: none; */
-    /* display: inline-block; */
     font-size: 12px;
-    /* border-radius: 4px; */
 }

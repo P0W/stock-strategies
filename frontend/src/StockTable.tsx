@@ -1,19 +1,8 @@
 import React from "react";
-import { INifty200Data, IRebalanceData, IStockData, SymbolRow } from "./SymbolRow";
+import { IStockTable } from "./StockDataTypes";
 import './StockTable.css';
+import { SymbolRow } from "./SymbolRow";
 
-export type ItemType = string | number;
-
-export interface IHeader {
-    display: string;
-    key: string;
-    cellTemplate?: (item: ItemType) => React.ReactElement | null;
-}
-
-interface IStockTable {
-    headers: IHeader[];
-    stockData: IStockData[] | IRebalanceData[] | INifty200Data[];
-}
 
 
 export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React.ReactElement => {
@@ -23,14 +12,14 @@ export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React
             <thead>
                 <tr>
                     {headers?.map((header, index) => (
-                        <th key={index}>{header.display}</th>
+                        <th key={`${index}-${header.display}`}>{header.display}</th>
                     ))}
                 </tr>
             </thead>
 
             <tbody>
                 {stockData?.map((stock, index) => (
-                    <SymbolRow key={index} item={stock} rank={index + 1} headers={headers} />
+                    <SymbolRow key={`${index}-${stock.symbol}`} item={stock} rank={index + 1} headers={headers} />
                 ))}
             </tbody>
         </table>
