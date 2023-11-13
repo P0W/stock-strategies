@@ -566,3 +566,33 @@ def get_portfolio_with_params(
             nifty200_symbols, N=num_stocks, investment=investment
         )
     return None
+
+
+def get_rebalance_with_params(
+    conn_string: str,
+    from_date: str,
+    to_date: str,
+    num_stocks: int = 15,
+    investment: int = 500000,
+) -> Dict:
+    blob_service = BlobService(conn_string)
+
+    nifty200_symbols_from_date = blob_service.get_blob_data_if_exists(
+        f"all_symbols/nifty200-symbols-{from_date}.json"
+    )
+    nifty200_symbols_to_date = blob_service.get_blob_data_if_exists(
+        f"all_symbols/nifty200-symbols-{to_date}.json"
+    )
+    if nifty200_symbols_from_date and nifty200_symbols_to_date:
+        from_portfolio = strategy.build_portfolio(
+            nifty200_symbols_from_date, N=num_stocks, investment=investment
+        )
+        to_portfolio = strategy.build_portfolio(
+            nifty200_symbols_to_date, N=num_stocks, investment=investment
+        )
+        return strategy.rebalance_portfolio(
+            from_portfolio,
+            to_portfolio,
+            strategy.build_price_list(nifty200_symbols_to_date),
+        )
+    return None

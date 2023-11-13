@@ -18,14 +18,14 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
   const [loading, setLoading] = React.useState(true);
   const cache = React.useRef<{ [key: string]: IStockData[] }>({});
 
-  const fetchData = async (endpoint: string, fromDate: string, toDate?: string) => {
-    const urlEndPoint = toDate ? `/${endpoint}/${fromDate}/${toDate}` : `/${endpoint}/${fromDate}/${numStocks}/${investmentValue}`;
-    if (cache.current[urlEndPoint]) {
-      return Promise.resolve(cache.current[urlEndPoint]);
+  const fetchData = async (endpoint: string) => {
+    //const urlEndPoint = toDate ? `/${endpoint}/${fromDate}/${toDate}` : `/${endpoint}/${fromDate}/${numStocks}/${investmentValue}`;
+    if (cache.current[endpoint]) {
+      return Promise.resolve(cache.current[endpoint]);
     } else {
-      const res = await fetch(urlEndPoint);
+      const res = await fetch(endpoint);
       const data = await res.json();
-      cache.current[urlEndPoint] = data;
+      cache.current[endpoint] = data;
       return data;
     }
   };
@@ -34,15 +34,15 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
   React.useEffect(() => {
     if (!fromDateString || !toDateString) return;
     setLoading(true);
-    const toFetch = fetchData('portfolio', toDateString);
-    const fromFetch = fetchData('portfolio', fromDateString);
-    const nifty200Fetch = fetchData('nifty200', toDateString);
-    const rebalanceFetch = fetchData('rebalance', fromDateString, toDateString);
+    const toFetch = fetchData(`/portfolio/${toDateString}/${numStocks}/${investmentValue}`);
+    const fromFetch = fetchData(`/portfolio/${fromDateString}/${numStocks}/${investmentValue}`);
+    const nifty200Fetch = fetchData(`/nifty200/${toDateString}`);
+    const rebalanceFetch = fetchData(`/rebalance/${fromDateString}/${toDateString}`);
 
     Promise.all([toFetch, fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
-        const pastStocksData = data[1][0] as IStockData[];
-        const presentStocksData = data[0][0] as IStockData[];
+        const pastStocksData = data[1] as IStockData[];
+        const presentStocksData = data[0] as IStockData[];
         const rebalanceStocksData = data[2] as unknown as { [key: string]: any };
         const nifty200 = data[3] as { [key: string]: number };
 

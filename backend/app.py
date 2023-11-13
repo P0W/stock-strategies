@@ -47,7 +47,7 @@ def portfolio_json(datestr=None):
     return jsonify({"error": "No portfolio data found"}), 400
 
 
-@app.route("/rebalance/<todate>/<fromDate>", methods=["GET"])
+@app.route("/rebalance/<fromDate>/<todate>", methods=["GET"])
 def rebalance_json(todate=None, fromDate=None):
     """
     Returns a portfolio view as a JSON object.
@@ -64,6 +64,7 @@ def rebalance_json(todate=None, fromDate=None):
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
+
 
 @app.route("/nifty200", methods=["GET"])
 @app.route("/nifty200/<datestr>", methods=["GET"])
@@ -83,6 +84,7 @@ def nifty200_json(datestr=None):
         return jsonify(json_result), 200
     return jsonify({"error": "No NIFTY 200 data found"}), 400
 
+
 @app.route("/portfolio/<datestr>/<numstocks>/<investment>", methods=["GET"])
 def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
     """
@@ -94,17 +96,58 @@ def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
         numstocks = int(numstocks)
         investment = float(investment)
     except ValueError:
-        abort(400, description="Invalid numstocks or investment. Expected integer and float respectively.")
+        abort(
+            400,
+            description="Invalid numstocks or investment. Expected integer and float respectively.",
+        )
 
     json_result = None
     conn_string = get_connection_string()
     if conn_string:
         json_result = business.get_portfolio_with_params(
-            conn_string=conn_string, request_date=datestr, num_stocks=numstocks, investment=investment
+            conn_string=conn_string,
+            request_date=datestr,
+            num_stocks=numstocks,
+            investment=investment,
         )
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
+
+
+@app.route("/rebalance/<todate>/<fromDate>/<numstocks>/<investment>", methods=["GET"])
+def rebalance_json_with_params(
+    todate=None, fromDate=None, numstocks=None, investment=None
+):
+    """
+    Returns a portfolio view as a JSON object.
+    """
+    validate_date(todate)
+    validate_date(fromDate)
+    ## Validate numstocks and investment
+    try:
+        numstocks = int(numstocks)
+        investment = float(investment)
+    except ValueError:
+        abort(
+            400,
+            description="Invalid numstocks or investment. Expected integer and float respectively.",
+        )
+
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_rebalance_with_params(
+            conn_string=conn_string,
+            from_date=todate,
+            to_date=fromDate,
+            num_stocks=numstocks,
+            investment=investment,
+        )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No portfolio data found"}), 400
+
 
 @app.route("/", methods=["GET"])
 def portfolio():
@@ -180,8 +223,8 @@ def validate_date(datestr):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1] == 'generate':
+    if len(sys.argv) == 2 and sys.argv[1] == "generate":
         generate_portfolio()
     else:
         serve(app, host="0.0.0.0", port=8000)
-    #app.run(host="0.0.0.0", port=8000)
+    # app.run(host="0.0.0.0", port=8000)
