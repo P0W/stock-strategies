@@ -32,12 +32,7 @@ export const mainTableHeader: IHeader[] = [
         display: 'Investment',
         key: 'investment',
         cellTemplate: NumericCell
-    },
-    // {
-    //     display: 'Score',
-    //     key: 'composite_score',
-    //     cellTemplate: (item: ItemType) => <td className='values'>{round_off(item as number)}</td>
-    // }
+    }
 ];
 
 export const rebalanceTableHeader: IHeader[] = [

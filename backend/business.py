@@ -1,7 +1,7 @@
 import datetime
 import json
 import logging
-from typing import Dict
+from typing import Dict, List
 
 import get_stocks as strategy
 from BlobService import BlobService
@@ -74,29 +74,34 @@ def get_portfolio(conn_string: str, request_date: str = None) -> str:
         portfolio_blob_name,
     )
 
-def get_nifty200(conn_string: str, request_date: str = None) -> Dict :
+
+def get_nifty200(conn_string: str, request_date: str = None) -> Dict:
     blob_service = BlobService(conn_string)
     if request_date:
         blob_name = f"all_symbols/nifty200-symbols-{request_date}.json"
     else:
         blob_name = strategy.get_file_name("all_symbols/nifty200-symbols")
     logging.info("Nifty200 blob name: %s", blob_name)
-    nifty200_symbols =  blob_service.get_blob_data_if_exists(blob_name)
+    nifty200_symbols = blob_service.get_blob_data_if_exists(blob_name)
     if nifty200_symbols:
         return strategy.build_price_list(nifty200_symbols)
     return None
 
-def get_rebalance(conn_string: str, from_date: str, to_date:str) -> Dict:
+
+def get_rebalance(conn_string: str, from_date: str, to_date: str) -> Dict:
     blob_service = BlobService(conn_string)
     blob_name = f"all_symbols/nifty200-symbols-{to_date}.json"
     from_blob_name = f"portfolio-on-{from_date}.json"
     to_blob_name = f"portfolio-on-{to_date}.json"
-    nifty200_symbols =  blob_service.get_blob_data_if_exists(blob_name)
-    from_portfolio =  blob_service.get_blob_data_if_exists(from_blob_name)
-    to_portfolio =  blob_service.get_blob_data_if_exists(to_blob_name)
+    nifty200_symbols = blob_service.get_blob_data_if_exists(blob_name)
+    from_portfolio = blob_service.get_blob_data_if_exists(from_blob_name)
+    to_portfolio = blob_service.get_blob_data_if_exists(to_blob_name)
     if nifty200_symbols and from_portfolio and to_portfolio:
-        return strategy.rebalance_portfolio(from_portfolio, to_portfolio, strategy.build_price_list(nifty200_symbols))
+        return strategy.rebalance_portfolio(
+            from_portfolio, to_portfolio, strategy.build_price_list(nifty200_symbols)
+        )
     return None
+
 
 def view_portfolio(
     conn_string: str, request_date: str = None, detailed_view: bool = True
@@ -544,3 +549,20 @@ def get_portfolio_value(blob_service: BlobService, portfolio, this_date: str):
         ## return percentage change
         pc = round_off((today_value - previous_date_value) / previous_date_value * 100)
         return pc, today_value, previous_date_value
+
+
+def get_portfolio_with_params(
+    conn_string: str,
+    request_date: str = None,
+    num_stocks: int = 15,
+    investment: int = 500000,
+) -> List:
+    blob_service = BlobService(conn_string)
+    nifty200_symbols = blob_service.get_blob_data_if_exists(
+        f"all_symbols/nifty200-symbols-{request_date}.json"
+    )
+    if nifty200_symbols:
+        return strategy.build_portfolio(
+            nifty200_symbols, N=num_stocks, investment=investment
+        )
+    return None

@@ -36,4 +36,5 @@ th {
 .stock-data {
     max-height: 75%;
     overflow-y: auto;
+    overflow-x: hidden;
 }

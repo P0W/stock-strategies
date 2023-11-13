@@ -30,6 +30,11 @@
     margin: 10px;
 }
 
+.date-picker-container input[type="number"] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 0px;
+}
 
 h4 {
     font-size: 1.2em;
