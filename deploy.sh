@@ -13,11 +13,11 @@ echo "Pulling the latest changes from the Git repository..."
 git pull orgin main
 
 # Build frontend assets
-echo "Building frontend assets..."
-cd frontend
-yarn install
-yarn build
-cd ..
+# echo "Building frontend assets..."
+# cd frontend
+# yarn install
+# yarn build
+# cd ..
 
 # Build and start Docker containers
 echo "Building and starting Docker containers..."
