@@ -40,13 +40,11 @@ jobs:
       #    git commit -m "Build update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
       #    git push
 
-      - name: Commit Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          #author_name: P0W
-          #author_email: powprashant@gmail.com
-          message: 'Created new build'
-          committer_name: GitHub Actions
-          committer_email: actions@github.com
-          add: 'build/* --force'
-          cwd: './frontend'
+      # - name: Commit Changes
+      #  uses: EndBug/add-and-commit@v9
+      #  with:
+      #    message: 'Created new build'
+      #    committer_name: GitHub Actions
+      #    committer_email: actions@github.com
+      #    add: 'build/* --force'
+      #    cwd: './frontend'
