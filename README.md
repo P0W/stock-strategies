@@ -11,6 +11,8 @@ It is designed to run as an Azure Function, making it easy to automate daily/wee
 
 [**`Live Hosted on Azure`**](https://172.174.157.91/show)
 
+![**Sample**](https://github.com/P0W/stock-strategies/blob/main/stock-strategies.png)
+
 Backtesting
 ------------
 * Used only returns values over last 1y, 1mo, 1w, 1d
