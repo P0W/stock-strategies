@@ -33,3 +33,7 @@ th {
     margin-left: 5px;
 }
 
+.stock-data {
+    max-height: 75%;
+    overflow-y: auto;
+}

@@ -1,4 +1,4 @@
-import { IHeader, ItemType } from "./StockDataTypes";
+import { IHeader, INifty200Data, IToFromData, ItemType } from "./StockDataTypes";
 import { round_off } from "./Utils";
 
 const NumericCell = (item: ItemType) => <td key={`price-${item}`} className='values'>{round_off(item as number)}</td>
@@ -9,14 +9,9 @@ export const mainTableHeader: IHeader[] = [
         key: 'rank'
     },
     {
-        display: 'Stock',
-        key: 'stock',
-        cellTemplate: (item: ItemType) => <td key={`stock-${item}`} className='stock-name'>{item}</td>
-    },
-    {
         display: 'Symbol',
         key: 'symbol',
-        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
+        cellTemplate: (item: ItemType, row) => <td key={`symbol-${item}`} className='stock-symbol' title={row?.stock}>{item}</td>
     },
     {
         display: 'Avg. Price',
@@ -96,10 +91,12 @@ export const nifty200TableHeader: IHeader[] = [
     },
     {
         display: 'Change',
-        key: 'diff',
-        cellTemplate: (item: ItemType) => {
-            const className = item as number < 0 ? 'loss' : 'profit';
-            return <td key={`diff-${className}`} className={className}>{round_off(item as number)}</td>;
+        key: 'price',
+        cellTemplate: (item: ItemType, row ) => {
+            const thisRow = row as IToFromData;
+            const diff = (item as number - thisRow.avg_price) / thisRow.price * 100
+            const className = diff < 0 ? 'loss' : 'profit';
+            return <td key={`diff-${className}`} className={className}>{round_off(diff)}</td>;
         }
     }
 ];

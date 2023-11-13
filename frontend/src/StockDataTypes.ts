@@ -3,7 +3,7 @@ export type ItemType = string | number;
 export interface IHeader {
     display: string;
     key: string;
-    cellTemplate?: (item: ItemType) => React.ReactElement | null;
+    cellTemplate?: (item: ItemType, row?: IStockData | IRebalanceData | INifty200Data) => React.ReactElement | null;
 }
 
 export interface IStockTable {
@@ -57,7 +57,6 @@ export interface INifty200Data {
 
 export interface IToFromData extends INifty200Data {
     avg_price: number;
-    diff: number;
     shares: number;
 };
 

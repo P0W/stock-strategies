@@ -9,7 +9,7 @@ export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item, headers }): React.
                 if (header.key === 'rank') {
                     return <td key={index}>{rank}</td>
                 }
-                return header.cellTemplate?.(item[header.key]) ?? <td key={`${index}-${header.key}`}>{item[header.key]}</td>
+                return header.cellTemplate?.(item[header.key], item) ?? <td key={`${index}-${header.key}`}>{item[header.key]}</td>
             })}
         </tr>
     );

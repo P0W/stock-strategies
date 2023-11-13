@@ -54,11 +54,10 @@ const useData = (toDateString: string, fromDateString: string) => {
               symbol: stock.symbol,
               price: nifty200[thisStock],
               avg_price: stock.price,
-              diff: (nifty200[thisStock] - stock.price) / stock.price * 100,
               shares: stock.shares
             } as INifty200Data;
           }
-          return { symbol: stock.symbol, price: -1, avg_price: stock.price, diff: -1 } as INifty200Data;
+          return { symbol: stock.symbol, price: -1, avg_price: stock.price } as INifty200Data;
         });
 
         // Set states
@@ -90,7 +89,7 @@ export const App = () => {
 
   return (
     <div className="App">
-      <h3> Nifty-200 Momentum Strategy Analyzer</h3>
+      <h4> Nifty-200 Momentum Strategy Analyzer</h4>
       <div className="date-picker-container">
         <label>From:</label>
         <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
@@ -112,14 +111,12 @@ export const App = () => {
               <label className="table-title">New Investment: {round_off(toInvestment)} INR | as on {toDateString}</label>
               <StockTable headers={mainTableHeader} stockData={toDateStocks} />
             </div>
-
+            <div className='stock-table-container'>
+              <label className='portfolio-value'> Capital Incurred: {round_off(capitalIncurred)} INR</label>
+              <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
+            </div>
           </div>
-          <div className='stock-table-container'>
-            <h4> Rebalances</h4>
-            <p className='portfolio-value'> Capital Incurred: {round_off(capitalIncurred)} INR | from {fromDateString} to {toDateString}</p>
-            <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
 
-          </div>
         </div> : fromDateString != '' && toDateString != '' && <div> Loading... </div>
       }
     </div>
