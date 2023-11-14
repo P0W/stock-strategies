@@ -1,0 +1,2 @@
+## Crontab
+10 3 * * * /bin/bash -c "cd ~/projects/stock-strategies/ && source bin/activate && python3.9 backend/app.py generate" > ~/projects/stock-strategies/logs/$(date +\%Y-\%m-\%d).log 2>&1
