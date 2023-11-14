@@ -13,6 +13,54 @@ It is designed to run as an Azure Function, making it easy to automate daily/wee
 
 ![**Sample**](https://github.com/P0W/stock-strategies/blob/main/stock-strategies.png)
 
+Usage
+-----
+
+1. Setup box
+    
+    a. Ubuntu
+   
+        sudo apt-get update
+        sudo apt-get upgrade
+        sudo apt-get install docker docker-compose python3
+   
+    b. Windows
+   
+        ## Install docker, python3.9
+
+2. Create local.settings.json
+    ```
+    {
+        "Values": {
+            "AzureWebJobsStorage": "<AZURE_STORAGE_ACCOUNT_KEY>",
+            "NUM_STOCKS": "<NUM_OF_STOCKS>",
+            "INVESTMENT_AMOUNT": "<INVESTMENT_AMOUNT>"
+        }
+    }
+    ```
+    
+3. Generate cert and key.pem
+   
+    a. Ubuntu
+   
+        sudo openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
+    b. Windows
+   
+        pip install cryptography
+        python backend/generate_keys.py
+5. Deploy
+   
+    a. Ubuntu
+
+        sudo docker-compose up -d --scale app=1
+   b. Windows
+
+        docker-compose up -d --scale app=1 
+
+6. For continous deployment on ubuntu use:
+
+   ```./deploy.sh```
+
 Backtesting
 ------------
 * Used only returns values over last 1y, 1mo, 1w, 1d
