@@ -14,12 +14,12 @@ It is designed to run as an Azure Function, making it easy to automate daily/wee
 Sample Momentum Analyzer View
 -----------------------------
 
-![**Sample**](https://github.com/P0W/stock-strategies/blob/main/stock-strategies.png)
+![**Sample Momentum Analyzer View**](resources/stock-strategies.png)
 
 Sample Rebalance updates
 ------------------------
 
-![**Sample**](https://github.com/P0W/stock-strategies/blob/main/stock-strategies_2.png)
+![**Sample Rebalance updates**](resources/stock-strategies_2.png)
 
 Usage
 -----
