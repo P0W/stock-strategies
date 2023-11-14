@@ -10,7 +10,7 @@ sudo docker image rm stock-strategies_app:latest
 
 # Pull the latest changes from the Git repository
 echo "Pulling the latest changes from the Git repository..."
-git pull orgin main
+git pull
 
 # Build frontend assets
 # echo "Building frontend assets..."
