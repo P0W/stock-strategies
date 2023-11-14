@@ -1,24 +1,72 @@
-import logging
+"""
+This module provides a decorator for caching function results.
+"""
+
 import functools
+import logging
+import redis
+import os
+import json
 
 logging = logging.getLogger(__name__)
 
+## Read from the environment variable
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 
-## @method cache_results
-## @brief Cache results of a function
-## @param func: function to cache
-## @return wrapper: wrapper function
+try:
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+    redis_client.ping()  # Check the connection
+    logging.info("redis connection ok")
+except redis.exceptions.ConnectionError:
+    logging.warning("redis connection error %s:%s", REDIS_HOST, REDIS_PORT)
+    redis_client = None
+
+
 def cache_results(func):
     cache = {}
 
     @functools.wraps(func)
     def wrapper(*args):
-        if args in cache:
-            logging.info("cache hit for %s", func.__name__)
-            return cache[args]
-        logging.info("cache miss for %s", func.__name__)
+        global redis_client
+        ## strip off object address
+        try:
+            key = f"{func.__name__}:{str(args[1:])}"
+        except IndexError:
+            key = f"{func.__name__}:"
+        if redis_client is not None:
+            try:
+                result_str = redis_client.get(key)
+                if result_str is not None and len(result_str) > 0:
+                    result = json.loads(result_str) # Convert to dict
+                    logging.info("redis cache hit for %s", key)
+                    return result
+                else:
+                    logging.warn("redis cache miss for %s | %s", key, result_str)
+            except redis.exceptions.ConnectionError:
+                redis_client = None
+            except json.decoder.JSONDecodeError as e:
+                logging.error("JSONDecodeError error %s | %s", key, result_str)
+                logging.error(e)
+                redis_client = None
+
+        if redis_client is None:
+            if args in cache:
+                logging.info("in-memory cache hit for %s", key)
+                return cache[args]
+            logging.info("in-memory cache miss for %s", key)
+            result = func(*args)
+            cache[args] = result
+            return result
+
+        logging.info("redis cache miss for %s", key)
         result = func(*args)
-        cache[args] = result
+        try:
+            result_str = json.dumps(result) # Convert to string
+            redis_client.set(key, result_str, ex=3600)  # Cache for 1 hour
+            logging.warn("redis cached %s for 1 hour", key)
+        except redis.exceptions.ConnectionError:
+            redis_client = None
         return result
 
     return wrapper

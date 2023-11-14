@@ -15,8 +15,13 @@ import os
 import sys
 
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
-logger = logging.getLogger(__name__)
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+
+logging.getLogger("util").setLevel(logging.INFO)
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.ERROR)
 
 @app.route("/show")
 def index():

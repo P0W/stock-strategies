@@ -6,6 +6,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000"  # Map container port 8000 to host, let the scalling generate new one into container
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+    restart: always
+    volumes:
+      - ./redis_data:/data
+    command: redis-server --appendonly yes
+    ports:
+      - "6001:6379"
 
   nginx:
     image: nginx
