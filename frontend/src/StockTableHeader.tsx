@@ -50,7 +50,8 @@ export const rebalanceTableHeader: IHeader[] = [
         key: 'amount',
         cellTemplate: (item: ItemType) => {
             // if capital incurred is negative, then its profit, use the .profit className else .loss
-            const className = item as number < 0 ? 'profit' : 'loss';
+            // use profit, loss or nochange classnames
+            const className = (item as number) === 0 ? 'nochange' : ((item as number) < 0 ? 'profit' : 'loss');
             return <td key={`amount-${className}`} className={className}>{round_off(item as number)}</td>;
         }
     },

@@ -46,39 +46,6 @@ h4 {
     width: 50%;
 }
 
-.profit {
-    font-size: 12px;
-    font-weight: bold;
-    background: green;
-    color: white;
-    align-items: center;
-}
-
-.loss {
-    font-size: 12px;
-    font-weight: bold;
-    background: #dc3545;
-    /* Red color */
-    color: white;
-    align-items: center;
-}
-
-.values {
-    text-align: center;
-    font-size: 12px;
-}
-
-.stock-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: #333;
-}
-
-.stock-symbol {
-    font-size: 12px;
-    font-weight: bold;
-    color: #999;
-}
 
 .stock-table-container {
     padding: 10px;
@@ -92,41 +59,21 @@ h4 {
     margin-bottom: 10px;
 }
 
-.Buy {
-    background-color: #4CAF50;
-    color: white;
-    padding: 5px 10px;
-    text-align: center;
-    font-size: 12px;
-}
-
-.Sell {
-    background-color: #f44336;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    font-size: 12px;
-}
-
-.Hold {
-    background-color: #ff9800;
-    color: white;
-    text-align: center;
-    font-size: 12px;
-}
-
 details {
     margin: 10px 0px 0 25px;
     font-size: 10px;
+    font-weight: bold;
 }
 
 .config-label {
     font-size: 12px;
-    margin: 50px;
+    margin: 0px 5px 0px 12px;
+    font-weight: bold;
 }
 
 .config-input {
     border: 1px solid #ccc;
     border-radius: 4px;
     margin: 5px 0px;
+    font-size: 12px;
 }

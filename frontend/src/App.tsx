@@ -19,7 +19,6 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
   const cache = React.useRef<{ [key: string]: IStockData[] }>({});
 
   const fetchData = async (endpoint: string) => {
-    //const urlEndPoint = toDate ? `/${endpoint}/${fromDate}/${toDate}` : `/${endpoint}/${fromDate}/${numStocks}/${investmentValue}`;
     if (cache.current[endpoint]) {
       return Promise.resolve(cache.current[endpoint]);
     } else {

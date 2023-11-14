@@ -31,7 +31,13 @@ const parseDateString = (dateStr: string): Date => {
 }
 
 export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange }) => {
-    const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate != '' ? parseDateString(initialDate): null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate != '' ? parseDateString(initialDate) : null);
+
+    const isWeekday = (date: Date) => {
+        const day = date.getDay();
+        return day !== 0 && day !== 6;
+    };
+
     return (
         <DatePicker
             onChange={(date: Date) => {
@@ -47,6 +53,7 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
             minDate={new Date('2023-10-04')}
             maxDate={new Date()}
             selected={selectedDate}
+            filterDate={isWeekday}
         />
     );
 };
