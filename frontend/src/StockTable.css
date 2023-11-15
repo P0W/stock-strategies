@@ -33,11 +33,11 @@ th {
     margin-left: 5px;
 }
 
-.stock-data {
-    max-height: 80vh;
+/* .stock-data {
+    max-height: 50%;
     overflow-y: auto;
     overflow-x: hidden;
-}
+} */
 
 .Buy {
     background-color: #4CAF50;

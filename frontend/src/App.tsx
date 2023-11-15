@@ -92,23 +92,25 @@ export const App = () => {
 
   return (
     <div className="App">
-      <h4> Nifty-200 Momentum Strategy Analyzer</h4>
+      <h4 className="title">
+        Nifty-200 Momentum Strategy Analyzer
+      </h4>
       <div className="date-picker-container">
         <label>From:</label>
         <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
         <label>To:</label>
         <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
       </div>
-      <details>
-          <summary>Configurations</summary>
-          <label className="config-label">Number of Stocks:</label>
-          <input className="config-input" type="number" min="1" max="20" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
-          <label className="config-label">Investment Value:</label>
-          <input className="config-input" type="number" min="100000" max="1500000" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
-        </details>
+      <details className="details">
+        <summary className="summary">Configurations</summary>
+        <label className="config-label">Number of Stocks:</label>
+        <input className="config-input" type="number" min="1" max="20" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
+        <label className="config-label">Investment Value:</label>
+        <input className="config-input" type="number" min="100000" max="1500000" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
+      </details>
       {!loading ?
         <div>
-          <div style={{ display: 'flex' }}>
+          <div className="analysis-container">
             <div className='stock-table-container'>
               <label className="portfolio-value">Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</label>
               <StockTable headers={mainTableHeader} stockData={fromDateStocks} />

@@ -1,11 +1,10 @@
 .date-picker-container {
     display: flex;
-    /* justify-content: space-between;
-    align-items: center;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 5px; */
-    margin-left: 25px;
+    padding: 10px;
+    margin: 0px 10px 10px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 
 .date-picker-container label {
@@ -30,26 +29,40 @@
     margin: 10px;
 }
 
-h4 {
+.App {
+    padding: 10px;
+    margin: 5px;
+}
+
+.analysis-container {
+    display: flex;
+    padding: 10px;
+    margin: 0px 10px 0px 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.title {
     font-size: 1.2em;
     font-weight: bold;
-    color: #333;
-    margin-top: 25px;
-    margin-left: 25px;
+    padding: 10px;
+    margin: 5px;
+    color: #4CAF50;
 }
 
 .portfolio-value {
     font-size: 12px;
     font-weight: bold;
-    color: #007bff;
-    margin-top: 10px;
     width: 50%;
 }
 
-
 .stock-table-container {
     padding: 10px;
-    margin-left: 25px;
+    margin: 0px 10px 10px 10px;
+    height: 65vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .table-title {
@@ -59,11 +72,21 @@ h4 {
     margin-bottom: 10px;
 }
 
-details {
-    margin: 10px 0px 0 25px;
+.details {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 0px 10px 0 10px;
     font-size: 10px;
     font-weight: bold;
-}
+    border-radius: 5px;
+  }
+
+  .summary {
+    padding: 10px;
+    font-size: 12px;
+    font-weight: bold;
+  }
 
 .config-label {
     font-size: 12px;
