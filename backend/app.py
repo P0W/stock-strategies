@@ -46,7 +46,7 @@ def login_required(func):
     return wrapper
 
 
-@app.route("/show")
+@app.route("/", methods=["GET"])
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
@@ -58,6 +58,7 @@ def static_file(path):
 
 @app.route("/portfolio", methods=["GET"])
 @app.route("/portfolio/<datestr>", methods=["GET"])
+@login_required
 def portfolio_json(datestr=None):
     """
     Returns a portfolio view as a JSON object.
@@ -76,6 +77,7 @@ def portfolio_json(datestr=None):
 
 
 @app.route("/rebalance/<fromDate>/<todate>", methods=["GET"])
+@login_required
 def rebalance_json(todate=None, fromDate=None):
     """
     Returns a portfolio view as a JSON object.
@@ -96,6 +98,7 @@ def rebalance_json(todate=None, fromDate=None):
 
 @app.route("/nifty200", methods=["GET"])
 @app.route("/nifty200/<datestr>", methods=["GET"])
+@login_required
 def nifty200_json(datestr=None):
     """
     Returns the NIFTY 200 index as a JSON object.
@@ -145,6 +148,7 @@ def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
 
 
 @app.route("/rebalance/<todate>/<fromDate>/<numstocks>/<investment>", methods=["GET"])
+@login_required
 def rebalance_json_with_params(
     todate=None, fromDate=None, numstocks=None, investment=None
 ):
@@ -236,7 +240,8 @@ def islogged(username):
     else:
         return jsonify({"error": "Not logged in"}), 400
 
-@app.route("/", methods=["GET"])
+@app.route("/test", methods=["GET"])
+@login_required
 def portfolio():
     """
     Returns a portfolio view as an HTML table.
@@ -313,5 +318,5 @@ if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "generate":
         generate_portfolio()
     else:
-        # serve(app, host="0.0.0.0", port=8000)
-        app.run(host="0.0.0.0", port=8000)
+        serve(app, host="0.0.0.0", port=8000)
+        # app.run(host="0.0.0.0", port=8000)

@@ -10,8 +10,26 @@ export const LoginPage = () => {
 
   const handleLogin = (event: any) => {
     event.preventDefault();
-    // Handle login logic here
-    navigate('/app');
+    fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error('Invalid username or password');
+        }
+      })
+      .then((data) => {
+        localStorage.setItem('token', data.token);
+        navigate('/app');
+      })
+      .catch((err) => {
+        console.error(err);
+        alert(err.message);
+      });
   };
 
   const handleSignUp = () => {

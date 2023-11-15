@@ -10,8 +10,26 @@ export const RegisterPage = () => {
 
     const handleRegister = (event: any) => {
         event.preventDefault();
-        // Handle registration logic here
-        navigate('/')
+        fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, confirmPassword })
+        })
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error('Invalid username or password');
+                }
+            })
+            .then((data) => {
+                localStorage.setItem('token', data.token);
+                navigate('/app');
+            })
+            .catch((err) => {
+                console.error(err);
+                alert(err.message);
+            });
     };
 
     const handleLogin = () => {

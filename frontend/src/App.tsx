@@ -102,7 +102,10 @@ export const App = () => {
   const classes = useStyles();
 
   const handleSignOut = () => {
-    fetch('/logout').then(() => navigate('/login'));
+    fetch('/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }).then(() => navigate('/login'));
   };
 
   React.useEffect(() => {
@@ -123,7 +126,7 @@ export const App = () => {
   return (
 
     <Container maxWidth="xl">
-     <Grid container justifyContent="space-between">
+      <Grid container justifyContent="space-between">
         <Typography variant="h4" align="center" gutterBottom className="title">
           Nifty-200 Momentum Strategy Analyzer
         </Typography>
