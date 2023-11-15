@@ -97,7 +97,7 @@ export const App = () => {
         <label>From:</label>
         <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
         <label>To:</label>
-        <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} />
+        <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
       </div>
       <details>
           <summary>Configurations</summary>
