@@ -4,6 +4,7 @@ This module provides a decorator for caching function results.
 
 import functools
 import logging
+import sqlite3
 import redis
 import os
 import json
@@ -69,4 +70,21 @@ def cache_results(func):
             redis_client = None
         return result
 
+    return wrapper
+
+
+def create_users_table():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (username TEXT PRIMARY KEY, password TEXT)''')
+    conn.commit()
+    conn.close()
+
+def ensure_users_table_exists(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if not os.path.isfile('users.db'):
+            create_users_table()
+        return func(*args, **kwargs)
     return wrapper

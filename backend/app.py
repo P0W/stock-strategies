@@ -3,25 +3,48 @@ This module defines a Flask app that serves a portfolio view.
 """
 
 import datetime
+import functools
 import json
 import logging
 
 from waitress import serve
-from flask import Flask, abort, jsonify, request, send_from_directory
+from flask import Flask, abort, jsonify, request, send_from_directory, session
 
-from util import cache_results
+from util import cache_results, ensure_users_table_exists
 import business as business
 import os
 import sys
+import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
+app.secret_key = os.urandom(24)
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 logging.getLogger("util").setLevel(logging.INFO)
-logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.ERROR)
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
+    logging.ERROR
+)
+
+logging = logging.getLogger(__name__)
+
+
+def login_required(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if "username" not in session:
+            return (
+                jsonify({"error": "You must be logged in to access this resource"}),
+                403,
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
+
 
 @app.route("/show")
 def index():
@@ -91,6 +114,7 @@ def nifty200_json(datestr=None):
 
 
 @app.route("/portfolio/<datestr>/<numstocks>/<investment>", methods=["GET"])
+@login_required
 def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
     """
     Returns a portfolio view as a JSON object.
@@ -154,6 +178,64 @@ def rebalance_json_with_params(
     return jsonify({"error": "No portfolio data found"}), 400
 
 
+@app.route("/register", methods=["POST"])
+@ensure_users_table_exists
+def register():
+    username = request.json.get("username")
+    password = request.json.get("password")
+    logging.info("Registering user %s", username)
+    logging.info("Password is %s", password)
+    hashed_password = generate_password_hash(password)
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    try:
+        c.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (username, hashed_password),
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "Username already exists"}), 400
+    finally:
+        conn.close()
+    return jsonify({"success": "User created successfully"}), 201
+
+
+@app.route("/login", methods=["POST"])
+@ensure_users_table_exists
+def login():
+    username = request.json.get("username")
+    password = request.json.get("password")
+    logging.info("Registering user %s", username)
+    logging.info("Password is %s", password)
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT password FROM users WHERE username = ?", (username,))
+    result = c.fetchone()
+    conn.close()
+    if result is None:
+        return jsonify({"error": "Invalid username or password"}), 400
+    hashed_password = result[0]
+    if check_password_hash(hashed_password, password):
+        session["username"] = username
+        return jsonify({"success": "Logged in successfully"}), 200
+    else:
+        return jsonify({"error": "Invalid username or password"}), 400
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop("username", None)
+    return jsonify({"success": "Logged out successfully"}), 200
+
+@app.route("/islogged/<username>", methods=["GET"])
+def islogged(username):
+    if "username" in session and session["username"] == username:
+        ## simply return ok
+        return jsonify({"success": "Logged in successfully"}), 200
+    else:
+        return jsonify({"error": "Not logged in"}), 400
+
 @app.route("/", methods=["GET"])
 def portfolio():
     """
@@ -169,7 +251,7 @@ def portfolio():
         )
         # table_html is string, return it as html
         if table_html:
-            logger.info("Portfolio found")
+            logging.info("Portfolio found")
             return table_html
     return jsonify({"error": "No portfolio data found"}), 400
 
@@ -186,9 +268,9 @@ def get_connection_string():
             data = json.load(json_file)
             conn_string = data["Values"]["AzureWebJobsStorage"]
     except FileNotFoundError as e:
-        logger.error("local.settings.json not found: %s", e)
+        logging.error("local.settings.json not found: %s", e)
     except json.JSONDecodeError as e:
-        logger.error("Error reading local.settings.json: %s", e)
+        logging.error("Error reading local.settings.json: %s", e)
     return conn_string
 
 
@@ -209,14 +291,14 @@ def generate_portfolio():
             num_stocks = int(data["Values"]["NUM_STOCKS"])
             investment_amount = float(data["Values"]["INVESTMENT_AMOUNT"])
     except FileNotFoundError as e:
-        logger.error("local.settings.json not found: %s", e)
+        logging.error("local.settings.json not found: %s", e)
     except json.JSONDecodeError as e:
-        logger.error("Error reading local.settings.json: %s", e)
+        logging.error("Error reading local.settings.json: %s", e)
     if conn_string and num_stocks and investment_amount:
         business.build_todays_portfolio(conn_string, num_stocks, investment_amount)
-        logger.info("Momentum strategy portfolio successfully built!")
+        logging.info("Momentum strategy portfolio successfully built!")
     else:
-        logger.error("Error building momentum strategy")
+        logging.error("Error building momentum strategy")
 
 
 def validate_date(datestr):
@@ -231,5 +313,5 @@ if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "generate":
         generate_portfolio()
     else:
-        serve(app, host="0.0.0.0", port=8000)
-    # app.run(host="0.0.0.0", port=8000)
+        # serve(app, host="0.0.0.0", port=8000)
+        app.run(host="0.0.0.0", port=8000)

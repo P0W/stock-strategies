@@ -8,6 +8,23 @@ import { StockDatePicker } from './StockDatePicker';
 import { mainTableHeader, nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { round_off } from './Utils';
 import { INifty200Data, IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, Container, Grid, Paper, TextField, Typography, makeStyles } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
+
+const useStyles = makeStyles({
+  tableContainer: {
+    padding: 10,
+    margin: 10,
+    height: '65vh',
+    overflowY: 'auto',
+
+  },
+  portfolioValue: {
+    marginBottom: 10,
+    fontWeight: 'bold',
+    fontSize: '0.75em'
+  }
+});
 
 const useData = (toDateString: string, fromDateString: string, numStocks: number, investmentValue: number) => {
   const [toDateStocks, setToDateStocks] = React.useState<IStockData[]>([]);
@@ -81,6 +98,19 @@ export const App = () => {
   const [toDateString, setToDateString] = React.useState<string>('');
   const [numStocks, setNumStocks] = React.useState<number>(15);
   const [investmentValue, setInvestmentValue] = React.useState<number>(500000);
+  const navigate = useNavigate();
+  const classes = useStyles();
+
+  const handleSignOut = () => {
+    fetch('/logout').then(() => navigate('/login'));
+  };
+
+  React.useEffect(() => {
+    // check for signed in user
+    // fetch(`/islogged/${user}`).then(res => {
+    //   if (res.status !== 200) navigate('/login');
+    // });
+  }, []);
 
   const { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, currentPrices, loading }
     = useData(toDateString, fromDateString, numStocks, investmentValue);
@@ -91,47 +121,74 @@ export const App = () => {
   const gains = currentPortfolioValue - fromInvestment;
 
   return (
-    <div className="App">
-      <h4 className="title">
-        Nifty-200 Momentum Strategy Analyzer
-      </h4>
-      <div className="date-picker-container">
-        <label>From:</label>
-        <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
-        <label>To:</label>
-        <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
-      </div>
-      <details className="details">
-        <summary className="summary">Configurations</summary>
-        <label className="config-label">Number of Stocks:</label>
-        <input className="config-input" type="number" min="1" max="20" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
-        <label className="config-label">Investment Value:</label>
-        <input className="config-input" type="number" min="100000" max="1500000" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
-      </details>
-      {!loading ?
-        <div>
-          <div className="analysis-container">
-            <div className='stock-table-container'>
-              <label className="portfolio-value">Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</label>
-              <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
-            </div>
-            <div className='stock-table-container'>
-              <label className={gains > 0 ? "profit" : "loss"}>Gain: {round_off(gains)} INR | as on {toDateString}</label>
-              <StockTable headers={nifty200TableHeader} stockData={currentPrices} />
-            </div>
-            <div className='stock-table-container'>
-              <label className="portfolio-value">New Investment: {round_off(toInvestment)} INR | as on {toDateString}</label>
-              <StockTable headers={mainTableHeader} stockData={toDateStocks} />
-            </div>
-            <div className='stock-table-container'>
-              <label className='portfolio-value'> Rebalance Updates | Capital Incurred: {round_off(capitalIncurred)} INR</label>
-              <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
-            </div>
-          </div>
 
-        </div> : fromDateString != '' && toDateString != '' && <div> Loading... </div>
-      }
-    </div>
+    <Container maxWidth="xl">
+     <Grid container justifyContent="space-between">
+        <Typography variant="h4" align="center" gutterBottom className="title">
+          Nifty-200 Momentum Strategy Analyzer
+        </Typography>
+        <Button variant="contained" color="secondary" onClick={handleSignOut} size="small">
+          Sign Out
+        </Button>
+      </Grid>
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item>
+          <Typography>From:</Typography>
+          <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
+        </Grid>
+        <Grid item>
+          <Typography>To:</Typography>
+          <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
+        </Grid>
+      </Grid>
+      <Box my={2}>
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<i className="fas fa-chevron-down"></i>}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography variant="h6">Configurations</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item>
+                <Typography>Number of Stocks:</Typography>
+                <TextField type="number" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
+              </Grid>
+              <Grid item>
+                <Typography>Investment Value:</Typography>
+                <TextField type="number" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
+              </Grid>
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+      {!loading ? (
+        <Box my={2}>
+          <Paper elevation={3} className="analysis-container">
+            <Box p={2} className={classes.tableContainer}>
+              <Typography variant="h6" className={classes.portfolioValue}>Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</Typography>
+              <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
+            </Box>
+            <Box p={2} className={classes.tableContainer}>
+              <Typography variant="h6" className={classes.portfolioValue} color={gains > 0 ? "primary" : "secondary"}>Gain: {round_off(gains)} INR | as on {toDateString}</Typography>
+              <StockTable headers={nifty200TableHeader} stockData={currentPrices} />
+            </Box>
+            <Box p={2} className={classes.tableContainer}>
+              <Typography variant="h6" className={classes.portfolioValue} >New Investment: {round_off(toInvestment)} INR | as on {toDateString}</Typography>
+              <StockTable headers={mainTableHeader} stockData={toDateStocks} />
+            </Box>
+            <Box p={2} className={classes.tableContainer}>
+              <Typography variant="h6" className={classes.portfolioValue}>Rebalance Updates | Capital Incurred: {round_off(capitalIncurred)} INR</Typography>
+              <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
+            </Box>
+          </Paper>
+        </Box>
+      ) : (
+        fromDateString !== '' && toDateString !== '' && <CircularProgress />
+      )}
+    </Container>
   );
 };
 
