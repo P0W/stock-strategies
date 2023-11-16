@@ -176,6 +176,9 @@ def login():
 
     # Get the user ID from Redis
     user_id = redis_client.hget('user_ids', username)
+    # Decode the user ID to a string
+    if user_id is not None:
+        user_id = user_id.decode('utf-8')
     session["username"] = username
 
     return jsonify({"success": "Logged in successfully", "id": user_id}), 200
