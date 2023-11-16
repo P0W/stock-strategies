@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Grid, Paper, Typography, Link, Box } from '@material-ui/core';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-ts';
 
 export const RegisterPage = () => {
     const [username, setUsername] = useState('');
@@ -15,10 +16,11 @@ export const RegisterPage = () => {
             setError('Passwords do not match');
             return;
         }
+        const hashedPassword = CryptoJS.SHA256(password).toString();
         fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, confirmPassword })
+            body: JSON.stringify({ username, hashedPassword })
         })
             .then((res) => {
                 if (res.ok) {

@@ -4,7 +4,6 @@ This module provides a decorator for caching function results.
 
 import functools
 import logging
-import sqlite3
 import redis
 import os
 import json
@@ -39,7 +38,7 @@ def cache_results(func):
             try:
                 result_str = redis_client.get(key)
                 if result_str is not None and len(result_str) > 0:
-                    result = json.loads(result_str) # Convert to dict
+                    result = json.loads(result_str)  # Convert to dict
                     logging.info("redis cache hit for %s", key)
                     return result
                 else:
@@ -63,28 +62,11 @@ def cache_results(func):
         logging.info("redis cache miss for %s", key)
         result = func(*args)
         try:
-            result_str = json.dumps(result) # Convert to string
+            result_str = json.dumps(result)  # Convert to string
             redis_client.set(key, result_str, ex=3600)  # Cache for 1 hour
             logging.warn("redis cached %s for 1 hour", key)
         except redis.exceptions.ConnectionError:
             redis_client = None
         return result
 
-    return wrapper
-
-
-def create_users_table():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (username TEXT PRIMARY KEY, password TEXT)''')
-    conn.commit()
-    conn.close()
-
-def ensure_users_table_exists(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if not os.path.isfile('users.db'):
-            create_users_table()
-        return func(*args, **kwargs)
     return wrapper

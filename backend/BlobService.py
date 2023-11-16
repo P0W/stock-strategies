@@ -7,6 +7,7 @@ from util import cache_results
 
 logging = logging.getLogger(__name__)
 
+
 ## @classname BlobService
 ## @brief Class to handle blob storage
 class BlobService:

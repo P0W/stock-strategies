@@ -4,6 +4,7 @@ This module defines a Flask app that serves a portfolio view.
 
 import datetime
 import functools
+import hashlib
 import json
 import logging
 
@@ -143,19 +144,20 @@ def rebalance_json_with_params(
 @app.route("/register", methods=["POST"])
 def register():
     username = request.json.get("username")
-    password = request.json.get("password")
+    hashed_password = request.json.get("hashedPassword")
+    password = hashlib.sha256(hashed_password.encode()).hexdigest()
     hashed_password = generate_password_hash(password)
 
     # Check if username already exists
-    if redis_client.hexists('users', username):
+    if redis_client.hexists("users", username):
         return jsonify({"error": "Username already exists"}), 400
 
     # Get the next ID
-    user_id = redis_client.incr('user_id')
+    user_id = redis_client.incr("user_id")
 
     # Store the user data in Redis
-    redis_client.hset('users', username, hashed_password)
-    redis_client.hset('user_ids', username, user_id)
+    redis_client.hset("users", username, hashed_password)
+    redis_client.hset("user_ids", username, user_id)
 
     return jsonify({"success": "User created successfully", "id": user_id}), 201
 
@@ -163,22 +165,23 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
     username = request.json.get("username")
-    password = request.json.get("password")
+    hashed_password = request.json.get("hashedPassword")
+    password = hashlib.sha256(hashed_password.encode()).hexdigest()
 
     # Get the hashed password from Redis
-    hashed_password = redis_client.hget('users', username)
+    hashed_password = redis_client.hget("users", username)
     if hashed_password is not None:
-        hashed_password = hashed_password.decode('utf-8')
+        hashed_password = hashed_password.decode("utf-8")
 
     # Check if the username exists and the password is correct
     if hashed_password is None or not check_password_hash(hashed_password, password):
         return jsonify({"error": "Invalid username or password"}), 400
 
     # Get the user ID from Redis
-    user_id = redis_client.hget('user_ids', username)
+    user_id = redis_client.hget("user_ids", username)
     # Decode the user ID to a string
     if user_id is not None:
-        user_id = user_id.decode('utf-8')
+        user_id = user_id.decode("utf-8")
     session["username"] = username
 
     return jsonify({"success": "Logged in successfully", "id": user_id}), 200
