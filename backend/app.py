@@ -10,6 +10,7 @@ import logging
 
 from waitress import serve
 from flask import Flask, abort, jsonify, request, send_from_directory, session
+from flask_session import Session
 
 from util import cache_results, redis_client
 import business as business
@@ -20,6 +21,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
 app.secret_key = os.urandom(24)
+# Configure Flask-Session
+# Use Redis session interface
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = redis_client
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -32,6 +37,8 @@ logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
 
 logging = logging.getLogger(__name__)
 
+# Initialize the Flask-Session extension
+Session(app)
 
 def login_required(func):
     @functools.wraps(func)
