@@ -17,7 +17,7 @@ services:
     restart: always
     volumes:
       - ./redis_data:/data
-    command: redis-server
+    command: redis-server --save 15 1 --loglevel warning
     ports:
       - "6001:6379"
 
@@ -30,6 +30,7 @@ services:
       - ./cert.pem:/etc/nginx/cert.pem:ro
       - ./key.pem:/etc/nginx/key.pem:ro
     ports:
+      - "8080:80" ## For testing
       - "443:443"
     depends_on:
       - app

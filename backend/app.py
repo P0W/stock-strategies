@@ -167,14 +167,16 @@ def login():
 
     # Get the hashed password from Redis
     hashed_password = redis_client.hget('users', username)
+    if hashed_password is not None:
+        hashed_password = hashed_password.decode('utf-8')
 
     # Check if the username exists and the password is correct
     if hashed_password is None or not check_password_hash(hashed_password, password):
-        session["username"] = username
         return jsonify({"error": "Invalid username or password"}), 400
 
     # Get the user ID from Redis
     user_id = redis_client.hget('user_ids', username)
+    session["username"] = username
 
     return jsonify({"success": "Logged in successfully", "id": user_id}), 200
 
