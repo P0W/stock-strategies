@@ -167,7 +167,6 @@ def login():
     username = request.json.get("username")
     hashed_password = request.json.get("hashedPassword")
     password = hashlib.sha256(hashed_password.encode()).hexdigest()
-
     # Get the hashed password from Redis
     hashed_password = redis_client.hget("users", username)
     if hashed_password is not None:

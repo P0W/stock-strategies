@@ -5,10 +5,11 @@
   "proxy": "http://172.174.157.91:8080",
   "dependencies": {
     "@material-ui/core": "^4.12.4",
+    "@types/crypto-js": "^4.2.1",
     "@types/react": "^18.2.37",
     "@types/react-datepicker": "^4.19.2",
     "@types/react-dom": "^18.2.15",
-    "crypto-ts": "^1.0.2",
+    "crypto-js": "^4.2.0",
     "react": "^18.2.0",
     "react-datepicker": "^4.21.0",
     "react-dom": "^18.2.0",
