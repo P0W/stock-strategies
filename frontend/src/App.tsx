@@ -10,6 +10,7 @@ import { round_off } from './Utils';
 import { INifty200Data, IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, Container, Grid, Paper, TextField, Typography, makeStyles } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./hooks/useAuth";
 
 const useStyles = makeStyles({
   tableContainer: {
@@ -100,20 +101,14 @@ export const App = () => {
   const [investmentValue, setInvestmentValue] = React.useState<number>(500000);
   const navigate = useNavigate();
   const classes = useStyles();
+  const { logout } = useAuth();
 
   const handleSignOut = () => {
     fetch('/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-    }).then(() => navigate('/login'));
+    }).then(() => { logout(); navigate('/login') });
   };
-
-  React.useEffect(() => {
-    // check for signed in user
-    // fetch(`/islogged/${user}`).then(res => {
-    //   if (res.status !== 200) navigate('/login');
-    // });
-  }, []);
 
   const { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, currentPrices, loading }
     = useData(toDateString, fromDateString, numStocks, investmentValue);

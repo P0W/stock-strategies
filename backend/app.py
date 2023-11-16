@@ -56,47 +56,6 @@ def static_file(path):
     return send_from_directory(app.static_folder, path)
 
 
-@app.route("/portfolio", methods=["GET"])
-@app.route("/portfolio/<datestr>", methods=["GET"])
-@login_required
-def portfolio_json(datestr=None):
-    """
-    Returns a portfolio view as a JSON object.
-    """
-    validate_date(datestr)
-
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_portfolio(
-            conn_string=conn_string, request_date=datestr
-        )
-    if json_result:
-        return jsonify(json_result), 200
-    return jsonify({"error": "No portfolio data found"}), 400
-
-
-@app.route("/rebalance/<fromDate>/<todate>", methods=["GET"])
-@login_required
-def rebalance_json(todate=None, fromDate=None):
-    """
-    Returns a portfolio view as a JSON object.
-    """
-    validate_date(todate)
-    validate_date(fromDate)
-
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_rebalance(
-            conn_string=conn_string, from_date=todate, to_date=fromDate
-        )
-    if json_result:
-        return jsonify(json_result), 200
-    return jsonify({"error": "No portfolio data found"}), 400
-
-
-@app.route("/nifty200", methods=["GET"])
 @app.route("/nifty200/<datestr>", methods=["GET"])
 @login_required
 def nifty200_json(datestr=None):
@@ -231,34 +190,6 @@ def login():
 def logout():
     session.pop("username", None)
     return jsonify({"success": "Logged out successfully"}), 200
-
-@app.route("/islogged/<username>", methods=["GET"])
-def islogged(username):
-    if "username" in session and session["username"] == username:
-        ## simply return ok
-        return jsonify({"success": "Logged in successfully"}), 200
-    else:
-        return jsonify({"error": "Not logged in"}), 400
-
-@app.route("/test", methods=["GET"])
-@login_required
-def portfolio():
-    """
-    Returns a portfolio view as an HTML table.
-
-    Returns:
-        str: The HTML table as a string.
-    """
-    conn_string = get_connection_string()
-    if conn_string:
-        table_html = business.view_portfolio(
-            conn_string=conn_string, detailed_view=False
-        )
-        # table_html is string, return it as html
-        if table_html:
-            logging.info("Portfolio found")
-            return table_html
-    return jsonify({"error": "No portfolio data found"}), 400
 
 
 @cache_results

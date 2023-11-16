@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Button, TextField, Grid, Paper, Typography, Link, Box } from '@material-ui/core';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
 
 
 export const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
+  
 
   const handleLogin = (event: any) => {
     event.preventDefault();
@@ -23,7 +26,12 @@ export const LoginPage = () => {
         }
       })
       .then((data) => {
-        localStorage.setItem('token', data.token);
+        login({
+          id: '1',
+          name: username,
+          email: 'john.doe@email.com',
+          authToken: data.token
+        });
         navigate('/app');
       })
       .catch((err) => {

@@ -23,8 +23,7 @@ export const RegisterPage = () => {
                 }
             })
             .then((data) => {
-                localStorage.setItem('token', data.token);
-                navigate('/app');
+                navigate('/');
             })
             .catch((err) => {
                 console.error(err);
@@ -35,7 +34,6 @@ export const RegisterPage = () => {
     const handleLogin = () => {
         navigate('/login');
     };
-
 
     return (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
