@@ -6,10 +6,15 @@ export const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleRegister = (event: any) => {
         event.preventDefault();
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
         fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -67,6 +72,7 @@ export const RegisterPage = () => {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
+                            {error && <p>{error}</p>}
                             <Button
                                 type="submit"
                                 fullWidth

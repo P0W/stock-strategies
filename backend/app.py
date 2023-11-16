@@ -10,11 +10,10 @@ import logging
 from waitress import serve
 from flask import Flask, abort, jsonify, request, send_from_directory, session
 
-from util import cache_results, ensure_users_table_exists
+from util import cache_results, redis_client
 import business as business
 import os
 import sys
-import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -142,48 +141,42 @@ def rebalance_json_with_params(
 
 
 @app.route("/register", methods=["POST"])
-@ensure_users_table_exists
 def register():
     username = request.json.get("username")
     password = request.json.get("password")
-    logging.info("Registering user %s", username)
-    logging.info("Password is %s", password)
     hashed_password = generate_password_hash(password)
-    conn = sqlite3.connect("users.db")
-    c = conn.cursor()
-    try:
-        c.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            (username, hashed_password),
-        )
-        conn.commit()
-    except sqlite3.IntegrityError:
+
+    # Check if username already exists
+    if redis_client.hexists('users', username):
         return jsonify({"error": "Username already exists"}), 400
-    finally:
-        conn.close()
-    return jsonify({"success": "User created successfully"}), 201
+
+    # Get the next ID
+    user_id = redis_client.incr('user_id')
+
+    # Store the user data in Redis
+    redis_client.hset('users', username, hashed_password)
+    redis_client.hset('user_ids', username, user_id)
+
+    return jsonify({"success": "User created successfully", "id": user_id}), 201
 
 
 @app.route("/login", methods=["POST"])
-@ensure_users_table_exists
 def login():
     username = request.json.get("username")
     password = request.json.get("password")
-    logging.info("Registering user %s", username)
-    logging.info("Password is %s", password)
-    conn = sqlite3.connect("users.db")
-    c = conn.cursor()
-    c.execute("SELECT password FROM users WHERE username = ?", (username,))
-    result = c.fetchone()
-    conn.close()
-    if result is None:
-        return jsonify({"error": "Invalid username or password"}), 400
-    hashed_password = result[0]
-    if check_password_hash(hashed_password, password):
+
+    # Get the hashed password from Redis
+    hashed_password = redis_client.hget('users', username)
+
+    # Check if the username exists and the password is correct
+    if hashed_password is None or not check_password_hash(hashed_password, password):
         session["username"] = username
-        return jsonify({"success": "Logged in successfully"}), 200
-    else:
         return jsonify({"error": "Invalid username or password"}), 400
+
+    # Get the user ID from Redis
+    user_id = redis_client.hget('user_ids', username)
+
+    return jsonify({"success": "Logged in successfully", "id": user_id}), 200
 
 
 @app.route("/logout", methods=["POST"])
