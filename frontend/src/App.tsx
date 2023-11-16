@@ -132,7 +132,7 @@ export const App = () => {
       <Grid container spacing={4} justifyContent="center">
         <Grid item>
           <Typography>From:</Typography>
-          <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} />
+          <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} endDate={toDateString} />
         </Grid>
         <Grid item>
           <Typography>To:</Typography>

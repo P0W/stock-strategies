@@ -8,6 +8,7 @@ interface IDatePickerProps {
     initialDate: string;
     onDateChange: (date_string: string) => void;
     startDate?: string | null;
+    endDate?: string | null;
 }
 
 const parseDateString = (dateStr: string): Date => {
@@ -31,7 +32,7 @@ const parseDateString = (dateStr: string): Date => {
     return parsedDate;
 }
 
-export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange, startDate }) => {
+export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange, startDate, endDate }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate != '' ? parseDateString(initialDate) : null);
 
     const isWeekday = (date: Date) => {
@@ -52,7 +53,7 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
             dateFormat='yyyy-MM-dd'
             placeholderText='Select a date'
             minDate={startDate ? parseDateString(startDate) : new Date('2023-10-04')}
-            maxDate={new Date()}
+            maxDate={endDate ? parseDateString(endDate) : new Date()}
             selected={selectedDate}
             filterDate={isWeekday}
         />
