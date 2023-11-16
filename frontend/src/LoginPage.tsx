@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, TextField, Grid, Paper, Typography, Link, Box } from '@material-ui/core';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import CryptoJS from 'crypto-ts';
+import {SHA256} from 'crypto-ts';
 
 export const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -13,7 +13,7 @@ export const LoginPage = () => {
 
   const handleLogin = (event: any) => {
     event.preventDefault();
-    const hashedPassword = CryptoJS.SHA256(password).toString();
+    const hashedPassword = SHA256(password).toString();
     fetch('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
