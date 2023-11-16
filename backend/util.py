@@ -63,7 +63,7 @@ def cache_results(func):
         result = func(*args)
         try:
             result_str = json.dumps(result)  # Convert to string
-            redis_client.set(key, result_str, ex=3600)  # Cache for 1 hour
+            redis_client.set(key, result_str, ex=300)  # Cache for 5 min
             logging.warn("redis cached %s for 1 hour", key)
         except redis.exceptions.ConnectionError:
             redis_client = None
