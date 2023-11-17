@@ -1,7 +1,7 @@
 
+import { Grid, TextField, Typography, makeStyles } from "@material-ui/core";
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
-
 import "react-datepicker/dist/react-datepicker.css";
 
 interface IDatePickerProps {
@@ -10,6 +10,12 @@ interface IDatePickerProps {
     startDate?: string | null;
     endDate?: string | null;
 }
+
+const useStyles = makeStyles((theme) => ({
+    datePickerPopper: {
+        zIndex: theme.zIndex.modal + 1, // Adjust this value as needed
+    },
+}));
 
 const parseDateString = (dateStr: string): Date => {
     const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -34,6 +40,7 @@ const parseDateString = (dateStr: string): Date => {
 
 export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange, startDate, endDate }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate != '' ? parseDateString(initialDate) : null);
+    const classes = useStyles();
 
     const isWeekday = (date: Date) => {
         const day = date.getDay();
@@ -56,6 +63,30 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
             maxDate={endDate ? parseDateString(endDate) : new Date()}
             selected={selectedDate}
             filterDate={isWeekday}
+            customInput={<TextField variant="outlined" />}
+            popperClassName={classes.datePickerPopper}
         />
+    );
+};
+
+interface IDatePickerComponentProps {
+    fromDateString: string;
+    toDateString: string;
+    setFromDateString: (date: string) => void;
+    setToDateString: (date: string) => void;
+}
+
+export const DatePickerComponent: React.FC<IDatePickerComponentProps> = ({ fromDateString, toDateString, setFromDateString, setToDateString }) => {
+    return (
+        <Grid container spacing={4} justifyContent="center">
+            <Grid item>
+                <Typography>From:</Typography>
+                <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} endDate={toDateString} />
+            </Grid>
+            <Grid item>
+                <Typography>To:</Typography>
+                <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
+            </Grid>
+        </Grid>
     );
 };

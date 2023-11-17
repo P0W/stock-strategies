@@ -1,9 +1,83 @@
-import { IHeader, INifty200Data, IToFromData, ItemType } from "./StockDataTypes";
-import { round_off } from "./Utils";
+import { Box, TableCell, Tooltip, Typography, makeStyles } from "@material-ui/core";
+import { IHeader, INifty200Data, IRebalanceData, IStockData, IToFromData, ItemType } from "./StockDataTypes";
+import { round_off, round_off_str } from "./Utils";
+import { blue, green, grey, red } from "@material-ui/core/colors";
 
-const NumericCell = (item: ItemType) => <td key={`price-${item}`} className='values'>{round_off(item as number)}</td>
 
-export const mainTableHeader: IHeader[] = [
+const NumericCell = (item: ItemType) => {
+    return (
+        <TableCell key={`price-${item}`}>
+            <Typography style={{ fontWeight: 'bold', color: '#666666', fontSize: '1.2em' }}>
+                {round_off_str(item as string)}
+            </Typography>
+        </TableCell>
+    );
+}
+
+const SymbolCell = (item: ItemType, row?: IStockData | IRebalanceData | INifty200Data) => {
+    return (<TableCell key={`symbol-${item}`}>
+        <Tooltip title={row?.stock || ''}>
+            <Typography style={{ color: blue[500], fontWeight: 'bold' }}>
+                {item}
+            </Typography>
+        </Tooltip>
+    </TableCell>
+    );
+}
+
+export const rebalanceTableHeader: IHeader[] = [
+    {
+        display: 'S.No.',
+        key: 'rank'
+    },
+    {
+        display: 'Symbol',
+        key: 'symbol',
+        cellTemplate: SymbolCell
+    },
+    {
+        display: 'Amount',
+        key: 'amount',
+        cellTemplate: (item: ItemType) => {
+            // if capital incurred is negative, then its profit, use the .profit className else .loss
+            // use profit, loss or nochange classnames
+            const action = (item as number) === 0 ? 'nochange' : ((item as number) < 0 ? 'profit' : 'loss');
+            const actionColor = (item as number) === 0 ? grey[500] : ((item as number) < 0 ? green[500] : red[500]);
+
+            return (
+                <TableCell key={`amount-${action}`}>
+                    <Typography style={{ color: actionColor, fontWeight: 'bold' }}>
+                        {round_off(item as number)}
+                    </Typography>
+                </TableCell>
+            );
+        }
+    },
+    {
+        display: 'Shares',
+        key: 'shares',
+        cellTemplate: NumericCell
+    },
+    {
+        display: 'Action',
+        key: 'shares',
+        cellTemplate: (item: ItemType) => {
+            // determine hold, buy or sell
+            const action = (item as number) === 0 ? 'Hold' : ((item as number) > 0 ? 'Buy' : 'Sell');
+            const actionColor = (item as number) === 0 ? grey[500] : ((item as number) > 0 ? green[500] : red[500]);
+
+            return (
+                <TableCell key={`shares-${action}`}>
+                    <Typography style={{ color: actionColor, fontWeight: 'bold' }}>
+                        {action}
+                    </Typography>
+                </TableCell>
+            );
+        }
+    }
+];
+
+export const nifty200TableHeader: IHeader[] = [
     {
         display: 'Rank',
         key: 'rank'
@@ -11,11 +85,11 @@ export const mainTableHeader: IHeader[] = [
     {
         display: 'Symbol',
         key: 'symbol',
-        cellTemplate: (item: ItemType, row) => <td key={`symbol-${item}`} className='stock-symbol' title={row?.stock}>{item}</td>
+        cellTemplate: SymbolCell
     },
     {
-        display: 'Avg. Price',
-        key: 'price',
+        display: 'Avg. price',
+        key: 'avg_price',
         cellTemplate: NumericCell
     },
     {
@@ -32,67 +106,57 @@ export const mainTableHeader: IHeader[] = [
         display: 'Investment',
         key: 'investment',
         cellTemplate: NumericCell
-    }
-];
-
-export const rebalanceTableHeader: IHeader[] = [
-    {
-        display: 'S.No.',
-        key: 'rank'
     },
     {
-        display: 'Symbol',
-        key: 'symbol',
-        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
-    },
-    {
-        display: 'Amount',
-        key: 'amount',
-        cellTemplate: (item: ItemType) => {
-            // if capital incurred is negative, then its profit, use the .profit className else .loss
-            // use profit, loss or nochange classnames
-            const className = (item as number) === 0 ? 'nochange' : ((item as number) < 0 ? 'profit' : 'loss');
-            return <td key={`amount-${className}`} className={className}>{round_off(item as number)}</td>;
-        }
-    },
-    {
-        display: 'Shares',
-        key: 'shares'
-    },
-    {
-        display: 'Action',
-        key: 'shares',
-        cellTemplate: (item: ItemType) => {
-            // determin hold, buy or sell
-            const action = (item as number) === 0 ? 'Hold' : ((item as number) > 0 ? 'Buy' : 'Sell');
-            return <td key={`shares-${action}`} className={action}>{action}</td>;
-        }
-    }
-];
-
-export const nifty200TableHeader: IHeader[] = [
-    {
-        display: 'S.No.',
-        key: 'rank'
-    },
-    {
-        display: 'Symbol',
-        key: 'symbol',
-        cellTemplate: (item: ItemType) => <td key={`symbol-${item}`} className='stock-symbol'>{item}</td>
-    },
-    {
-        display: 'Price',
+        display: 'Current Price',
         key: 'price',
         cellTemplate: NumericCell
     },
     {
+        display: 'Profit/Loss',
+        key: 'price',
+        cellTemplate: (item: ItemType, row) => {
+            const thisRow = row as IToFromData;
+            const diff = (item as number - thisRow.avg_price) * thisRow.shares;
+            const isLoss = diff < 0;
+            return (
+                <TableCell align="center" key={`pnl-diff-${isLoss ? 'loss' : 'profit'}`}>
+                    <Box style={{
+                        backgroundColor: isLoss ? red[50] : green[50], // Lighter shades for background
+                    }}>
+                        <Typography style={{
+                            color: isLoss ? red[500] : green[500],
+                            fontWeight: 'bold',
+                        }}>
+                            {round_off(diff)}
+                        </Typography>
+                    </Box>
+                </TableCell>
+            );
+        }
+    },
+    {
         display: 'Change',
         key: 'price',
-        cellTemplate: (item: ItemType, row ) => {
+        cellTemplate: (item: ItemType, row) => {
             const thisRow = row as IToFromData;
             const diff = (item as number - thisRow.avg_price) / thisRow.price * 100
-            const className = diff < 0 ? 'loss' : 'profit';
-            return <td key={`diff-${className}`} className={className}>{round_off(diff)}</td>;
+            const isLoss = diff < 0;
+            return (
+                <TableCell align="center" key={`diff-${isLoss ? 'loss' : 'profit'}`}>
+                    <Box style={{
+                        backgroundColor: isLoss ? red[50] : green[50], // Lighter shades for background
+                        // padding: '0.5em',
+                    }}>
+                        <Typography style={{
+                            color: isLoss ? red[500] : green[500],
+                            fontWeight: 'bold',
+                        }}>
+                            {round_off(diff)}
+                        </Typography>
+                    </Box>
+                </TableCell>
+            );
         }
     }
 ];

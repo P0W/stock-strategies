@@ -5,6 +5,7 @@
   "proxy": "http://172.174.157.91:8080",
   "dependencies": {
     "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
     "@types/crypto-js": "^4.2.1",
     "@types/react": "^18.2.37",
     "@types/react-datepicker": "^4.19.2",

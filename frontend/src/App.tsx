@@ -1,36 +1,24 @@
-import "./App.css";
+// import "./App.css";
 import React from 'react';
 
 import { StockTable } from './StockTable';
-import { StockDatePicker } from './StockDatePicker';
+import { DatePickerComponent, StockDatePicker } from './StockDatePicker';
 
 
-import { mainTableHeader, nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
+import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { round_off } from './Utils';
-import { INifty200Data, IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, Container, Grid, Paper, TextField, Typography, makeStyles } from "@material-ui/core";
+import { IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
+import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, CircularProgress, Container, Drawer, Grid, IconButton, Paper, TextField, Toolbar, Typography, makeStyles } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
+import { green, red } from "@material-ui/core/colors";
+import MenuIcon from '@material-ui/icons/Menu';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { SidePanel } from './SidePanel';
 
-const useStyles = makeStyles({
-  tableContainer: {
-    padding: 10,
-    margin: 10,
-    height: '65vh',
-    overflowY: 'auto',
-
-  },
-  portfolioValue: {
-    marginBottom: 10,
-    fontWeight: 'bold',
-    fontSize: '0.75em'
-  }
-});
 
 const useData = (toDateString: string, fromDateString: string, numStocks: number, investmentValue: number) => {
-  const [toDateStocks, setToDateStocks] = React.useState<IStockData[]>([]);
-  const [fromDateStocks, setFromDateStocks] = React.useState<IStockData[]>([]);
-  const [currentPrices, setCurrentPrices] = React.useState<INifty200Data[]>([]);
+  const [currentPrices, setCurrentPrices] = React.useState<IToFromData[]>([]);
   const [rebalanceData, setRebalanceData] = React.useState<IRebalanceData[]>([]);
   const [capitalIncurred, setCapitalIncurred] = React.useState<number>(0);
   const [loading, setLoading] = React.useState(true);
@@ -51,17 +39,15 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
   React.useEffect(() => {
     if (!fromDateString || !toDateString) return;
     setLoading(true);
-    const toFetch = fetchData(`/portfolio/${toDateString}/${numStocks}/${investmentValue}`);
     const fromFetch = fetchData(`/portfolio/${fromDateString}/${numStocks}/${investmentValue}`);
     const nifty200Fetch = fetchData(`/nifty200/${toDateString}`);
     const rebalanceFetch = fetchData(`/rebalance/${fromDateString}/${toDateString}/${numStocks}/${investmentValue}`);
 
-    Promise.all([toFetch, fromFetch, rebalanceFetch, nifty200Fetch])
+    Promise.all([fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
-        const pastStocksData = data[1] as IStockData[];
-        const presentStocksData = data[0] as IStockData[];
-        const rebalanceStocksData = data[2] as unknown as { [key: string]: any };
-        const nifty200 = data[3] as { [key: string]: number };
+        const pastStocksData = data[0] as IStockData[];
+        const rebalanceStocksData = data[1] as unknown as { [key: string]: any };
+        const nifty200 = data[2] as { [key: string]: number };
 
         // get the prices for the stocks in the fromDateStocks from nifty200
         const currentStockPrice = pastStocksData.map(stock => {
@@ -69,17 +55,18 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
           if (thisStock) {
             return {
               symbol: stock.symbol,
-              price: nifty200[thisStock],
               avg_price: stock.price,
-              shares: stock.shares
-            } as INifty200Data;
+              weight: stock.weight,
+              shares: stock.shares,
+              investment: stock.investment,
+              price: nifty200[thisStock], // Current price
+              stock: stock.stock
+            } as IToFromData;
           }
-          return { symbol: stock.symbol, price: -1, avg_price: stock.price } as INifty200Data;
+          return { symbol: stock.symbol, price: -1, avg_price: stock.price } as IToFromData;
         });
 
         // Set states
-        setFromDateStocks(pastStocksData);
-        setToDateStocks(presentStocksData);
         setRebalanceData(rebalanceStocksData["stocks"] as IRebalanceData[]);
         setCapitalIncurred(rebalanceStocksData["capital_incurred"]);
         setCurrentPrices(currentStockPrice);
@@ -91,8 +78,79 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
       });
   }, [fromDateString, toDateString]);
 
-  return { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, currentPrices, loading };
+  return { rebalanceData, capitalIncurred, currentPrices, loading };
 };
+
+interface IViewProps {
+  rebalanceData: IRebalanceData[];
+  capitalIncurred: number;
+  currentPrices: IToFromData[];
+  loading: boolean;
+}
+
+
+
+const useStyles = makeStyles((theme) => ({
+  title: {
+    color: theme.palette.primary.main,
+    marginBottom: theme.spacing(2),
+  },
+  container: {
+    marginTop: theme.spacing(8),
+  },
+  menuButton: {
+    marginLeft: (props: { drawerOpen: boolean }) => props.drawerOpen ? theme.spacing(80) : 0,
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
+}));
+
+const ShowTableV2 = (props: IViewProps) => {
+  const { rebalanceData, capitalIncurred, currentPrices, loading } = props;
+  const fromInvestment = currentPrices.reduce((acc, stock) => acc + stock.investment, 0);
+  const toInvestment = currentPrices.reduce((acc, stock) => acc + stock.price * stock.shares, 0);
+  const gains = toInvestment - fromInvestment;
+  return !loading ? (
+    <>
+      <Box display="flex" justifyContent="space-between" alignItems="center" padding="1em" bgcolor="#f5f5f5">
+        <Typography variant="h6">
+          Investment Value: {round_off(fromInvestment)}
+        </Typography>
+        <Typography variant="h6" style={{
+          color: gains > 0 ? green[500] : red[500],
+          fontWeight: 'bold',
+        }}>
+          Current Portfolio Value: {round_off(toInvestment)}
+        </Typography>
+      </Box>
+
+      <StockTable headers={nifty200TableHeader} stockData={props.currentPrices} />
+
+      <Box mt={4}>
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="rebalance-content"
+            id="rebalance-header"
+          >
+            <Typography variant="h6" style={{ fontWeight: 'bold' }}>Rebalance Updates</Typography>
+            <Typography variant="subtitle1" style={{
+              marginLeft: '1em',
+              fontWeight: 'bold',
+              color: capitalIncurred < 0 ? green[500] : red[500]
+            }}>
+              {capitalIncurred < 0 ? 'Receive' : 'Invest More:'} {Math.abs(round_off(capitalIncurred))}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+    </>
+  ) : <CircularProgress />;
+}
 
 export const App = () => {
   const [fromDateString, setFromDateString] = React.useState<string>('');
@@ -100,8 +158,9 @@ export const App = () => {
   const [numStocks, setNumStocks] = React.useState<number>(15);
   const [investmentValue, setInvestmentValue] = React.useState<number>(500000);
   const navigate = useNavigate();
-  const classes = useStyles();
   const { logout } = useAuth();
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const classes = useStyles({ drawerOpen });
 
   const handleSignOut = () => {
     fetch('/logout', {
@@ -110,83 +169,52 @@ export const App = () => {
     }).then(() => { logout(); navigate('/login') });
   };
 
-  const { toDateStocks, fromDateStocks, rebalanceData, capitalIncurred, currentPrices, loading }
+  const { rebalanceData, capitalIncurred, currentPrices, loading }
     = useData(toDateString, fromDateString, numStocks, investmentValue);
-  // Sum up the investment amount
-  const fromInvestment = fromDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
-  const toInvestment = toDateStocks.reduce((acc, stock) => acc + stock.investment, 0);
-  const currentPortfolioValue = (currentPrices as IToFromData[]).reduce((acc, stock) => acc + stock.shares * stock.price, 0);
-  const gains = currentPortfolioValue - fromInvestment;
 
   return (
-
-    <Container maxWidth="xl">
-      <Grid container justifyContent="space-between">
-        <Typography variant="h4" align="center" gutterBottom className="title">
-          Nifty-200 Momentum Strategy Analyzer
-        </Typography>
-        <Button variant="contained" color="secondary" onClick={handleSignOut} size="small">
-          Sign Out
-        </Button>
-      </Grid>
-      <Grid container spacing={4} justifyContent="center">
-        <Grid item>
-          <Typography>From:</Typography>
-          <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} endDate={toDateString} />
+    <div>
+      <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => setDrawerOpen(!drawerOpen)}>
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <SidePanel
+        drawerOpen={drawerOpen}
+        numStocks={numStocks}
+        setNumStocks={setNumStocks}
+        investmentValue={investmentValue}
+        setInvestmentValue={setInvestmentValue}
+        handleSignOut={handleSignOut}
+      />
+      <Container maxWidth="xl" className={classes.container}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Typography variant="h4" align="center" gutterBottom className={classes.title}>
+              Nifty-200 Momentum Strategy Analyzer
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <DatePickerComponent
+              fromDateString={fromDateString}
+              toDateString={toDateString}
+              setFromDateString={setFromDateString}
+              setToDateString={setToDateString}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            {fromDateString != '' && toDateString != '' && <ShowTableV2
+              rebalanceData={rebalanceData}
+              capitalIncurred={capitalIncurred}
+              currentPrices={currentPrices}
+              loading={loading}
+            />
+            }
+          </Grid>
         </Grid>
-        <Grid item>
-          <Typography>To:</Typography>
-          <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
-        </Grid>
-      </Grid>
-      <Box my={2}>
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<i className="fas fa-chevron-down"></i>}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Typography variant="h6">Configurations</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={3} alignItems="center">
-              <Grid item>
-                <Typography>Number of Stocks:</Typography>
-                <TextField type="number" value={numStocks} onChange={(e) => setNumStocks(Number(e.target.value))} />
-              </Grid>
-              <Grid item>
-                <Typography>Investment Value:</Typography>
-                <TextField type="number" value={investmentValue} onChange={(e) => setInvestmentValue(Number(e.target.value))} />
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-      {!loading ? (
-        <Box my={2}>
-          <Paper elevation={3} className="analysis-container">
-            <Box p={2} className={classes.tableContainer}>
-              <Typography variant="h6" className={classes.portfolioValue}>Investment: {round_off(fromInvestment)} INR | as on {fromDateString}</Typography>
-              <StockTable headers={mainTableHeader} stockData={fromDateStocks} />
-            </Box>
-            <Box p={2} className={classes.tableContainer}>
-              <Typography variant="h6" className={classes.portfolioValue} color={gains > 0 ? "primary" : "secondary"}>Gain: {round_off(gains)} INR | as on {toDateString}</Typography>
-              <StockTable headers={nifty200TableHeader} stockData={currentPrices} />
-            </Box>
-            <Box p={2} className={classes.tableContainer}>
-              <Typography variant="h6" className={classes.portfolioValue} >New Investment: {round_off(toInvestment)} INR | as on {toDateString}</Typography>
-              <StockTable headers={mainTableHeader} stockData={toDateStocks} />
-            </Box>
-            <Box p={2} className={classes.tableContainer}>
-              <Typography variant="h6" className={classes.portfolioValue}>Rebalance Updates | Capital Incurred: {round_off(capitalIncurred)} INR</Typography>
-              <StockTable headers={rebalanceTableHeader} stockData={rebalanceData} />
-            </Box>
-          </Paper>
-        </Box>
-      ) : (
-        fromDateString !== '' && toDateString !== '' && <CircularProgress />
-      )}
-    </Container>
-  );
+      </Container>
+    </div>);
 };
 

@@ -58,6 +58,9 @@ export interface INifty200Data {
 export interface IToFromData extends INifty200Data {
     avg_price: number;
     shares: number;
+    stock: string;
+    investment: number;
+    weight: number;
 };
 
 
