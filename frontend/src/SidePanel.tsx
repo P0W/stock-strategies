@@ -15,11 +15,7 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: drawerWidth,
     },
     signOutButton: {
-        backgroundColor: '#f50057',
-        color: 'white',
-        '&:hover': {
-            backgroundColor: '#aa003d',
-        },
+        fontWeight: 'bold',
     },
 }));
 
@@ -38,7 +34,7 @@ export const SidePanel: React.FC<ISidePanelProps> = ({ drawerOpen, numStocks, se
     return (
         <Drawer variant="persistent" anchor="left" open={drawerOpen} className={classes.drawer}>
             <Box my={2} className={classes.container}>
-                <Button variant="contained" onClick={handleSignOut} size="small" className={classes.signOutButton}>
+                <Button variant="text" onClick={handleSignOut} size="large" className={classes.signOutButton}>
                     Sign Out
                 </Button>
                 <Typography variant="h6" className={classes.item}>Configurations</Typography>

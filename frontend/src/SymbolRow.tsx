@@ -3,21 +3,6 @@ import { ISymbolRow } from "./StockDataTypes";
 import { TableRow, TableCell } from '@material-ui/core';
 
 
-// export const SymbolRow: React.FC<ISymbolRow> = ({ rank, item, headers }): React.ReactElement => {
-
-//     return (
-//         <tr key={rank}>
-//             {headers?.map((header, index) => {
-//                 if (header.key === 'rank') {
-//                     return <td key={index}>{rank}</td>
-//                 }
-//                 return header.cellTemplate?.(item[header.key], item) ?? <td key={`${index}-${header.key}`}>{item[header.key]}</td>
-//             })}
-//         </tr>
-//     );
-// };
-
-
 export const SymbolRow: React.FC<ISymbolRow> = ({ item, rank, headers }): React.ReactElement => {
     return (
         <TableRow key={rank}>
