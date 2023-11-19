@@ -1,7 +1,8 @@
-import { Box, TableCell, Tooltip, Typography, makeStyles } from "@material-ui/core";
 import { IHeader, INifty200Data, IRebalanceData, IStockData, IToFromData, ItemType } from "./StockDataTypes";
 import { round_off, round_off_str } from "./Utils";
-import { blue, green, grey, red } from "@material-ui/core/colors";
+import { Box, TableCell, Tooltip, Typography } from "@mui/material";
+import { blue, grey, green, red } from "@mui/material/colors";
+
 
 
 const NumericCell = (item: ItemType) => {

@@ -1,21 +1,31 @@
 
-import { Grid, TextField, Typography, makeStyles } from "@material-ui/core";
+import { Grid, TextField, Typography, makeStyles } from "@mui/material";
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Theme } from "@mui/system";
+
+const useStyles = makeStyles((theme: Theme) => ({
+  datePickerPopper: {
+    zIndex: ( theme.zIndex as number ) + 1, // Adjust this value as needed
+  },
+}));
+
 
 interface IDatePickerProps {
+    label: string;
     initialDate: string;
     onDateChange: (date_string: string) => void;
     startDate?: string | null;
     endDate?: string | null;
 }
 
-const useStyles = makeStyles((theme) => ({
-    datePickerPopper: {
-        zIndex: theme.zIndex.modal + 1, // Adjust this value as needed
-    },
-}));
+
+// const useStyles = makeStyles(() => ({
+//     datePickerPopper: {
+//       //  zIndex: theme.zIndex.modal + 1, // Adjust this value as needed
+//     },
+// }));
 
 const parseDateString = (dateStr: string): Date => {
     const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -38,9 +48,8 @@ const parseDateString = (dateStr: string): Date => {
     return parsedDate;
 }
 
-export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange, startDate, endDate }) => {
+export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDateChange, startDate, endDate, label }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate != '' ? parseDateString(initialDate) : null);
-    const classes = useStyles();
 
     const isWeekday = (date: Date) => {
         const day = date.getDay();
@@ -58,13 +67,11 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
                 setSelectedDate(date);
             }}
             dateFormat='yyyy-MM-dd'
-            placeholderText='Select a date'
             minDate={startDate ? parseDateString(startDate) : new Date('2023-10-04')}
             maxDate={endDate ? parseDateString(endDate) : new Date()}
             selected={selectedDate}
             filterDate={isWeekday}
-            customInput={<TextField variant="outlined" />}
-            popperClassName={classes.datePickerPopper}
+            customInput={<TextField variant="outlined" label={label} size="small" />}
         />
     );
 };
@@ -80,12 +87,18 @@ export const DatePickerComponent: React.FC<IDatePickerComponentProps> = ({ fromD
     return (
         <Grid container spacing={4} justifyContent="center">
             <Grid item>
-                <Typography>From:</Typography>
-                <StockDatePicker initialDate={fromDateString} onDateChange={setFromDateString} endDate={toDateString} />
+                <StockDatePicker
+                    initialDate={fromDateString}
+                    onDateChange={setFromDateString}
+                    endDate={toDateString}
+                    label="From Date" />
             </Grid>
             <Grid item>
-                <Typography>To:</Typography>
-                <StockDatePicker initialDate={toDateString} onDateChange={setToDateString} startDate={fromDateString} />
+                <StockDatePicker
+                    initialDate={toDateString}
+                    onDateChange={setToDateString}
+                    startDate={fromDateString}
+                    label="To Date" />
             </Grid>
         </Grid>
     );

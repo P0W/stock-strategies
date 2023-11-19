@@ -4,8 +4,11 @@
   "private": true,
   "proxy": "http://172.174.157.91:8080",
   "dependencies": {
-    "@material-ui/core": "^4.12.4",
-    "@material-ui/icons": "^4.11.3",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.18",
+    "@mui/material": "^5.14.18",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.6",
     "@types/crypto-js": "^4.2.1",
     "@types/react": "^18.2.37",
     "@types/react-datepicker": "^4.19.2",
@@ -16,6 +19,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
     "react-scripts": "^5.0.1",
+    "styled-components": "^6.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {

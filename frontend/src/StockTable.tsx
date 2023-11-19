@@ -1,19 +1,11 @@
 import React from "react";
 import { IStockTable } from "./StockDataTypes";
 import { SymbolRow } from "./SymbolRow";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, makeStyles, Typography } from '@material-ui/core';
-
-
-const useStyles = makeStyles({
-    tableHeader: {
-        fontWeight: 'bold',
-        color: '#3f51b5'
-    },
-});
+import { makeStyles } from "@mui/material";
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 
 
 export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React.ReactElement => {
-    const classes = useStyles();
 
     return (
         <TableContainer component={Paper}>
@@ -22,7 +14,10 @@ export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React
                     <TableRow>
                         {headers?.map((header, index) => (
                             <TableCell key={`${index}-${header.display}`}>
-                                <Typography className={classes.tableHeader}>
+                                <Typography sx={{
+                                    fontWeight: 'bold',
+                                    color: '#3f51b5'
+                                }}>
                                     {header.display}
                                 </Typography>
                             </TableCell>

@@ -8,13 +8,15 @@ import { DatePickerComponent, StockDatePicker } from './StockDatePicker';
 import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { round_off } from './Utils';
 import { IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, CircularProgress, Container, Drawer, Grid, IconButton, Paper, TextField, Toolbar, Typography, makeStyles } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
-import { green, red } from "@material-ui/core/colors";
-import MenuIcon from '@material-ui/icons/Menu';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { SidePanel } from './SidePanel';
+import { SidePanel } from "./SidePanel";
+import { AppBar, Box, CircularProgress, Container, Grid, IconButton, makeStyles, Paper, Toolbar, Typography } from "@mui/material";
+import { green, red } from "@mui/material/colors";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Navbar } from './Navbar';
+
 
 
 const useData = (toDateString: string, fromDateString: string, numStocks: number, investmentValue: number) => {
@@ -89,23 +91,6 @@ interface IViewProps {
 }
 
 
-
-const useStyles = makeStyles((theme) => ({
-  title: {
-    color: theme.palette.primary.main,
-    marginBottom: theme.spacing(2),
-  },
-  container: {
-    marginTop: theme.spacing(8),
-  },
-  menuButton: {
-    marginLeft: (props: { drawerOpen: boolean }) => props.drawerOpen ? theme.spacing(80) : 0,
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-  },
-}));
-
 const ShowTableV2 = (props: IViewProps) => {
   const { rebalanceData, capitalIncurred, currentPrices, loading } = props;
   const fromInvestment = currentPrices.reduce((acc, stock) => acc + stock.investment, 0);
@@ -113,20 +98,41 @@ const ShowTableV2 = (props: IViewProps) => {
   const gains = toInvestment - fromInvestment;
   return !loading ? (
     <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" padding="1em" bgcolor="#f5f5f5">
-        <Typography variant="h6">
-          Investment Value: {round_off(fromInvestment)}
-        </Typography>
-        <Typography variant="h6" style={{
-          color: gains > 0 ? green[500] : red[500],
-          fontWeight: 'bold',
-        }}>
-          Current Portfolio Value: {round_off(toInvestment)}
-        </Typography>
-      </Box>
 
-      <StockTable headers={nifty200TableHeader} stockData={props.currentPrices} />
 
+      <Paper elevation={1} sx={{
+        padding: '1em',
+        marginBottom: '1em',
+        marginTop: '1em',
+        backgroundColor: '#f5f5f5',
+      }}>
+
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <Typography >
+              Investment Value: {round_off(fromInvestment)}
+            </Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography style={{
+              color: gains > 0 ? green[500] : red[500],
+              fontWeight: 'bold',
+            }}>
+              Current Portfolio Value: {round_off(toInvestment)}
+            </Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography style={{
+              color: gains > 0 ? green[500] : red[500],
+              fontWeight: 'bold'
+            }}>
+              {gains > 0 ? "Profit" : "Loss"} : {round_off(gains)}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <StockTable headers={nifty200TableHeader} stockData={props.currentPrices} />
+      </Paper>
       <Box mt={4}>
         <Accordion>
           <AccordionSummary
@@ -160,7 +166,6 @@ export const App = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const classes = useStyles({ drawerOpen });
 
   const handleSignOut = () => {
     fetch('/logout', {
@@ -174,13 +179,24 @@ export const App = () => {
 
   return (
     <div>
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
+      {/* <AppBar position="fixed">
+        <Toolbar disableGutters>
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => setDrawerOpen(!drawerOpen)}>
             <MenuIcon />
           </IconButton>
+          
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            
+            
+          >
+            p=mv
+          </Typography>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
+      <Navbar handleOpen={() => setDrawerOpen(!drawerOpen)} />
       <SidePanel
         drawerOpen={drawerOpen}
         numStocks={numStocks}
@@ -189,10 +205,12 @@ export const App = () => {
         setInvestmentValue={setInvestmentValue}
         handleSignOut={handleSignOut}
       />
-      <Container maxWidth="xl" className={classes.container}>
-        <Grid container spacing={3}>
+      <Container maxWidth="xl" sx={{
+        marginTop: '1em',
+      }}>
+        <Grid container >
           <Grid item xs={12}>
-            <Typography variant="h4" align="center" gutterBottom className={classes.title}>
+            <Typography variant="h6" align="center" gutterBottom >
               Nifty-200 Momentum Strategy Analyzer
             </Typography>
           </Grid>

@@ -1,6 +1,6 @@
 import React from "react";
 import { ISymbolRow } from "./StockDataTypes";
-import { TableRow, TableCell } from '@material-ui/core';
+import { TableCell, TableRow } from "@mui/material";
 
 
 export const SymbolRow: React.FC<ISymbolRow> = ({ item, rank, headers }): React.ReactElement => {
