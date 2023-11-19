@@ -3,14 +3,7 @@ import { Grid, TextField, Typography, makeStyles } from "@mui/material";
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Theme } from "@mui/system";
-
-const useStyles = makeStyles((theme: Theme) => ({
-  datePickerPopper: {
-    zIndex: ( theme.zIndex as number ) + 1, // Adjust this value as needed
-  },
-}));
-
+import "./StockDatePicker.css";
 
 interface IDatePickerProps {
     label: string;
@@ -19,13 +12,6 @@ interface IDatePickerProps {
     startDate?: string | null;
     endDate?: string | null;
 }
-
-
-// const useStyles = makeStyles(() => ({
-//     datePickerPopper: {
-//       //  zIndex: theme.zIndex.modal + 1, // Adjust this value as needed
-//     },
-// }));
 
 const parseDateString = (dateStr: string): Date => {
     const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -59,10 +45,8 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
     return (
         <DatePicker
             onChange={(date: Date) => {
-
                 // convert date to IST timezone
                 const selected_date = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-
                 onDateChange(selected_date);
                 setSelectedDate(date);
             }}

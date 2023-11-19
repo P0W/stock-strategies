@@ -1,14 +1,14 @@
 import * as React from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface IProps {
     handleOpen: () => void;
 }
 
 const pages = ['Pricing', 'About'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Account', 'Logout'];
 
 export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -30,7 +30,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar position="fixed">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <BoltIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}

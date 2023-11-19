@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Button, Grid, Link, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import {SHA256} from 'crypto-js';
+import { SHA256 } from 'crypto-js';
+import { Copyright } from './Utils';
 
 export const RegisterPage = () => {
     const [username, setUsername] = useState('');
@@ -57,6 +58,7 @@ export const RegisterPage = () => {
                                 label="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                required
                             />
                             <TextField
                                 fullWidth
@@ -65,6 +67,7 @@ export const RegisterPage = () => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                required
                             />
                             <TextField
                                 fullWidth
@@ -73,6 +76,7 @@ export const RegisterPage = () => {
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
                             />
                             {error && <p>{error}</p>}
                             <Button
@@ -91,6 +95,7 @@ export const RegisterPage = () => {
                                 Login
                             </Link>
                         </Typography>
+                        <Copyright sx={{ mt: 5 }} />
                     </Paper>
                 </Grid>
             </Grid>

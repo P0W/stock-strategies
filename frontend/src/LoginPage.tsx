@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { Box, Button, Grid, Link, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import {SHA256} from 'crypto-js';
+import { SHA256 } from 'crypto-js';
+import { Copyright } from './Utils';
 
 export const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-  
+
 
   const handleLogin = (event: any) => {
     event.preventDefault();
@@ -28,9 +29,9 @@ export const LoginPage = () => {
       })
       .then((data) => {
         login({
-          id: '1',
+          id: data.id,
           name: username,
-          email: 'john.doe@email.com',
+          email: '--',
           authToken: data.token
         });
         navigate('/app');
@@ -85,6 +86,7 @@ export const LoginPage = () => {
                 Sign up
               </Link>
             </Typography>
+            <Copyright sx={{ mt: 5 }} />
           </Paper>
         </Grid>
       </Grid>

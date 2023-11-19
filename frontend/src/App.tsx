@@ -6,12 +6,12 @@ import { DatePickerComponent, StockDatePicker } from './StockDatePicker';
 
 
 import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
-import { round_off } from './Utils';
+import { drawerWidth, round_off } from './Utils';
 import { IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { SidePanel } from "./SidePanel";
-import { AppBar, Box, CircularProgress, Container, Grid, IconButton, makeStyles, Paper, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, CircularProgress, Container, Divider, Grid, IconButton, LinearProgress, makeStyles, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -98,8 +98,6 @@ const ShowTableV2 = (props: IViewProps) => {
   const gains = toInvestment - fromInvestment;
   return !loading ? (
     <>
-
-
       <Paper elevation={1} sx={{
         padding: '1em',
         marginBottom: '1em',
@@ -155,7 +153,7 @@ const ShowTableV2 = (props: IViewProps) => {
         </Accordion>
       </Box>
     </>
-  ) : <CircularProgress />;
+  ) : <LinearProgress  />;
 }
 
 export const App = () => {
@@ -178,24 +176,10 @@ export const App = () => {
     = useData(toDateString, fromDateString, numStocks, investmentValue);
 
   return (
-    <div>
-      {/* <AppBar position="fixed">
-        <Toolbar disableGutters>
-          <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => setDrawerOpen(!drawerOpen)}>
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            
-            
-          >
-            p=mv
-          </Typography>
-        </Toolbar>
-      </AppBar> */}
+    <Container maxWidth="xl" disableGutters sx={{
+      alignContent: 'center',
+      marginTop: '4.5em'
+    }}>
       <Navbar handleOpen={() => setDrawerOpen(!drawerOpen)} />
       <SidePanel
         drawerOpen={drawerOpen}
@@ -205,34 +189,32 @@ export const App = () => {
         setInvestmentValue={setInvestmentValue}
         handleSignOut={handleSignOut}
       />
-      <Container maxWidth="xl" sx={{
-        marginTop: '1em',
-      }}>
-        <Grid container >
-          <Grid item xs={12}>
-            <Typography variant="h6" align="center" gutterBottom >
-              Nifty-200 Momentum Strategy Analyzer
-            </Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <DatePickerComponent
-              fromDateString={fromDateString}
-              toDateString={toDateString}
-              setFromDateString={setFromDateString}
-              setToDateString={setToDateString}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            {fromDateString != '' && toDateString != '' && <ShowTableV2
-              rebalanceData={rebalanceData}
-              capitalIncurred={capitalIncurred}
-              currentPrices={currentPrices}
-              loading={loading}
-            />
-            }
-          </Grid>
-        </Grid>
-      </Container>
-    </div>);
+      <Stack spacing={1}>
+        <Box >
+          <Typography variant="h6" align="center" gutterBottom >
+            Nifty-200 Momentum Strategy Analyzer
+          </Typography>
+        </Box>
+        <Box >
+          <DatePickerComponent
+            fromDateString={fromDateString}
+            toDateString={toDateString}
+            setFromDateString={setFromDateString}
+            setToDateString={setToDateString}
+          />
+        </Box>
+        <Divider />
+        <Box >
+          {fromDateString != '' && toDateString != '' && <ShowTableV2
+            rebalanceData={rebalanceData}
+            capitalIncurred={capitalIncurred}
+            currentPrices={currentPrices}
+            loading={loading}
+          />
+          }
+        </Box>
+      </Stack>
+    </Container>
+  );
 };
 
