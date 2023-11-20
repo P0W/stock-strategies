@@ -26,9 +26,11 @@ def build_todays_portfolio(
     if nifty200_symbols is None:
         logging.info("%s blob does not exist", blob_name)
         ## Get the list of stocks
-        nifty200_symbols = strategy.getStockList()
+        nifty200_symbols, tickertape_links = strategy.getStockList()
         ## Upload the list of stocks
         blob_service.upload_blob(nifty200_symbols, blob_name)
+        tickertake_file_blob_name = f"all_symbols/tickertape-links.json"
+        blob_service.upload_blob(tickertape_links, tickertake_file_blob_name)
 
     ## Upload the portfolio
     blob_name = strategy.get_file_name("portfolio-on")

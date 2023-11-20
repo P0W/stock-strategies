@@ -23,8 +23,8 @@ app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
 app.secret_key = os.urandom(24)
 # Configure Flask-Session
 # Use Redis session interface
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = redis_client
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_REDIS"] = redis_client
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -39,6 +39,7 @@ logging = logging.getLogger(__name__)
 
 # Initialize the Flask-Session extension
 Session(app)
+
 
 def login_required(func):
     @functools.wraps(func)

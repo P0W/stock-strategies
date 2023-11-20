@@ -135,6 +135,7 @@ def getStockList(
     res = tickerRequest.get(baseUrl)
     results = []
     retries = {}
+    tickertape_links = {}
 
     if res.ok:
         soup = BeautifulSoup(res.content, features="html.parser")
@@ -151,6 +152,7 @@ def getStockList(
             aTag = s.find("a", href=True)
             sTag = s.find("span", {"class": "typography-caption-medium"})
             apiTicker = aTag["href"].split("-")[-1]
+            tickertape_links[sTag.text] = f"https://www.tickertape.in{aTag['href']}"
             base_api_url = f"https://api.tickertape.in/stocks/charts/inter/{apiTicker}"
             returns = {}
             current_price = -1.0
@@ -220,7 +222,7 @@ def getStockList(
         logging.info("Failed to get data from %s", baseUrl)
         ### show error message
         logging.info(res.text)
-    return results
+    return results, tickertape_links
 
 
 ## @brief Method to display portfolio
@@ -416,9 +418,11 @@ if __name__ == "__main__":
             nifty200_symbols = json.load(fh)
     else:
         logging.info("File not found: %s, fetching data from tickertape", fileName)
-        nifty200_symbols = getStockList()
+        nifty200_symbols, tickertape_links = getStockList()
         with open(fileName, "w") as fh:
             json.dump(nifty200_symbols, fh, indent=2)
+        with open("tickertape_links.json", "w") as fh:
+            json.dump(tickertape_links, fh, indent=2)
     if date_provided:
         fileName = f"portfolio-on-{sys.argv[1]}.json"
     else:
