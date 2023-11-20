@@ -5,9 +5,7 @@ import { useLocalStorage } from "./useLocalStorage";
 // NOTE: optimally move this into a separate file
 export interface User {
     id: string;
-    name: string;
-    email: string;
-    authToken?: string;
+    fullName: string;
 }
 
 export const useUser = () => {

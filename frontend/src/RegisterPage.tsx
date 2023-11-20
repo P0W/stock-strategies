@@ -8,6 +8,9 @@ export const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -21,7 +24,7 @@ export const RegisterPage = () => {
         fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, hashedPassword })
+            body: JSON.stringify({ username, hashedPassword, email, phoneNumber, fullName })
         })
             .then((res) => {
                 if (res.ok) {
@@ -30,7 +33,7 @@ export const RegisterPage = () => {
                     throw new Error('Invalid username or password');
                 }
             })
-            .then((data) => {
+            .then(() => {
                 navigate('/');
             })
             .catch((err) => {
@@ -59,6 +62,28 @@ export const RegisterPage = () => {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Full Name"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                required
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Phone Number"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
                             />
                             <TextField
                                 fullWidth

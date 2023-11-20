@@ -30,9 +30,7 @@ export const LoginPage = () => {
       .then((data) => {
         login({
           id: data.id,
-          name: username,
-          email: '--',
-          authToken: data.token
+          fullName: data.fullName
         });
         navigate('/app');
       })

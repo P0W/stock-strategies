@@ -44,7 +44,7 @@ Session(app)
 def login_required(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        if "username" not in session:
+        if "username" not in session and not app.debug:
             return (
                 jsonify({"error": "You must be logged in to access this resource"}),
                 403,
@@ -160,6 +160,11 @@ def register():
     password = hashlib.sha256(hashed_password.encode()).hexdigest()
     hashed_password = generate_password_hash(password)
 
+    # Get email, phoneNumber, name
+    email = request.json.get("email")
+    phoneNumber = request.json.get("phoneNumber")
+    fullName = request.json.get("fullName")
+
     # Check if username already exists
     if redis_client.hexists("users", username):
         return jsonify({"error": "Username already exists"}), 400
@@ -170,6 +175,21 @@ def register():
     # Store the user data in Redis
     redis_client.hset("users", username, hashed_password)
     redis_client.hset("user_ids", username, user_id)
+
+    ## Store the user data: email, phoneNumber, name in Redis
+    redis_client.hset(
+        "users_profile",
+        username,
+        json.dumps(
+            {
+                "email": email,
+                "phoneNumber": phoneNumber,
+                "fullName": fullName,
+                "num_stocks": 15,
+                "investment": 5000000,
+            }
+        ),
+    )
 
     return jsonify({"success": "User created successfully", "id": user_id}), 201
 
@@ -195,7 +215,45 @@ def login():
         user_id = user_id.decode("utf-8")
     session["username"] = username
 
-    return jsonify({"success": "Logged in successfully", "id": user_id}), 200
+    ## Get the user profile from Redis
+    user_profile = redis_client.hget("users_profile", username)
+    if user_profile is not None:
+        user_profile = json.loads(user_profile.decode("utf-8"))
+        fullName = user_profile["fullName"]
+    else:
+        user_profile = {}
+        fullName = "P0W"
+
+    return (
+        jsonify(
+            {"success": "Logged in successfully", "id": user_id, "fullName": fullName}
+        ),
+        200,
+    )
+
+
+@app.route("/profile", methods=["GET"])
+@login_required
+def profile():
+    username = session["username"]
+    user_profile = redis_client.hget("users_profile", username)
+    if user_profile is not None:
+        user_profile = json.loads(user_profile.decode("utf-8"))
+    return jsonify(user_profile), 200
+
+
+@app.route("/profile", methods=["POST"])
+@login_required
+def update_profile():
+    username = session["username"]
+    user_profile = redis_client.hget("users_profile", username)
+    if user_profile is not None:
+        user_profile = json.loads(user_profile.decode("utf-8"))
+    else:
+        user_profile = {}
+    user_profile.update(request.json)
+    redis_client.hset("users_profile", username, json.dumps(user_profile))
+    return jsonify({"success": "Profile updated successfully"}), 200
 
 
 @app.route("/logout", methods=["POST"])
@@ -260,6 +318,9 @@ def validate_date(datestr):
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "generate":
         generate_portfolio()
+    elif len(sys.argv) == 2 and sys.argv[1] == "debug":
+        ## Debug
+        app.run(debug=True, host="0.0.0.0", port=8000)
     else:
+        ## Production
         serve(app, host="0.0.0.0", port=8000)
-        # app.run(host="0.0.0.0", port=8000)

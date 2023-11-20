@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 import { AuthContext } from './hooks/AuthContext';
 import { User } from './hooks/useUser';
 import { Button, ThemeProvider, createTheme } from '@mui/material';
+import ProfilePage from './ProfilePage';
 
 
 const domNode = document.getElementById('root');
@@ -43,6 +44,11 @@ const AppWrapper = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/app" element={
             <ProtectedRoute><App /></ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
           } />
 
         </Routes>

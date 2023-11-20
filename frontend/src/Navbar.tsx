@@ -2,6 +2,8 @@ import * as React from 'react';
 import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
 
 interface IProps {
     handleOpen: () => void;
@@ -13,6 +15,8 @@ const settings = ['Profile', 'Account', 'Logout'];
 export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -29,18 +33,40 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
         setAnchorElUser(null);
     };
 
+    const handleMenuItemClick = (event: React.MouseEvent<HTMLElement>) => {
+        const target = event.target as HTMLElement;
+        switch (target.id) {
+            case "menu-Profile":
+                navigate("/profile");
+                break;
+            case "menu-Account":
+                handleCloseUserMenu();
+                break;
+            case "menu-Logout":
+                fetch('/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                  }).then(() => { logout(); navigate('/login') });
+                break;
+            default:
+                console.log("Unknown menu item clicked");
+                handleCloseUserMenu();
+                break;
+        }
+    };
+
     return (
         <AppBar position="fixed">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <BoltIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}
+                    <BoltIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}
                         onClick={handleOpen} />
                     <Typography
-                        variant="h6"
+                        variant="h4"
                         noWrap
                         component="a"
                         sx={{
-                            mr: 2,
+                            mr: 1,
                             display: { xs: 'none', md: 'flex' },
                             fontFamily: 'monospace',
                             fontWeight: 700,
@@ -91,7 +117,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
                     <BoltIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}
                         onClick={handleOpen} />
                     <Typography
-                        variant="h5"
+                        variant="h4"
                         noWrap
                         component="a"
                         sx={{
@@ -122,7 +148,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                <Avatar alt="P0W"  />
                             </IconButton>
                         </Tooltip>
                         <Menu
@@ -142,8 +168,8 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
                             onClose={handleCloseUserMenu}
                         >
                             {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
+                                <MenuItem key={setting} onClick={handleMenuItemClick}>
+                                    <Typography textAlign="center" id={`menu-${setting}`}>{setting}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
