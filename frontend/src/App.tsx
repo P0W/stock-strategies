@@ -185,6 +185,11 @@ export const App = () => {
     }).then(() => { logout(); navigate('/login') });
   };
 
+  React.useEffect(() => {
+    setNumStocks(user?.num_stocks ?? 15);
+    setInvestmentValue(user?.investment ?? 500000);
+  }, [user]);
+
   const { rebalanceData, capitalIncurred, currentPrices, loading }
     = useData(toDateString, fromDateString, numStocks, investmentValue);
 

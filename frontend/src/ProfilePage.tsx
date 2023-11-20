@@ -2,11 +2,13 @@ import * as React from 'react';
 import { Button, TextField, Box, Grid, Paper, Typography, LinearProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { User } from './hooks/useUser';
+import { useAuth } from './hooks/useAuth';
 
 
 const ProfilePage = () => {
     const [formData, setFormData] = React.useState<User>();
     const [loading, setLoading] = React.useState(true);
+    const { login } = useAuth();
 
     const navigate = useNavigate();
 
@@ -84,6 +86,7 @@ const ProfilePage = () => {
             }
 
             // Handle successful save here
+            login(formData ?? {});
         } catch (error) {
             console.error(error);
         }
