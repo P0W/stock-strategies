@@ -219,15 +219,12 @@ def login():
     user_profile = redis_client.hget("users_profile", username)
     if user_profile is not None:
         user_profile = json.loads(user_profile.decode("utf-8"))
-        fullName = user_profile["fullName"]
     else:
         user_profile = {}
-        fullName = "P0W"
-
+    ## jsonify the user profile along with the success message
+    user_profile["success"] = "Logged in successfully"
     return (
-        jsonify(
-            {"success": "Logged in successfully", "id": user_id, "fullName": fullName}
-        ),
+        jsonify(user_profile),
         200,
     )
 

@@ -29,8 +29,11 @@ export const LoginPage = () => {
       })
       .then((data) => {
         login({
-          id: data.id,
-          fullName: data.fullName
+          fullName: data.fullName,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          num_stocks: data.num_stocks,
+          investment: data.investment
         });
         navigate('/app');
       })

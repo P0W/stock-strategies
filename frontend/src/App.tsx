@@ -172,11 +172,11 @@ const ShowTableV2 = (props: IViewProps) => {
 export const App = () => {
   const [fromDateString, setFromDateString] = React.useState<string>('');
   const [toDateString, setToDateString] = React.useState<string>('');
-  const [numStocks, setNumStocks] = React.useState<number>(15);
-  const [investmentValue, setInvestmentValue] = React.useState<number>(500000);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [numStocks, setNumStocks] = React.useState<number>(user?.num_stocks ?? 15);
+  const [investmentValue, setInvestmentValue] = React.useState<number>(user?.investment ?? 500000);
 
   const handleSignOut = () => {
     fetch('/logout', {

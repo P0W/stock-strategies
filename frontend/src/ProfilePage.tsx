@@ -1,17 +1,11 @@
 import * as React from 'react';
 import { Button, TextField, Box, Grid, Paper, Typography, LinearProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { User } from './hooks/useUser';
 
-interface IProfilePageData {
-    fullName?: string;
-    email?: string;
-    phoneNumber?: string;
-    num_stocks?: number;
-    investment?: number;
-}
 
 const ProfilePage = () => {
-    const [formData, setFormData] = React.useState<IProfilePageData>();
+    const [formData, setFormData] = React.useState<User>();
     const [loading, setLoading] = React.useState(true);
 
     const navigate = useNavigate();
