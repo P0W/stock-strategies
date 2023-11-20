@@ -103,12 +103,16 @@ def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
     json_result = None
     conn_string = get_connection_string()
     if conn_string:
-        json_result = business.get_portfolio_with_params(
+        porfolio_data, tickertape_links = business.get_portfolio_with_params(
             conn_string=conn_string,
             request_date=datestr,
             num_stocks=numstocks,
             investment=investment,
         )
+        json_result = {
+            "portfolio": porfolio_data,
+            "tickertape_links": tickertape_links,
+        }
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400

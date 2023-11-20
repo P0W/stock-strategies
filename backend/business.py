@@ -564,9 +564,12 @@ def get_portfolio_with_params(
         f"all_symbols/nifty200-symbols-{request_date}.json"
     )
     if nifty200_symbols:
+        tickertape_links = blob_service.get_blob_data_if_exists(
+            f"all_symbols/tickertape-links.json"
+        )
         return strategy.build_portfolio(
             nifty200_symbols, N=num_stocks, investment=investment
-        )
+        ), tickertape_links
     return None
 
 
