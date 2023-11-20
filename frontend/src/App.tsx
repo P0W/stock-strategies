@@ -7,7 +7,7 @@ import { DatePickerComponent, StockDatePicker } from './StockDatePicker';
 
 import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { drawerWidth, round_off } from './Utils';
-import { IRebalanceData, IStockData, IToFromData } from "./StockDataTypes";
+import { IPortfolio, IRebalanceData, IStockData, ITickerTapeLinks, IToFromData } from "./StockDataTypes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { SidePanel } from "./SidePanel";
@@ -47,7 +47,9 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
 
     Promise.all([fromFetch, rebalanceFetch, nifty200Fetch])
       .then(data => {
-        const pastStocksData = data[0] as IStockData[];
+        const portfolioData = data[0] as IPortfolio;
+        const pastStocksData = portfolioData.portfolio as IStockData[];
+        const tickertape_links = portfolioData.tickertape_links as ITickerTapeLinks;
         const rebalanceStocksData = data[1] as unknown as { [key: string]: any };
         const nifty200 = data[2] as { [key: string]: number };
 
@@ -62,14 +64,25 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
               shares: stock.shares,
               investment: stock.investment,
               price: nifty200[thisStock], // Current price
-              stock: stock.stock
+              stock: stock.stock,
+              url: tickertape_links[stock.symbol]
             } as IToFromData;
           }
           return { symbol: stock.symbol, price: -1, avg_price: stock.price } as IToFromData;
         });
 
+        // Update the rebalanceData with the stock name and url
+        const rebalanceData = rebalanceStocksData["stocks"] as IRebalanceData[];
+        rebalanceData.forEach(stock => {
+          const thisStock = Object.keys(nifty200)?.find(niftyStock => niftyStock === stock.symbol);
+          if (thisStock) {
+            stock.stock = pastStocksData.find(stock => stock.symbol === thisStock)?.stock ?? '';
+            stock.url = tickertape_links[thisStock];
+          }
+        });
+
         // Set states
-        setRebalanceData(rebalanceStocksData["stocks"] as IRebalanceData[]);
+        setRebalanceData(rebalanceData);
         setCapitalIncurred(rebalanceStocksData["capital_incurred"]);
         setCurrentPrices(currentStockPrice);
         setLoading(false);
@@ -153,7 +166,7 @@ const ShowTableV2 = (props: IViewProps) => {
         </Accordion>
       </Box>
     </>
-  ) : <LinearProgress  />;
+  ) : <LinearProgress />;
 }
 
 export const App = () => {

@@ -11,6 +11,9 @@ export interface IStockTable {
     stockData: IStockData[] | IRebalanceData[] | INifty200Data[];
 }
 
+export interface ITickerTapeLinks {
+    [key: string]: any;
+}
 
 export interface IStockData {
     [key: string]: any;
@@ -42,11 +45,18 @@ export interface IStockData {
     }
 };
 
+export interface IPortfolio {
+    tickertape_links: ITickerTapeLinks;
+    portfolio: IStockData[];
+}
+
 export interface IRebalanceData {
     [key: string]: any;
     symbol: string;
     amount: number;
     shares: number;
+    stock: string;
+    url: string;
 };
 
 export interface INifty200Data {
@@ -61,6 +71,7 @@ export interface IToFromData extends INifty200Data {
     stock: string;
     investment: number;
     weight: number;
+    url: string;
 };
 
 

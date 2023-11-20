@@ -1,6 +1,6 @@
 import { IHeader, INifty200Data, IRebalanceData, IStockData, IToFromData, ItemType } from "./StockDataTypes";
 import { round_off, round_off_str } from "./Utils";
-import { Box, TableCell, Tooltip, Typography } from "@mui/material";
+import { Box, Link, TableCell, Tooltip, Typography } from "@mui/material";
 import { blue, grey, green, red } from "@mui/material/colors";
 
 
@@ -16,13 +16,25 @@ const NumericCell = (item: ItemType) => {
 }
 
 const SymbolCell = (item: ItemType, row?: IStockData | IRebalanceData | INifty200Data) => {
-    return (<TableCell key={`symbol-${item}`}>
-        <Tooltip title={row?.stock || ''}>
-            <Typography style={{ color: blue[500], fontWeight: 'bold' }}>
-                {item}
-            </Typography>
-        </Tooltip>
-    </TableCell>
+    return (
+        <TableCell key={`symbol-${item}`}>
+            <Tooltip title={row?.stock || ''}>
+                {row?.url ? (
+                    <Link
+                        href={row.url}
+                        style={{ color: blue[500], fontWeight: 'bold' }}
+                        underline="none"
+                        target="_blank"
+                        rel="noopener">
+                        {item}
+                    </Link>
+                ) : (
+                    <Typography style={{ color: blue[500], fontWeight: 'bold' }}>
+                        {item}
+                    </Typography>
+                )}
+            </Tooltip>
+        </TableCell>
     );
 }
 
