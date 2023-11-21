@@ -3,20 +3,19 @@ import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Too
 import BoltIcon from '@mui/icons-material/Bolt';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
 
 interface IProps {
     handleOpen: () => void;
+    handleLogout: () => void;
 }
 
 const pages = ['Pricing', 'About'];
 const settings = ['Profile', 'Account', 'Logout'];
 
-export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
+export const Navbar: React.FC<IProps> = ({ handleOpen, handleLogout }) => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const navigate = useNavigate();
-    const { logout } = useAuth();
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -46,7 +45,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
                 fetch('/logout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                  }).then(() => { logout(); navigate('/login') });
+                }).then(() => { navigate('/login'); handleLogout(); });
                 break;
             default:
                 console.log("Unknown menu item clicked");
@@ -148,7 +147,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen }) => {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="P0W"  />
+                                <Avatar alt="P0W" />
                             </IconButton>
                         </Tooltip>
                         <Menu

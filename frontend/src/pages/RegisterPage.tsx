@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Grid, Link, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { SHA256 } from 'crypto-js';
-import { Copyright } from './Utils';
+import { Copyright } from '../components/Utils';
 
 export const RegisterPage = () => {
     const [username, setUsername] = useState('');

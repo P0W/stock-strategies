@@ -9,13 +9,14 @@ import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
 import { drawerWidth } from './Utils';
 import { IPortfolio, IRebalanceData, IStockData, ITickerTapeLinks, IToFromData } from "./StockDataTypes";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { SidePanel } from "./SidePanel";
 import { AppBar, Box, CircularProgress, Container, Divider, Grid, IconButton, LinearProgress, makeStyles, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Navbar } from './Navbar';
+import { useInactivityLogout } from '../hooks/useInactivityLogout';
 
 
 
@@ -175,6 +176,11 @@ const ShowTableV2 = (props: IViewProps) => {
   ) : <LinearProgress />;
 }
 
+interface IAppProps {
+  handleLogout: () => void;
+}
+
+
 export const App = () => {
   const [fromDateString, setFromDateString] = React.useState<string>('');
   const [toDateString, setToDateString] = React.useState<string>('');
@@ -184,17 +190,25 @@ export const App = () => {
   const [numStocks, setNumStocks] = React.useState<number>(user?.num_stocks ?? 15);
   const [investmentValue, setInvestmentValue] = React.useState<number>(user?.investment ?? 500000);
 
+  const { cleanup, expired } = useInactivityLogout(user);
+
   const handleSignOut = () => {
     fetch('/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-    }).then(() => { logout(); navigate('/login') });
+    }).then(() => { logout(); navigate('/login'); cleanup(); });
   };
 
   React.useEffect(() => {
     setNumStocks(user?.num_stocks ?? 15);
     setInvestmentValue(user?.investment ?? 500000);
   }, [user]);
+
+  React.useEffect(() => {
+    if (expired) {
+      handleSignOut();
+    }
+  }, [expired]);
 
   const { rebalanceData, capitalIncurred, currentPrices, loading }
     = useData(toDateString, fromDateString, numStocks, investmentValue);
@@ -204,7 +218,10 @@ export const App = () => {
       alignContent: 'center',
       marginTop: '4.5em'
     }}>
-      <Navbar handleOpen={() => setDrawerOpen(!drawerOpen)} />
+      <Navbar
+        handleOpen={() => setDrawerOpen(!drawerOpen)}
+        handleLogout={handleSignOut}
+      />
       <SidePanel
         drawerOpen={drawerOpen}
         numStocks={numStocks}
