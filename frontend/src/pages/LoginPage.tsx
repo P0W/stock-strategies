@@ -47,6 +47,30 @@ export const LoginPage = () => {
     navigate('/register');
   };
 
+  const handleTrialLogin = () => {
+    fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'trialuser',
+        hashedPassword: '79891e980747ffbd21e690297394efe764fa56d7e37750f800879fbb2d34571a'
+      })
+    }).then((data: any) => {
+      login({
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        num_stocks: data.num_stocks,
+        investment: data.investment
+      });
+      navigate('/app');
+    })
+      .catch((err) => {
+        console.error(err);
+        alert(err.message);
+      });
+  };
+
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
       <Grid container justifyContent="center">
@@ -85,6 +109,12 @@ export const LoginPage = () => {
               Don't have an account?{' '}
               <Link component="button" variant="body2" onClick={handleSignUp}>
                 Sign up
+              </Link>
+            </Typography>
+            <Typography variant="body1" style={{ marginTop: 16, textAlign: 'center' }}>
+              Or{' '}
+              <Link component="button" variant="body2" onClick={handleTrialLogin}>
+                Login as a trial user
               </Link>
             </Typography>
             <Copyright sx={{ mt: 5 }} />
