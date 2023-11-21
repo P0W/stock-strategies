@@ -9,7 +9,7 @@ calculate financial metrics, build and rebalance investment portfolios, and disp
 
 It is designed to run as an Azure Function or on Azure VM, making it easy to automate daily/weekly/monthly portfolio updates.
 
-[**`Live Hosted on Azure`**](https://172.174.157.91) (please accept the certificate, by clicking advance)
+[**`Live Hosted on Azure`**](https://172.174.157.91) (please accept the certificate, by clicking advance, login as trial user)
 
 Sample Momentum Analyzer View
 -----------------------------
