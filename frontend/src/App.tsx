@@ -6,7 +6,7 @@ import { DatePickerComponent, StockDatePicker } from './StockDatePicker';
 
 
 import { nifty200TableHeader, rebalanceTableHeader } from './StockTableHeader';
-import { drawerWidth, round_off } from './Utils';
+import { drawerWidth } from './Utils';
 import { IPortfolio, IRebalanceData, IStockData, ITickerTapeLinks, IToFromData } from "./StockDataTypes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
@@ -120,25 +120,31 @@ const ShowTableV2 = (props: IViewProps) => {
 
         <Grid container spacing={2}>
           <Grid item xs={4}>
-            <Typography >
-              Investment Value: {round_off(fromInvestment)}
-            </Typography>
+            <Box p={1}>
+              <Typography variant="body1">
+                Investment Value: ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(fromInvestment)}
+              </Typography>
+            </Box>
           </Grid>
           <Grid item xs={4}>
-            <Typography style={{
-              color: gains > 0 ? green[500] : red[500],
-              fontWeight: 'bold',
-            }}>
-              Current Portfolio Value: {round_off(toInvestment)}
-            </Typography>
+            <Box p={1}>
+              <Typography variant="body1">
+                Current Portfolio Value: ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(toInvestment)}
+                <span style={{ color: gains > 0 ? green[500] : red[500], fontWeight: 'bold' }}>
+                  ({new Intl.NumberFormat('en-IN', { style: 'percent', minimumFractionDigits: 2 }).format((gains / fromInvestment))})
+                </span>
+              </Typography>
+            </Box>
           </Grid>
           <Grid item xs={4}>
-            <Typography style={{
-              color: gains > 0 ? green[500] : red[500],
-              fontWeight: 'bold'
-            }}>
-              {gains > 0 ? "Profit" : "Loss"} : {round_off(gains)}
-            </Typography>
+            <Box p={1}>
+              <Typography variant="body1" style={{
+                color: gains > 0 ? green[500] : red[500],
+                fontWeight: 'bold'
+              }}>
+                {gains > 0 ? "Profit" : "Loss"} : ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(gains)}
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
 
@@ -157,7 +163,7 @@ const ShowTableV2 = (props: IViewProps) => {
               fontWeight: 'bold',
               color: capitalIncurred < 0 ? green[500] : red[500]
             }}>
-              {capitalIncurred < 0 ? 'Receive' : 'Invest More:'} {Math.abs(round_off(capitalIncurred))}
+              {capitalIncurred < 0 ? 'Receive' : 'Invest More:'} ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(-1*capitalIncurred)}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>

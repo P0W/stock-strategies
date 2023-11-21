@@ -125,6 +125,30 @@ def composite_score(returns):
     return composite_score, normalized_returns, normalized_vwap, normalized_rsi
 
 
+def fetch_nifty_200_data():
+    apiTicker = ".NIFTY200"
+    base_api_url = f"https://api.tickertape.in/stocks/charts/inter/{apiTicker}"
+    tickerRequest = TickerRequest()
+    result = {}
+    duration = "1d"
+    apiUrl = f"{base_api_url}?duration={duration}"
+    logging.info(f"Fetching data for {apiTicker} last {duration}")
+    try:
+        res = tickerRequest.get(apiUrl)
+        if res.ok:
+            res_json = res.json()
+            data_points = res_json["data"][0]["points"]
+            result["rsi"] = calculate_rsi(data_points)
+            result["current_price"] = data_points[-1]["lp"]
+            return result
+        else:
+            logging.info(f"Reponse failed to get data for {apiTicker}")
+    except Exception as e:
+        logging.error(e)
+        logging.error(f"Failed to get data for {apiTicker}")
+    return None
+
+
 ## @brief Method to get list of stocks from tickertape
 ## @param baseUrl: base url to fetch list of stocks
 ## @return results: list of stocks

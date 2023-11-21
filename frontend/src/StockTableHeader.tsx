@@ -1,5 +1,5 @@
 import { IHeader, INifty200Data, IRebalanceData, IStockData, IToFromData, ItemType } from "./StockDataTypes";
-import { round_off, round_off_str } from "./Utils";
+import { round_off } from "./Utils";
 import { Box, Link, TableCell, Tooltip, Typography } from "@mui/material";
 import { blue, grey, green, red } from "@mui/material/colors";
 
@@ -9,7 +9,17 @@ const NumericCell = (item: ItemType) => {
     return (
         <TableCell key={`price-${item}`}>
             <Typography style={{ fontWeight: 'bold', color: '#666666', fontSize: '1.2em' }}>
-                {round_off_str(item as string)}
+                ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(item as number)}
+            </Typography>
+        </TableCell>
+    );
+}
+
+const SharesCell = (item: ItemType) => {
+    return (
+        <TableCell key={`shares-${item}`}>
+            <Typography style={{ fontWeight: 'bold', color: '#666666', fontSize: '1.2em' }}>
+                {round_off(item as number)}
             </Typography>
         </TableCell>
     );
@@ -60,7 +70,7 @@ export const rebalanceTableHeader: IHeader[] = [
             return (
                 <TableCell key={`amount-${action}`}>
                     <Typography style={{ color: actionColor, fontWeight: 'bold' }}>
-                        {round_off(item as number)}
+                        ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(item as number)}
                     </Typography>
                 </TableCell>
             );
@@ -69,7 +79,7 @@ export const rebalanceTableHeader: IHeader[] = [
     {
         display: 'Shares',
         key: 'shares',
-        cellTemplate: NumericCell
+        cellTemplate: SharesCell
     },
     {
         display: 'Action',
@@ -108,12 +118,12 @@ export const nifty200TableHeader: IHeader[] = [
     {
         display: 'Weight',
         key: 'weight',
-        cellTemplate: NumericCell
+        cellTemplate: SharesCell
     },
     {
         display: 'Shares',
         key: 'shares',
-        cellTemplate: NumericCell
+        cellTemplate: SharesCell
     },
     {
         display: 'Investment',
@@ -141,7 +151,7 @@ export const nifty200TableHeader: IHeader[] = [
                             color: isLoss ? red[500] : green[500],
                             fontWeight: 'bold',
                         }}>
-                            {round_off(diff)}
+                            ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(diff)}
                         </Typography>
                     </Box>
                 </TableCell>
