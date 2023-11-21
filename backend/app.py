@@ -61,7 +61,10 @@ def index():
 
 @app.route("/<path:path>")
 def static_file(path):
-    return send_from_directory(app.static_folder, path)
+    try:
+        return send_from_directory(app.static_folder, path)
+    except:
+        return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/nifty200/<datestr>", methods=["GET"])
