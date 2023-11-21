@@ -1,6 +1,6 @@
 [![Build](https://github.com/P0W/stock-strategies/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/P0W/stock-strategies/actions/workflows/node.js.yml)
 
-# stock-strategies 
+# Nifty-200 Momentum  [p = mv] 
 
 Description
 -------------
