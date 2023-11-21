@@ -21,7 +21,7 @@ git pull
 
 # Build and start Docker containers
 echo "Building and starting Docker containers..."
-sudo docker-compose up -d --scale app=1 --build
+sudo docker-compose up -d --scale app=2 --build
 
 # Display a message indicating successful execution
 echo "Deployment completed successfully."

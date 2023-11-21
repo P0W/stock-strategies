@@ -163,7 +163,7 @@ const ShowTableV2 = (props: IViewProps) => {
               fontWeight: 'bold',
               color: capitalIncurred < 0 ? green[500] : red[500]
             }}>
-              {capitalIncurred < 0 ? 'Receive' : 'Invest More:'} ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(-1*capitalIncurred)}
+              {capitalIncurred < 0 ? 'Receive' : 'Invest More:'} ₹{new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(Math.abs(capitalIncurred))}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
