@@ -84,7 +84,11 @@ const SymbolCell = (
 const RankCell = (item: ItemType) => {
   return (
     <TableCell key={`rank-${item}`} style={{ textAlign: "center" }}>
-      <Typography>{item}</Typography>
+      <Typography
+        style={{ fontWeight: "lighter", color: "#666666", fontSize: "1.2em" }}
+      >
+        {item}
+      </Typography>
     </TableCell>
   );
 };
