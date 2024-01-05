@@ -10,9 +10,6 @@ export const SymbolRow: React.FC<ISymbolRow> = ({ item, rank, headers }): React.
             {headers?.map((header, index) => {
                 const value = item[header.key];
                 const key = `${index}-${header.display}`;
-                // if (header.key === 'price' || header.key === 'investment') {
-                //     value = parseFloat(value).toFixed(2);
-                // }
                 if (header.key === 'rank') {
                     return <TableCell key ={key} >
                         {rank}

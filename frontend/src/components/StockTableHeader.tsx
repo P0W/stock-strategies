@@ -12,7 +12,7 @@ import { blue, grey, green, red } from "@mui/material/colors";
 
 const NumericCell = (item: ItemType) => {
   return (
-    <TableCell key={`price-${item}`}>
+    <TableCell key={`price-${item}`} style={{ textAlign: "center" }}>
       <Typography
         style={{ fontWeight: "bold", color: "#666666", fontSize: "1.2em" }}
       >
@@ -27,7 +27,7 @@ const NumericCell = (item: ItemType) => {
 
 const SharesCell = (item: ItemType) => {
   return (
-    <TableCell key={`shares-${item}`}>
+    <TableCell key={`shares-${item}`} style={{ textAlign: "center" }}>
       <Typography
         style={{ fontWeight: "bold", color: "#666666", fontSize: "1.2em" }}
       >
@@ -59,7 +59,7 @@ const SymbolCell = (
   row?: IStockData | IRebalanceData | INifty200Data
 ) => {
   return (
-    <TableCell key={`symbol-${item}`}>
+    <TableCell key={`symbol-${item}`} style={{ textAlign: "center" }}>
       <Tooltip title={row?.stock || ""}>
         {row?.url ? (
           <Link

@@ -12,7 +12,7 @@ export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React
                 <TableHead >
                     <TableRow>
                         {headers?.map((header, index) => (
-                            <TableCell key={`${index}-${header.display}`}>
+                            <TableCell key={`${index}-${header.display}`} style={{ textAlign: "center" }}>
                                 <Typography sx={{
                                     fontWeight: 'bold',
                                     color: '#3f51b5'
