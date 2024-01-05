@@ -81,10 +81,19 @@ const SymbolCell = (
   );
 };
 
+const RankCell = (item: ItemType) => {
+  return (
+    <TableCell key={`rank-${item}`} style={{ textAlign: "center" }}>
+      <Typography>{item}</Typography>
+    </TableCell>
+  );
+};
+
 export const rebalanceTableHeader: IHeader[] = [
   {
     display: "S.No.",
     key: "rank",
+    cellTemplate: RankCell,
   },
   {
     display: "Symbol",
@@ -111,7 +120,7 @@ export const rebalanceTableHeader: IHeader[] = [
           : red[500];
 
       return (
-        <TableCell key={`amount-${action}`}>
+        <TableCell key={`amount-${action}`} style={{ textAlign: "center" }}>
           <Typography style={{ color: actionColor, fontWeight: "bold" }}>
             ₹
             {new Intl.NumberFormat("en-IN", {
@@ -142,7 +151,7 @@ export const rebalanceTableHeader: IHeader[] = [
           : red[500];
 
       return (
-        <TableCell key={`shares-${action}`}>
+        <TableCell key={`shares-${action}`} style={{ textAlign: "center" }}>
           <Typography style={{ color: actionColor, fontWeight: "bold" }}>
             {action}
           </Typography>
@@ -156,6 +165,7 @@ export const nifty200TableHeader: IHeader[] = [
   {
     display: "Rank",
     key: "rank",
+    cellTemplate: RankCell,
   },
   {
     display: "Symbol",
