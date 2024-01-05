@@ -417,13 +417,13 @@ def rebalance_portfolio(
             capital_incurred += amount  ## Buy new stocks
 
     ##  sort the list of dictionaries based on the "shares" value in ascending order
-    ##  so that the "no change" items come first, followed by "sold" items, and then "bought" items.
+    ##  so that the "no change" items come first, followed by "sold" items, and then "bought" items,
+    ## and then at last sort by symbol
     result["stocks"] = sorted(
         result["stocks"],
-        key=lambda x: (x["shares"] == 0, x["shares"] < 0, -x["amount"]),
+        key=lambda x: (x["shares"] == 0, x["shares"] < 0, x["symbol"]),
         reverse=True,
     )
-
     result["capital_incurred"] = capital_incurred
     return result
 

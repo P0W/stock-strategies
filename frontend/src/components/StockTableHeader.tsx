@@ -42,11 +42,13 @@ const RebalanceSharesCell = (
   row?: IStockData | IRebalanceData | INifty200Data
 ) => {
   return (
-    <TableCell key={`shares-${item}`}>
+    <TableCell key={`shares-${item}`} style={{ textAlign: "center" }}>
       <Typography
         style={{ fontWeight: "bold", color: "#666666", fontSize: "1.2em" }}
       >
-        {round_off(item as number)} / {round_off(row?.initial_shares as number)}
+        {round_off(item as number)}
+        {row?.initial_shares !== 0 &&
+          ` / ${round_off(row?.initial_shares as number)}`}
       </Typography>
     </TableCell>
   );
