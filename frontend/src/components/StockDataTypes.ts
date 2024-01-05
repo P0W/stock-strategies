@@ -57,6 +57,7 @@ export interface IRebalanceData {
     shares: number;
     stock: string;
     url: string;
+    initial_shares: number;
 };
 
 export interface INifty200Data {

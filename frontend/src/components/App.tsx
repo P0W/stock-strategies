@@ -79,6 +79,7 @@ const useData = (toDateString: string, fromDateString: string, numStocks: number
           if (thisStock) {
             stock.stock = pastStocksData.find(stock => stock.symbol === thisStock)?.stock ?? '';
             stock.url = tickertape_links[thisStock];
+            stock.initial_shares = pastStocksData.find(stock => stock.symbol === thisStock)?.shares ?? 0;
           }
         });
 

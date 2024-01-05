@@ -1,7 +1,6 @@
 import React from "react";
 import { IStockTable } from "./StockDataTypes";
 import { SymbolRow } from "./SymbolRow";
-import { makeStyles } from "@mui/material";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 
 
