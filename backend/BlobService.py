@@ -14,11 +14,13 @@ class BlobService:
     ## @classmethod __init__
     ## @brief Initialize the BlobServiceClient
     ## @param connection_string: connection string to blob storage
-    def __init__(self, connection_string: str) -> None:
+    def __init__(
+        self, connection_string: str, container_name="momentum-strategy"
+    ) -> None:
         self.blob_service_client = BlobServiceClient.from_connection_string(
             connection_string
         )
-        self.container_name = "momentum-strategy"
+        self.container_name = container_name
         self.container_client = self.blob_service_client.get_container_client(
             self.container_name
         )

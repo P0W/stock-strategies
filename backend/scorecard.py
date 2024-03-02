@@ -111,14 +111,14 @@ def getStockList(
         logging.info("Failed to get data from %s", baseUrl)
         ### show error message
         logging.info(res.text)
+    ## sort by composite score
+    results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
     return results
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     stocks = getStockList()
-    ## sort by composite score
-    stocks = sorted(stocks, key=lambda x: x["composite_score"], reverse=True)
     ## print top 10 stocks
     for stock in stocks[:15]:
         print(json.dumps(stock, indent=2))

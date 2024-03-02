@@ -4,6 +4,7 @@ import logging
 from typing import Dict, List
 
 import get_stocks as strategy
+import scorecard
 from BlobService import BlobService
 
 logging = logging.getLogger(__name__)
@@ -608,4 +609,30 @@ def get_rebalance_with_params(
             to_portfolio,
             strategy.build_price_list(nifty200_symbols_to_date),
         )
+    return None
+
+
+def build_score_card(conn_string: str) -> Dict:
+    container_name = "nifty-scorecards"
+    blob_service = BlobService(conn_string, container_name)
+    blob_name = strategy.get_file_name("nifty200-scorecard")
+    score_card = blob_service.get_blob_data_if_exists(blob_name)
+    if score_card is None:
+        logging.info("%s blob does not exist", blob_name)
+        score_card = scorecard.getStockList()
+        blob_service.upload_blob(score_card, blob_name)
+    return score_card
+
+
+def get_score_card(conn_string: str, request_date: str = None) -> Dict:
+    container_name = "nifty-scorecards"
+    blob_service = BlobService(conn_string, container_name)
+    if request_date:
+        blob_name = f"nifty200-scorecard-{request_date}.json"
+    else:
+        blob_name = strategy.get_file_name("nifty200-scorecard")
+    logging.info("Scorecard blob name: %s", blob_name)
+    scorecard = blob_service.get_blob_data_if_exists(blob_name)
+    if scorecard:
+        return scorecard
     return None

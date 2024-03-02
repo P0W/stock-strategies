@@ -262,6 +262,25 @@ def logout():
     return jsonify({"success": "Logged out successfully"}), 200
 
 
+@app.route("/scorecard/<datestr>", methods=["GET"])
+@login_required
+def scorecard(datestr=None):
+    """
+    Returns the score card as a JSON object.
+    """
+    validate_date(datestr)
+
+    json_result = None
+    conn_string = get_connection_string()
+    if conn_string:
+        json_result = business.get_score_card(
+            conn_string=conn_string, request_date=datestr
+        )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No score card data found"}), 400
+
+
 @cache_results
 def get_connection_string():
     """
@@ -303,6 +322,8 @@ def generate_portfolio():
     if conn_string and num_stocks and investment_amount:
         business.build_todays_portfolio(conn_string, num_stocks, investment_amount)
         logging.info("Momentum strategy portfolio successfully built!")
+        business.build_score_card(conn_string)
+        logging.info("Score card successfully built!")
     else:
         logging.error("Error building momentum strategy")
 

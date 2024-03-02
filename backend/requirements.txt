@@ -10,3 +10,4 @@ flask==3.0.0
 waitress==2.1.2
 redis==5.0.0
 flask_session==0.5.0
+tqdm
