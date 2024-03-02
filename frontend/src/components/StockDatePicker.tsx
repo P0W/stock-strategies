@@ -54,7 +54,7 @@ export const StockDatePicker: React.FC<IDatePickerProps> = ({ initialDate, onDat
             minDate={startDate ? parseDateString(startDate) : new Date('2023-10-04')}
             maxDate={endDate ? parseDateString(endDate) : new Date()}
             selected={selectedDate}
-            filterDate={isWeekday}
+            // filterDate={isWeekday}
             customInput={<TextField variant="outlined" label={label} size="small" />}
         />
     );
