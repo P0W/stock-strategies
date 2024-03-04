@@ -621,7 +621,6 @@ def build_score_card(conn_string: str) -> Dict:
         logging.info("%s blob does not exist", blob_name)
         score_card = scorecard.getStockList()
         blob_service.upload_blob(score_card, blob_name)
-        logging.info("Uploaded the scorecard")
     return score_card
 
 
