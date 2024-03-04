@@ -60,7 +60,7 @@ const SymbolCell = (
 ) => {
   return (
     <TableCell key={`symbol-${item}`} style={{ textAlign: "center" }}>
-      <Tooltip title={row?.stock || ""}>
+      <Tooltip title={row?.symbol || ""}>
         {row?.url ? (
           <Link
             href={row.url}
@@ -100,8 +100,8 @@ export const rebalanceTableHeader: IHeader[] = [
     cellTemplate: RankCell,
   },
   {
-    display: "Symbol",
-    key: "symbol",
+    display: "Constituents",
+    key: "stock",
     cellTemplate: SymbolCell,
   },
   {
