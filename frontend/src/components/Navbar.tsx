@@ -9,7 +9,7 @@ interface IProps {
     handleLogout: () => void;
 }
 
-const pages = ['Pricing', 'About'];
+const pages = ['Pricing', 'About', 'Stock Balls'];
 const settings = ['Profile', 'Account', 'Logout'];
 
 export const Navbar: React.FC<IProps> = ({ handleOpen, handleLogout }) => {
@@ -24,8 +24,23 @@ export const Navbar: React.FC<IProps> = ({ handleOpen, handleLogout }) => {
         setAnchorElUser(event.currentTarget);
     };
 
-    const handleCloseNavMenu = () => {
+    const handleCloseNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(null);
+        const target = event.target as HTMLElement;
+        switch (target.id) {
+            case "page-Pricing":
+                navigate("/pricing");
+                break;
+            case "page-About":
+                navigate("/about");
+                break;
+            case "page-Stock Balls":
+                navigate("/stockballs");
+                break;
+            default:
+                console.log("Unknown page clicked");
+                break;
+        }
     };
 
     const handleCloseUserMenu = () => {
@@ -108,7 +123,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen, handleLogout }) => {
                         >
                             {pages.map((page) => (
                                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{page}</Typography>
+                                    <Typography textAlign="center" id={`page-${page}`}>{page}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -137,6 +152,7 @@ export const Navbar: React.FC<IProps> = ({ handleOpen, handleLogout }) => {
                             <Button
                                 key={page}
                                 onClick={handleCloseNavMenu}
+                                id={`page-${page}`}
                                 sx={{ my: 2, color: 'white', display: 'block' }}
                             >
                                 {page}

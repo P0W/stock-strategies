@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 import { AuthContext } from './hooks/AuthContext';
 import { User } from './hooks/useUser';
 import ProfilePage from './pages/ProfilePage';
+import { StockBalls } from './components/StockBalls';
 
 
 const domNode = document.getElementById('root');
@@ -41,6 +42,11 @@ const AppWrapper = () => {
           <Route path="/profile" element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path = "/stockballs" element = {
+            <ProtectedRoute>
+              <StockBalls />
             </ProtectedRoute>
           } />
 

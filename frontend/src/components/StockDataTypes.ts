@@ -81,3 +81,28 @@ export interface ISymbolRow {
     item: IStockData | IRebalanceData | INifty200Data;
     headers: IHeader[];
 };
+
+/**
+ * "stock": "Indian Oil Corporation Ltd",
+  "symbol": "IOC",
+  "score_card": {
+    "Performance": "yellow",
+    "Valuation": "green",
+    "Growth": "red",
+    "Profitability": "green",
+    "Entry point": "green",
+    "Red flags": "green"
+  },
+  "link": "https://www.tickertape.in/stocks/indian-oil-corporation-IOC",
+  "composite_score": 23
+}
+ */
+export interface IStockBalls {
+    stock: string;
+    symbol: string;
+    score_card: {
+        [key: string]: string;
+    };
+    link: string;
+    composite_score: number;
+};
