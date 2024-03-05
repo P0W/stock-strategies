@@ -15,13 +15,14 @@ def score_stock(score_card):
     - Valuation
     - Entry point
     - Red flags
+    Growth > Performance > Profitability > Valuation > Entry point > Red flags
     """
     fields = {
         "Performance": 5,
-        "Growth": 5,
-        "Profitability": 5,
-        "Valuation": 4,
-        "Entry point": 3,
+        "Growth": 6,
+        "Profitability": 4,
+        "Valuation": 3,
+        "Entry point": 2,
         "Red flags": 1,
     }
     colors = {"green": 2, "yellow": 1, "red": -2}

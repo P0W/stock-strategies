@@ -34,7 +34,35 @@ export const StockBalls: React.FC = (): React.ReactElement => {
         const todaysDate = new Date().toISOString().split("T")[0];
         const response = await fetch(`/scorecard/${todaysDate}`);
         const data = await response.json();
-        console.log(data);
+
+        const colors = { green: 2, yellow: 1, red: -2 };
+        const fields = {
+          Performance: 5,
+          Growth: 6,
+          Profitability: 4,
+          Valuation: 3,
+          "Entry point": 2,
+          "Red flags": 1,
+        };
+        Object.keys(data).forEach((key) => {
+          const stock = data[key];
+          let score = 0;
+          Object.keys(fields).forEach((field) => {
+            const color = stock.score_card[field] as string;
+            if (color) {
+              score +=
+                fields[field as keyof typeof fields] *
+                colors[color as keyof typeof colors];
+            }
+          });
+          stock.composite_score = score;
+        });
+        // Sort the stocks based on composite score
+        data.sort(
+          (a: IStockBalls, b: IStockBalls) =>
+            b.composite_score - a.composite_score
+        );
+
         setStockBalls(data);
       } catch (error) {
         console.error("Error fetching stock balls", error);
