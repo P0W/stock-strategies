@@ -52,7 +52,7 @@ export const StockBalls: React.FC = (): React.ReactElement => {
           backgroundColor: "#f5f5f5",
         }}
       >
-        <TableContainer>
+        <TableContainer style={{maxHeight:800}}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>

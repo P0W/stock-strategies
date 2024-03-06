@@ -53,7 +53,7 @@ export const LoginPage = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: 'trialuser',
-        hashedPassword: '79891e980747ffbd21e690297394efe764fa56d7e37750f800879fbb2d34571a'
+        hashedPassword: '1de04c49ce1b1bd6c8ce2af8f69213c3013cf2dbf4309cad043a4074c97a5156'
       })
     }).then((data: any) => {
       login({
