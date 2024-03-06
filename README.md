@@ -21,6 +21,10 @@ Sample Rebalance updates
 
 ![**Sample Rebalance updates**](resources/stock-strategies_2.png)
 
+Stock Score Card (Stock Balls View)
+-----------------------------------
+![**Sample Stock Balls**](resources/StockBalls.png)
+
 Usage
 -----
 
