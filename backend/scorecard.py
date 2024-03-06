@@ -99,7 +99,7 @@ def getStockList(
                     price_data = res[1].json()
                     ## add price data
                     price = price_data["data"][0]["points"][-1]["lp"]
-                    composite_score += round(1000.0 / price, 2)
+                    score_card["price"] = price
             except Exception as e:  ##pylint: disable=broad-exception-caught
                 logging.error(e)
                 logging.error("Failed to get data for %s", apiTicker)
@@ -136,8 +136,8 @@ def getStockList(
         logging.info("Failed to get data from %s", baseUrl)
         ### show error message
         logging.info(res.text)
-    ## sort by composite score
-    results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
+    ## sort by composite score, if same use price lower first
+    results.sort(key=lambda x: (x["composite_score"], x["price"]), reverse=True)
     return results
 
 
