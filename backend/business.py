@@ -587,13 +587,13 @@ def get_portfolio_with_params(
 
 
 def get_rebalance_with_params(
-    conn_string: str,
+    azure_blob_account_name: str,
     from_date: str,
     to_date: str,
     num_stocks: int = 15,
     investment: int = 500000,
 ) -> Dict:
-    blob_service = BlobService(conn_string)
+    blob_service = BlobService(azure_blob_account_name)
 
     nifty200_symbols_from_date = blob_service.get_blob_data_if_exists(
         f"all_symbols/nifty200-symbols-{from_date}.json"
