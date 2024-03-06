@@ -15,8 +15,6 @@ WORKDIR /app
 COPY backend/*.py /app/backend/
 # Copy requirements.txt
 COPY backend/requirements.txt /app/backend/
-# Copy local.settings.json
-COPY local.settings.json /app/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r backend/requirements.txt

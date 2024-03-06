@@ -44,12 +44,6 @@ const AppWrapper = () => {
               <ProfilePage />
             </ProtectedRoute>
           } />
-          <Route path = "/stockballs" element = {
-            <ProtectedRoute>
-              <StockBalls />
-            </ProtectedRoute>
-          } />
-
         </Routes>
       </Router>
     </AuthContext.Provider>
