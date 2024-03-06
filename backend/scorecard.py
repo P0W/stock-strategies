@@ -99,7 +99,6 @@ def getStockList(
                     price_data = res[1].json()
                     ## add price data
                     price = price_data["data"][0]["points"][-1]["lp"]
-                    score_card["price"] = price
             except Exception as e:  ##pylint: disable=broad-exception-caught
                 logging.error(e)
                 logging.error("Failed to get data for %s", apiTicker)
