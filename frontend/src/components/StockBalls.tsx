@@ -16,54 +16,24 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { styled } from "@mui/system";
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
 
 export const StockBalls: React.FC = (): React.ReactElement => {
   const [stockBalls, setStockBalls] = React.useState<IStockBalls[]>([]);
-  const theme = useTheme();
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const todaysDate = new Date().toISOString().split("T")[0];
-        const response = await fetch(`/scorecard/${todaysDate}`);
-        const data = await response.json();
-
-        const colors = { green: 2, yellow: 1, red: -2 };
-        const fields = {
-          Performance: 5,
-          Growth: 6,
-          Profitability: 4,
-          Valuation: 3,
-          "Entry point": 2,
-          "Red flags": 1,
-        };
-        Object.keys(data).forEach((key) => {
-          const stock = data[key];
-          let score = 0;
-          Object.keys(fields).forEach((field) => {
-            const color = stock.score_card[field] as string;
-            if (color) {
-              score +=
-                fields[field as keyof typeof fields] *
-                colors[color as keyof typeof colors];
-            }
-          });
-          stock.composite_score = score;
-        });
-        // Sort the stocks based on composite score
-        data.sort(
-          (a: IStockBalls, b: IStockBalls) =>
-            b.composite_score - a.composite_score
-        );
-
-        setStockBalls(data);
+        const previousDate = new Date();
+        previousDate.setDate(previousDate.getDate() - 1);
+        const preDateStr = previousDate.toISOString().split("T")[0];
+        // try both today's date and yesterday's date
+        const res = Promise.all([
+            fetch(`/scorecard/${todaysDate}`),
+            fetch(`/scorecard/${preDateStr}`),
+            ]);
+        // use the first successful response
+        const data = (await res).find((response) => response.ok);
+        setStockBalls(await data?.json());
       } catch (error) {
         console.error("Error fetching stock balls", error);
       }
@@ -82,7 +52,7 @@ export const StockBalls: React.FC = (): React.ReactElement => {
           backgroundColor: "#f5f5f5",
         }}
       >
-        <TableContainer style={{ maxHeight: 800 }}>
+        <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -109,7 +79,7 @@ export const StockBalls: React.FC = (): React.ReactElement => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {stockBalls.map((stockBall, index) => {
+              {stockBalls && stockBalls?.map((stockBall, index) => {
                 return (
                   <TableRow key={index}>
                     <TableCell align="center">{index + 1}</TableCell>
@@ -129,32 +99,34 @@ export const StockBalls: React.FC = (): React.ReactElement => {
                     </TableCell>
                     <TableCell>
                       <Grid container spacing={1}>
-                        {Object.keys(stockBall.score_card).map((key, index) => {
-                          const color = stockBall.score_card[key];
-                          return (
-                            <Grid item xs={2} key={index}>
-                              <Tooltip title={key}>
-                                <Avatar
-                                  variant="circular"
-                                  style={{
-                                    background: `linear-gradient(45deg, ${color} 30%, ${color} 90%)`,
-                                    boxShadow:
-                                      "0 3px 5px 2px rgba(0, 0, 0, .3)",
-                                    border: 0,
-                                    borderRadius: "50%",
-                                    width: "20px",
-                                    height: "20px",
-                                    padding: "5px",
-                                    color:
-                                      color === "yellow" ? "black" : "white",
-                                  }}
-                                >
-                                  {key[0].toUpperCase()}
-                                </Avatar>
-                              </Tooltip>
-                            </Grid>
-                          );
-                        })}
+                        {Object.keys(stockBall?.score_card)?.map(
+                          (key, index) => {
+                            const color = stockBall.score_card[key];
+                            return (
+                              <Grid item xs={2} key={index}>
+                                <Tooltip title={key}>
+                                  <Avatar
+                                    variant="circular"
+                                    style={{
+                                      background: `linear-gradient(45deg, ${color} 30%, ${color} 90%)`,
+                                      boxShadow:
+                                        "0 3px 5px 2px rgba(0, 0, 0, .3)",
+                                      border: 0,
+                                      borderRadius: "50%",
+                                      width: "20px",
+                                      height: "20px",
+                                      padding: "5px",
+                                      color:
+                                        color === "yellow" ? "black" : "white",
+                                    }}
+                                  >
+                                    {key[0].toUpperCase()}
+                                  </Avatar>
+                                </Tooltip>
+                              </Grid>
+                            );
+                          }
+                        )}
                       </Grid>
                     </TableCell>
                     <TableCell align="center">

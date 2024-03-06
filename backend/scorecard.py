@@ -1,9 +1,14 @@
-import requests
+"""Generates valuation scores for stocks in the Nifty 200 index."""
 import logging
 import concurrent.futures
-from bs4 import BeautifulSoup
 import json
+from concurrent.futures import ThreadPoolExecutor
+
+import requests
+from bs4 import BeautifulSoup
 from tqdm import tqdm
+
+##pylint: disable=invalid-name
 
 
 def score_stock(score_card):
@@ -34,13 +39,25 @@ def score_stock(score_card):
     return score
 
 
+### @brief Method to fetch multiple urls using a single session
+### @param urls: list of urls to fetch
+### @return list of responses
+def fetch_all(urls):
+    """Fetch multiple URLs using a single session."""
+    with requests.Session() as session:
+        with ThreadPoolExecutor() as executor:
+            return list(executor.map(session.get, urls))
+
+
 ## @brief Method to get list of stocks from tickertape
 ## @param baseUrl: base url to fetch list of stocks
 ## @return results: list of stocks
+## pylint:disable=too-many-statements,line-too-long
 def getStockList(
     baseUrl="https://www.tickertape.in/indices/nifty-200-index-.NIFTY200/constituents?type=marketcap",
 ):
-    res = requests.get(baseUrl)
+    """Web scrapper"""
+    res = requests.get(baseUrl, timeout=10)
     results = []
     retries = {}
     tickertape_links = {}
@@ -53,9 +70,6 @@ def getStockList(
             return results
         subTables = mainTable.find_all("tr", {"class": "constituent-data-row"})
 
-        ## display number of stocks
-        logging.info(f"Number of stocks: {len(subTables)}")
-
         def fetch_stock_data(s, retry=False):
             aTag = s.find("a", href=True)
             sTag = s.find("span", {"class": "typography-caption-medium"})
@@ -65,29 +79,38 @@ def getStockList(
             base_api_url = (
                 f"https://analyze.api.tickertape.in/stocks/scorecard/{apiTicker}"
             )
+            price_url = (
+                f"https://api.tickertape.in/stocks/charts/inter/{apiTicker}?duration=1w"
+            )
             score_card = []
             composite_score = 0
-            # logging.info(f"Fetching data for {sTag.text}")
+            price = 0
             try:
-                res = requests.get(base_api_url)
-
-                if res.ok:
-                    res_json = res.json()
+                res = fetch_all([base_api_url, price_url])
+                if res[0].ok:
+                    res_json = res[0].json()
                     score_card = {
                         item["name"]: item["colour"] for item in res_json["data"]
                     }
                     composite_score = score_stock(score_card)
                 else:
-                    logging.info(f"Reponse failed to get data for {apiTicker}")
-            except Exception as e:
+                    logging.info("Reponse failed to get data for %s", apiTicker)
+                if res[1].ok:
+                    price_data = res[1].json()
+                    ## add price data
+                    price = price_data["data"][0]["points"][-1]["lp"]
+                    composite_score += round(1000.0 / price, 2)
+            except Exception as e:  ##pylint: disable=broad-exception-caught
                 logging.error(e)
-                logging.error(f"Failed to get data for {apiTicker}")
+                logging.error("Failed to get data for %s", apiTicker)
                 ## add to retry queue
                 if not retry:
                     retries[s] = 3
                 else:
                     retries[s] -= 1
-                    logging.info(f"Again will retry {sTag.text} {retries[s]} time(s)")
+                    logging.info(
+                        "Again will retry %s %d time(s)", sTag.text, retries[s]
+                    )
 
             results.append(
                 {
@@ -96,6 +119,7 @@ def getStockList(
                     "score_card": score_card,
                     "link": tLink,
                     "composite_score": composite_score,
+                    "price": price,
                 }
             )
 
@@ -103,11 +127,11 @@ def getStockList(
         with concurrent.futures.ThreadPoolExecutor() as executor:
             list(tqdm(executor.map(fetch_stock_data, subTables), total=len(subTables)))
         ## retry failed requests
-        for s in retries:
-            if retries[s] > 0:
-                fetch_stock_data(s, retry=True)
+        for key, value in retries.items():
+            if value > 0:
+                fetch_stock_data(key, retry=True)
             else:
-                logging.info(f"Failed to fetch data for {s.text} after 3 retries")
+                logging.info("Failed to fetch data for %s after 3 retries", key.text)
     else:
         logging.info("Failed to get data from %s", baseUrl)
         ### show error message
@@ -121,11 +145,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     stocks = getStockList()
     ## print top 10 stocks
-    for stock in stocks[:15]:
-        print(json.dumps(stock, indent=2))
+    with open("score.card.json", "w", encoding="utf-8") as f:
+        json.dump(stocks[:10], f, indent=2)
 
     ## create a csv file
-    with open("scorecard.csv", "w") as f:
+    with open("scorecard.csv", "w", encoding="utf-8") as f:
         f.write("Stock,Symbol,Composite Score,Link\n")
         for stock in stocks:
             f.write(
