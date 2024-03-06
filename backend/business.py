@@ -15,10 +15,10 @@ def round_off(value: float) -> float:
 
 
 def build_todays_portfolio(
-    connection_string: str, NUM_STOCKS: int, INVESTMENT_AMOUNT: int
+    azure_blob_account_name: str, NUM_STOCKS: int = None, INVESTMENT_AMOUNT: int = None
 ):
     # Initialize the BlobServiceClient
-    blob_service = BlobService(connection_string)
+    blob_service = BlobService(azure_blob_account_name)
 
     # Define the name of the blob
     blob_name = strategy.get_file_name("all_symbols/nifty200-symbols")
@@ -38,6 +38,8 @@ def build_todays_portfolio(
             ## Upload the list of stocks
             blob_service.upload_blob(nifty200_data, nifty200_data_blob_name)
 
+    if NUM_STOCKS is None or INVESTMENT_AMOUNT is None:
+        return None
     ## Upload the portfolio
     blob_name = strategy.get_file_name("portfolio-on")
     portfolio = blob_service.get_blob_data_if_exists(blob_name)
@@ -70,8 +72,8 @@ def build_todays_portfolio(
     return portfolio
 
 
-def get_portfolio(conn_string: str, request_date: str = None) -> str:
-    blob_service = BlobService(conn_string)
+def get_portfolio(azure_blob_account_name: str, request_date: str = None) -> str:
+    blob_service = BlobService(azure_blob_account_name)
     if request_date:
         portfolio_blob_name = f"portfolio-on-{request_date}.json"
     else:
@@ -83,8 +85,8 @@ def get_portfolio(conn_string: str, request_date: str = None) -> str:
     )
 
 
-def get_nifty200(conn_string: str, request_date: str = None) -> Dict:
-    blob_service = BlobService(conn_string)
+def get_nifty200(azure_blob_account_name: str, request_date: str = None) -> Dict:
+    blob_service = BlobService(azure_blob_account_name)
     if request_date:
         blob_name = f"all_symbols/nifty200-symbols-{request_date}.json"
     else:
@@ -96,8 +98,8 @@ def get_nifty200(conn_string: str, request_date: str = None) -> Dict:
     return None
 
 
-def get_rebalance(conn_string: str, from_date: str, to_date: str) -> Dict:
-    blob_service = BlobService(conn_string)
+def get_rebalance(azure_blob_account_name: str, from_date: str, to_date: str) -> Dict:
+    blob_service = BlobService(azure_blob_account_name)
     blob_name = f"all_symbols/nifty200-symbols-{to_date}.json"
     from_blob_name = f"portfolio-on-{from_date}.json"
     to_blob_name = f"portfolio-on-{to_date}.json"
@@ -112,10 +114,12 @@ def get_rebalance(conn_string: str, from_date: str, to_date: str) -> Dict:
 
 
 def view_portfolio(
-    conn_string: str, request_date: str = None, detailed_view: bool = True
+    azure_blob_account_name: str, request_date: str = None, detailed_view: bool = True
 ) -> str:
-    portfolio, portfolio_blob_name = get_portfolio(conn_string, request_date)
-    blob_service = BlobService(conn_string)
+    portfolio, portfolio_blob_name = get_portfolio(
+        azure_blob_account_name, request_date
+    )
+    blob_service = BlobService(azure_blob_account_name)
     if portfolio:
         # Generate an HTML table
         table_html = """
@@ -560,12 +564,12 @@ def get_portfolio_value(blob_service: BlobService, portfolio, this_date: str):
 
 
 def get_portfolio_with_params(
-    conn_string: str,
+    azure_blob_account_name: str,
     request_date: str = None,
     num_stocks: int = 15,
     investment: int = 500000,
 ) -> List:
-    blob_service = BlobService(conn_string)
+    blob_service = BlobService(azure_blob_account_name)
     nifty200_symbols = blob_service.get_blob_data_if_exists(
         f"all_symbols/nifty200-symbols-{request_date}.json"
     )
@@ -612,9 +616,9 @@ def get_rebalance_with_params(
     return None
 
 
-def build_score_card(conn_string: str) -> Dict:
+def build_score_card(azure_blob_account_name: str) -> Dict:
     container_name = "nifty-scorecards"
-    blob_service = BlobService(conn_string, container_name)
+    blob_service = BlobService(azure_blob_account_name, container_name)
     blob_name = strategy.get_file_name("nifty200-scorecard")
     score_card = blob_service.get_blob_data_if_exists(blob_name)
     if score_card is None:
@@ -624,9 +628,9 @@ def build_score_card(conn_string: str) -> Dict:
     return score_card
 
 
-def get_score_card(conn_string: str, request_date: str = None) -> Dict:
+def get_score_card(azure_blob_account_name: str, request_date: str = None) -> Dict:
     container_name = "nifty-scorecards"
-    blob_service = BlobService(conn_string, container_name)
+    blob_service = BlobService(azure_blob_account_name, container_name)
     if request_date:
         blob_name = f"nifty200-scorecard-{request_date}.json"
     else:

@@ -1,7 +1,8 @@
 """
-This module defines a Flask app that serves a portfolio view.
+This module defines a Flask app.
 """
-
+import os
+import sys
 import datetime
 import functools
 import hashlib
@@ -11,12 +12,10 @@ import logging
 from waitress import serve
 from flask import Flask, abort, jsonify, request, send_from_directory, session
 from flask_session import Session
-
-from util import cache_results, redis_client
-import business as business
-import os
-import sys
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from util import cache_results, redis_client  ## pylint: disable=import-error
+import business  ## pylint: disable=import-error
 
 
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "frontend/build"))
@@ -42,6 +41,8 @@ Session(app)
 
 
 def login_required(func):
+    """Decorator to require login to access a route."""
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if "username" not in session and not app.debug:
@@ -56,14 +57,16 @@ def login_required(func):
 
 @app.route("/", methods=["GET"])
 def index():
+    """Serve the index.html file."""
     return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/<path:path>")
 def static_file(path):
+    """Serve static files."""
     try:
         return send_from_directory(app.static_folder, path)
-    except:
+    except Exception as _:  ## pylint: disable=broad-exception-caught
         return send_from_directory(app.static_folder, "index.html")
 
 
@@ -75,12 +78,9 @@ def nifty200_json(datestr=None):
     """
     validate_date(datestr)
 
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_nifty200(
-            conn_string=conn_string, request_date=datestr
-        )
+    json_result = business.get_nifty200(
+        azure_blob_account_name="stockstrategies", request_date=datestr
+    )
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No NIFTY 200 data found"}), 400
@@ -103,24 +103,22 @@ def portfolio_json_with_params(datestr=None, numstocks=None, investment=None):
             description="Invalid numstocks or investment. Expected integer and float respectively.",
         )
 
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        porfolio_data, tickertape_links = business.get_portfolio_with_params(
-            conn_string=conn_string,
-            request_date=datestr,
-            num_stocks=numstocks,
-            investment=investment,
-        )
-        json_result = {
-            "portfolio": porfolio_data,
-            "tickertape_links": tickertape_links,
-        }
+    porfolio_data, tickertape_links = business.get_portfolio_with_params(
+        azure_blob_account_name="stockstrategies",
+        request_date=datestr,
+        num_stocks=numstocks,
+        investment=investment,
+    )
+    json_result = {
+        "portfolio": porfolio_data,
+        "tickertape_links": tickertape_links,
+    }
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
 
 
+## pylint: disable=invalid-name
 @app.route("/rebalance/<todate>/<fromDate>/<numstocks>/<investment>", methods=["GET"])
 @login_required
 def rebalance_json_with_params(
@@ -141,16 +139,13 @@ def rebalance_json_with_params(
             description="Invalid numstocks or investment. Expected integer and float respectively.",
         )
 
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_rebalance_with_params(
-            conn_string=conn_string,
-            from_date=todate,
-            to_date=fromDate,
-            num_stocks=numstocks,
-            investment=investment,
-        )
+    json_result = business.get_rebalance_with_params(
+        azure_blob_account_name="stockstrategies",
+        from_date=todate,
+        to_date=fromDate,
+        num_stocks=numstocks,
+        investment=investment,
+    )
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No portfolio data found"}), 400
@@ -158,6 +153,7 @@ def rebalance_json_with_params(
 
 @app.route("/register", methods=["POST"])
 def register():
+    """Registers a new user by adding their username and password to Redis."""
     username = request.json.get("username")
     hashed_password = request.json.get("hashedPassword")
     password = hashlib.sha256(hashed_password.encode()).hexdigest()
@@ -199,6 +195,7 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
+    """Logs in a user by adding the username to the session."""
     username = request.json.get("username")
     hashed_password = request.json.get("hashedPassword")
     password = hashlib.sha256(hashed_password.encode()).hexdigest()
@@ -235,6 +232,7 @@ def login():
 @app.route("/profile", methods=["GET"])
 @login_required
 def profile():
+    """Returns the user's profile as a JSON object."""
     username = session["username"]
     user_profile = redis_client.hget("users_profile", username)
     if user_profile is not None:
@@ -245,6 +243,7 @@ def profile():
 @app.route("/profile", methods=["POST"])
 @login_required
 def update_profile():
+    """Updates the user's profile."""
     username = session["username"]
     user_profile = redis_client.hget("users_profile", username)
     if user_profile is not None:
@@ -258,6 +257,7 @@ def update_profile():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    """Logs out a user by removing the username from the session."""
     session.pop("username", None)
     return jsonify({"success": "Logged out successfully"}), 200
 
@@ -270,12 +270,9 @@ def scorecard(datestr=None):
     """
     validate_date(datestr)
 
-    json_result = None
-    conn_string = get_connection_string()
-    if conn_string:
-        json_result = business.get_score_card(
-            conn_string=conn_string, request_date=datestr
-        )
+    json_result = business.get_score_card(
+        azure_blob_account_name="stockstrategies", request_date=datestr
+    )
     if json_result:
         return jsonify(json_result), 200
     return jsonify({"error": "No score card data found"}), 400
@@ -302,33 +299,15 @@ def get_connection_string():
 def generate_portfolio():
     """
     Generates today's portfolio using the momentum strategy.
-
-    Reads the connection string and strategy parameters from local.settings.json.
     """
-    conn_string = None
-    num_stocks = None
-    investment_amount = None
-    try:
-        # Read local.settings.json
-        with open("local.settings.json", encoding="utf-8") as json_file:
-            data = json.load(json_file)
-            conn_string = data["Values"]["AzureWebJobsStorage"]
-            num_stocks = int(data["Values"]["NUM_STOCKS"])
-            investment_amount = float(data["Values"]["INVESTMENT_AMOUNT"])
-    except FileNotFoundError as e:
-        logging.error("local.settings.json not found: %s", e)
-    except json.JSONDecodeError as e:
-        logging.error("Error reading local.settings.json: %s", e)
-    if conn_string and num_stocks and investment_amount:
-        business.build_todays_portfolio(conn_string, num_stocks, investment_amount)
-        logging.info("Momentum strategy portfolio successfully built!")
-        business.build_score_card(conn_string)
-        logging.info("Score card successfully built!")
-    else:
-        logging.error("Error building momentum strategy")
+    business.build_todays_portfolio(azure_blob_account_name="stockstrategies")
+    logging.info("Momentum strategy portfolio successfully built!")
+    business.build_score_card(azure_blob_account_name="stockstrategies")
+    logging.info("Score card successfully built!")
 
 
 def validate_date(datestr):
+    """Validates the date format."""
     try:
         if datestr:
             datetime.datetime.strptime(datestr, "%Y-%m-%d")  # Validate date format

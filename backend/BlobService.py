@@ -1,6 +1,7 @@
 import json
 import logging
 
+from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 from util import cache_results
 
@@ -14,11 +15,10 @@ class BlobService:
     ## @classmethod __init__
     ## @brief Initialize the BlobServiceClient
     ## @param connection_string: connection string to blob storage
-    def __init__(
-        self, connection_string: str, container_name="momentum-strategy"
-    ) -> None:
-        self.blob_service_client = BlobServiceClient.from_connection_string(
-            connection_string
+    def __init__(self, account_name: str, container_name="momentum-strategy") -> None:
+        self.account_url = f"https://{account_name}.blob.core.windows.net/"
+        self.blob_service_client = BlobServiceClient(
+            account_url=self.account_url, credential=DefaultAzureCredential()
         )
         self.container_name = container_name
         self.container_client = self.blob_service_client.get_container_client(

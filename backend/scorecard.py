@@ -136,7 +136,7 @@ def getStockList(
         ### show error message
         logging.info(res.text)
     ## sort by composite score, if same use price lower first
-    results.sort(key=lambda x: (x["composite_score"], x["price"]), reverse=True)
+    results.sort(key=lambda x: (x["composite_score"], -x["price"]), reverse=True)
     return results
 
 
