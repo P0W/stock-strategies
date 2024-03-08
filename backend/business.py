@@ -6,6 +6,7 @@ from typing import Dict, List
 import get_stocks as strategy
 import scorecard
 from BlobService import BlobService
+from util import cache_results
 
 logging = logging.getLogger(__name__)
 
@@ -627,7 +628,7 @@ def build_score_card(azure_blob_account_name: str) -> Dict:
         blob_service.upload_blob(score_card, blob_name)
     return score_card
 
-
+@cache_results
 def get_score_card(azure_blob_account_name: str, request_date: str = None) -> Dict:
     container_name = "nifty-scorecards"
     blob_service = BlobService(azure_blob_account_name, container_name)
