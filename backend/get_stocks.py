@@ -393,7 +393,13 @@ def rebalance_portfolio(
     for stock, info in day1_stock_info.items():
         shares_day1 = info.get("shares", 0)
         shares_day2 = day2_stock_info.get(stock, {}).get("shares", 0)
-        price_day2 = current_day_price_dict[stock]
+        try:
+            price_day2 = current_day_price_dict[stock]
+        except KeyError:
+            logging.warning("Price not available for %s", {stock})
+            price_day2 = info.get(
+                "price", 0
+            )  ## use previous day price if not available
         amount = (shares_day2 - shares_day1) * price_day2
         result["stocks"].append(
             {
