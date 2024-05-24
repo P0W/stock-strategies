@@ -143,7 +143,7 @@ export const rebalanceTableHeader: IHeader[] = [
   {
     display: "Action",
     key: "shares",
-    cellTemplate: (item: ItemType) => {
+    cellTemplate: (item: ItemType, row) => {
       // determine hold, buy or sell
       const action =
         (item as number) === 0 ? "Hold" : (item as number) > 0 ? "Buy" : "Sell";
@@ -153,10 +153,19 @@ export const rebalanceTableHeader: IHeader[] = [
           : (item as number) > 0
           ? green[500]
           : red[500];
-
+      
+          // Determine the partial sell or buy
+          let partial_suffix = false;
+          if (
+            row?.initial_shares !== 0 && (item as number) !==0 &&
+            (row?.initial_shares as number) !== Math.abs(item as number)
+          ) {
+            partial_suffix = true;
+          }
       return (
         <TableCell key={`shares-${action}`} style={{ textAlign: "center" }}>
           <Typography style={{ color: actionColor, fontWeight: "bold" }}>
+            {partial_suffix && "Partial "}
             {action}
           </Typography>
         </TableCell>

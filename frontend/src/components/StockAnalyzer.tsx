@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IRebalanceData, IToFromData } from "./StockDataTypes";
-import { green, red } from "@mui/material/colors";
+import { green, grey, red } from "@mui/material/colors";
 import { StockTable } from "./StockTable";
 import { nifty200TableHeader, rebalanceTableHeader } from "./StockTableHeader";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -48,6 +48,16 @@ const ShowTableV2 = (props: IViewProps) => {
     0
   );
   const gains = toInvestment - fromInvestment;
+  // Count number of stock selling, buying and holding
+  const sell = rebalanceData.filter(
+    (stock: IRebalanceData) => stock.shares < 0
+  ).length;
+  const buy = rebalanceData.filter(
+    (stock: IRebalanceData) => stock.shares > 0
+  ).length;
+  const hold = rebalanceData.filter(
+    (stock: IRebalanceData) => stock.shares === 0
+  ).length;
   return !loading ? (
     <>
       <Paper
@@ -145,6 +155,20 @@ const ShowTableV2 = (props: IViewProps) => {
               headers={rebalanceTableHeader}
               stockData={rebalanceData}
             />
+            <Typography variant="body1" sx={{ padding: "10px" }}>
+              Number of stocks buying:{" "}
+              <span style={{ color: green[500] }}>
+                <strong>{buy}</strong>
+              </span>
+              , selling:{" "}
+              <span style={{ color: red[500] }}>
+                <strong>{sell}</strong>
+              </span>
+              , holding:{" "}
+              <span style={{ color: grey[500] }}>
+                <strong>{hold}</strong>
+              </span>
+            </Typography>
           </AccordionDetails>
         </Accordion>
       </Box>
@@ -182,12 +206,14 @@ export const StockAnalyzer: React.FC<StockAnalyzerProps> = ({
       <Divider />
       <Box>
         {fromDateString !== "" && toDateString !== "" && (
-          <ShowTableV2
-            rebalanceData={rebalanceData}
-            capitalIncurred={capitalIncurred}
-            currentPrices={currentPrices}
-            loading={loading}
-          />
+          <>
+            <ShowTableV2
+              rebalanceData={rebalanceData}
+              capitalIncurred={capitalIncurred}
+              currentPrices={currentPrices}
+              loading={loading}
+            />
+          </>
         )}
       </Box>
     </Stack>
