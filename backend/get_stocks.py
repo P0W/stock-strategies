@@ -5,6 +5,7 @@ import logging
 import sys
 import pathlib
 import datetime
+import concurrent.futures
 
 import requests
 from bs4 import BeautifulSoup
@@ -98,31 +99,35 @@ def z_score_normalize(data):
 ## @return normalized_returns: normalized returns
 ## @return normalized_vwap: normalized vwap
 ## @return normalized_rsi: normalized rsi
-def composite_score(returns):
+def composite_score(returns, price):
     # Define weights for each metric
-    weight_returns = 0.4
-    weight_vwap = 0.2
-    weight_rsi = 0.4
+    weight_returns = 0.3  ## weighing 30%  for returns
+    weight_vwap = 0.2  ## weighing 20% for vwap
+    weight_rsi = 0.5  ## weighing 50% for rsi
+
     normalized_returns = [
         returns["1y"]["return"],
-        returns["1mo"]["return"] * 12,
-        returns["1w"]["return"] * 52,
+        100.0 * ((1 + returns["1mo"]["return"] / 100.0) ** 12 - 1),
+        100.0 * ((1 + returns["1w"]["return"] / 100.0) ** 52 - 1),
     ]
-    normalized_vwap = z_score_normalize(
-        [returns["1y"]["vwap"], returns["1mo"]["vwap"], returns["1w"]["vwap"]]
-    )
-    normalized_rsi = z_score_normalize(
-        [returns["1y"]["rsi"], returns["1mo"]["rsi"], returns["1w"]["rsi"]]
-    )
+    ## weighing the recent value more, difference from current price
+    weighted_vwap = [0.2, 0.3, 0.5]
+    normalized_vwap = [
+        (price - returns["1y"]["vwap"]) * weighted_vwap[0] / price,
+        (price - returns["1mo"]["vwap"]) * weighted_vwap[1] / price,
+        (price - returns["1w"]["vwap"]) * weighted_vwap[2] / price,
+    ]
+
+    normalized_rsi = [returns["1y"]["rsi"], returns["1mo"]["rsi"], returns["1w"]["rsi"]]
 
     # Calculate the composite score
-    composite_score = (
+    composite_score_result = (
         weight_returns * sum(normalized_returns)
         + weight_vwap * sum(normalized_vwap)
         + weight_rsi * sum(normalized_rsi)
     )
 
-    return composite_score, normalized_returns, normalized_vwap, normalized_rsi
+    return composite_score_result, normalized_returns, normalized_vwap, normalized_rsi
 
 
 def fetch_nifty_200_data():
@@ -213,7 +218,7 @@ def getStockList(
                             f"Again will retry {sTag.text} {retries[s]} time(s)"
                         )
 
-            score, ret, v, rsi = composite_score(returns)
+            score, ret, v, rsi = composite_score(returns, current_price)
 
             results.append(
                 {
@@ -229,10 +234,10 @@ def getStockList(
             )
 
         # Use ThreadPoolExecutor for concurrent fetching
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        #     executor.map(fetch_stock_data, subTables)
-        for s in subTables:
-            fetch_stock_data(s)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(fetch_stock_data, subTables)
+        # for s in subTables:
+        #    fetch_stock_data(s)
 
         ## retry failed requests
         for s in retries:

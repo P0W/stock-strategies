@@ -23,14 +23,14 @@ def score_stock(score_card):
     Growth > Performance > Profitability > Valuation > Entry point > Red flags
     """
     fields = {
-        "Performance": 5,
-        "Growth": 6,
-        "Profitability": 4,
-        "Valuation": 3,
-        "Entry point": 2,
-        "Red flags": 1,
+        "Growth": 0.3,  # 30% weight to Growth
+        "Performance": 0.25,  # 25% weight to Performance
+        "Profitability": 0.2,  # 20% weight to Profitability
+        "Valuation": 0.15,  # 15% weight to Valuation
+        "Entry point": 0.07,  # 7% weight to Entry point
+        "Red flags": 0.03,  # 3% weight to Red flags
     }
-    colors = {"green": 2, "yellow": 1, "red": -2}
+    colors = {"green": 0.5, "yellow": 0.3, "red": -0.4}
     score = 0
     for field, weight in fields.items():
         color = score_card.get(field)

@@ -154,7 +154,7 @@ export const StockBalls: React.FC = React.memo(() => {
                       </TableCell>
                       <TableCell align="center">
                         <Typography variant="h6" component="span">
-                          {stockBall.composite_score}
+                          {(stockBall.composite_score * 100).toFixed(1)}
                         </Typography>
                       </TableCell>
                     </TableRow>
