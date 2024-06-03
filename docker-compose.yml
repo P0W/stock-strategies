@@ -5,7 +5,7 @@ services:
       context: ./  # Use the current directory as the build context
       dockerfile: Dockerfile
     ports:
-      - "8000"  # Map container port 8000 to host, let the scalling generate new one into container
+      - "8000"  # Map container port 8000 to host, let the scaling generate new ones into the container
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -24,13 +24,18 @@ services:
   nginx:
     image: nginx
     volumes:
-    ## Generate cert.pem and key.pem with the following command:
-    ## sudo openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
       - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
-      - ./cert.pem:/etc/nginx/cert.pem:ro
-      - ./key.pem:/etc/nginx/key.pem:ro
+      - ./letsencrypt:/etc/letsencrypt:ro  # Mount Let's Encrypt directory as read-only
+      - ./var/www/certbot:/var/www/certbot:ro
     ports:
-      - "8080:80" ## For testing
+      - "80:80"  # For HTTP challenge
       - "443:443"
     depends_on:
       - app
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt  # Mount Let's Encrypt directory
+      - ./var/www/certbot:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /var/www/certbot --agree-tos --no-eff-email --email powprashant@gmail.com -d stocks.eastus.cloudapp.azure.com; sleep 12h; done'"
