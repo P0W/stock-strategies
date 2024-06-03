@@ -17,7 +17,7 @@ COPY backend/*.py /app/backend/
 COPY backend/requirements.txt /app/backend/
 
 # Install any needed packages specified in requirements.txt
-RUN pip install -r backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 ## copy from frontend/build to /app/frontend/build
 COPY frontend/build /app/frontend/build

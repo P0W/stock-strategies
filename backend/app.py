@@ -24,6 +24,8 @@ app.secret_key = os.urandom(24)
 # Use Redis session interface
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_REDIS"] = redis_client
+app.config["SESSION_PERMANENT"] = False
+app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(minutes=30)
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
