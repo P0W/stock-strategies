@@ -9,7 +9,7 @@ calculate financial metrics, build and rebalance investment portfolios, and disp
 
 It is designed to run as an Azure Function or on Azure VM, making it easy to automate daily/weekly/monthly portfolio updates.
 
-[**`Live Hosted on Azure`**](https://stocks.eastus.cloudapp.azure.com){:target="_blank"}
+<a href="http://stocks.eastus.cloudapp.azure.com" target="_blank">**`Live Hosted on Azure`**</a>
 
 Sample Momentum Analyzer View
 -----------------------------
