@@ -26,7 +26,11 @@ export const StockNews: React.FC = React.memo(() => {
         const previousDate = new Date();
         previousDate.setDate(previousDate.getDate() - 1);
         const preDateStr = previousDate.toISOString().split("T")[0];
-        const res = Promise.all([fetch(`/news/${preDateStr}/${todaysDate}`)]);
+        // try both today's date and yesterday's date
+        const res = Promise.all([
+          fetch(`/stocknews/${todaysDate}`),
+          fetch(`/stocknews/${preDateStr}`),
+        ]);
         // use the first successful response
         const data = (await res).find((response) => response.ok);
         setStockNews(await data?.json());
