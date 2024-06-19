@@ -123,6 +123,8 @@ class StockNewsScraper:
                 # If timezone information is important, consider parsing and handling it separately
 
                 news_heading = entry.select_one("h2 > a").get_text(strip=True)
+                ## COnvert to published_date to "Tue, 12 Jun 2024 01:49:00"
+                published_date = published_date.strftime("%a, %d %b %Y %H:%M:%S")
                 entry_data.append((published_date, jump_page, news_heading))
             except AttributeError as error:
                 logging.error("Error parsing entry: %s", error)
@@ -160,6 +162,7 @@ class StockNewsScraper:
                                 "stock": " ".join(
                                     entry[2].split(";")[0].split(" ")[1:]
                                 ),
+                                "target_price": float(article_info["target_price"]),
                             }
                         )
                 except Exception as error:  # pylint: disable=broad-except
@@ -209,6 +212,7 @@ def main(back_days):
                     news_item["url"],
                 ]
             )
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
