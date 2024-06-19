@@ -16,14 +16,18 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 
+const settings = ["Profile", "Account", "Logout"];
+
+// Make page type
+export type Page = "Pricing" | "About" | "Analyzer" | "Balls" | "Recommendations";
+const pages: Page[] = ["Pricing", "About", "Analyzer", "Balls", "Recommendations"];
+
 interface IProps {
   handleOpen: () => void;
   handleLogout: () => void;
-  handlePageChange: (page: string) => void;
+  handlePageChange: (page: Page) => void;
 }
 
-const pages = ["Pricing", "About", "Analyzer", "Stock Balls", "Stock News"];
-const settings = ["Profile", "Account", "Logout"];
 
 export const Navbar: React.FC<IProps> = ({
   handleOpen,
@@ -49,14 +53,14 @@ export const Navbar: React.FC<IProps> = ({
     setAnchorElNav(null);
     const target = event.target as HTMLElement;
     switch (target.id) {
-      case "page-Stock Balls":
-        handlePageChange("Stock Balls");
+      case "page-Balls":
+        handlePageChange("Balls");
         break;
       case "page-Analyzer":
         handlePageChange("Analyzer");
         break;
-      case "page-Stock News":
-        handlePageChange("Stock News");
+      case "page-Recommendations":
+        handlePageChange("Recommendations");
         break;
       default:
         console.log("Unknown page clicked");

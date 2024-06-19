@@ -13,7 +13,7 @@ import { SidePanel } from "./SidePanel";
 import {
   Container,
 } from "@mui/material";
-import { Navbar } from "./Navbar";
+import { Navbar, Page } from "./Navbar";
 import { useInactivityLogout } from "../hooks/useInactivityLogout";
 import { StockAnalyzer } from "./StockAnalyzer";
 import { StockBalls } from "./StockBalls";
@@ -134,7 +134,7 @@ export const App = () => {
   const [investmentValue, setInvestmentValue] = React.useState<number>(
     user?.investment ?? 500000
   );
-  const [currentPage, setCurrentPage] = React.useState<string>("Analyzer");
+  const [currentPage, setCurrentPage] = React.useState<Page>("Balls");
 
   const { cleanup, expired } = useInactivityLogout(user);
 
@@ -201,8 +201,8 @@ export const App = () => {
           loading={loading}
         />
       )}
-      {currentPage === "Stock Balls" && <StockBalls />}
-      {currentPage === "Stock News" && <StockNews />}
+      {currentPage === "Balls" && <StockBalls />}
+      {currentPage === "Recommendations" && <StockNews />}
     </Container>
   );
 };
