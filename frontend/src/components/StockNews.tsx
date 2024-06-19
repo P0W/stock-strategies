@@ -73,7 +73,6 @@ export const StockNews: React.FC = React.memo(() => {
   return (
     <Container maxWidth="lg">
       <Paper elevation={1} style={{ padding: "1rem", marginBottom: "1rem" }}>
-        <Typography variant="h4">Stock News</Typography>
         <TextField
           label="Search"
           variant="outlined"
