@@ -36,33 +36,6 @@ export const StockNews: React.FC = React.memo(() => {
         setStockNews(await data?.json());
       } catch (error) {
         console.error("Error fetching stock news", error);
-        // Use a mock data as follows
-        setStockNews([
-          {
-            stock: "TCS",
-            recommendation: "Buy",
-            broker: "Motilal Oswal",
-            target_price: 4000,
-            published_date: "2021-10-13",
-            url: "https://www.moneycontrol.com/news/business/stocks/tcs-7091981.html",
-          },
-          {
-            stock: "Infosys",
-            recommendation: "Sell",
-            broker: "Angel Broking",
-            target_price: 2000,
-            published_date: "2021-10-13",
-            url: "https://www.moneycontrol.com/news/business/stocks/infosys-7091981.html",
-          },
-          {
-            stock: "Wipro",
-            recommendation: "Hold",
-            broker: "ICICI Securities",
-            target_price: 800,
-            published_date: "2021-10-13",
-            url: "https://www.moneycontrol.com/news/business/stocks/wipro-7091981.html",
-          },
-        ]);
       }
     };
     fetchData();
