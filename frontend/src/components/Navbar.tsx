@@ -22,7 +22,7 @@ interface IProps {
   handlePageChange: (page: string) => void;
 }
 
-const pages = ["Pricing", "About", "Analyzer", "Stock Balls"];
+const pages = ["Pricing", "About", "Analyzer", "Stock Balls", "Stock News"];
 const settings = ["Profile", "Account", "Logout"];
 
 export const Navbar: React.FC<IProps> = ({
@@ -54,6 +54,9 @@ export const Navbar: React.FC<IProps> = ({
         break;
       case "page-Analyzer":
         handlePageChange("Analyzer");
+        break;
+      case "page-Stock News":
+        handlePageChange("Stock News");
         break;
       default:
         console.log("Unknown page clicked");

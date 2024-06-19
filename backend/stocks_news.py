@@ -182,7 +182,7 @@ def main(back_days):
     with open("stock_news.csv", "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(
-            ["Stock Name", "Broker", "Recommendation", "Target Price", "Published Date"]
+            ["Stock Name", "Broker", "Recommendation", "Target Price", "Published Date", "URL"]
         )
         for news_item in news.values():
             writer.writerow(
@@ -192,6 +192,7 @@ def main(back_days):
                     news_item["recommendation"],
                     news_item["target_price"],
                     news_item["published_date"],
+                    news_item["jump_page"],
                 ]
             )
 

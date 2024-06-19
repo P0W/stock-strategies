@@ -106,3 +106,13 @@ export interface IStockBalls {
     link: string;
     composite_score: number;
 };
+
+
+export interface IStockNews {
+    stock: string;
+    broker: string;
+    recommendation: string;
+    target_price: number;
+    published_date: string;
+    url: string;
+}

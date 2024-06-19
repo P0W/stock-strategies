@@ -17,6 +17,7 @@ import { Navbar } from "./Navbar";
 import { useInactivityLogout } from "../hooks/useInactivityLogout";
 import { StockAnalyzer } from "./StockAnalyzer";
 import { StockBalls } from "./StockBalls";
+import { StockNews } from "./StockNews";
 
 const useData = (
   toDateString: string,
@@ -201,6 +202,7 @@ export const App = () => {
         />
       )}
       {currentPage === "Stock Balls" && <StockBalls />}
+      {currentPage === "Stock News" && <StockNews />}
     </Container>
   );
 };
