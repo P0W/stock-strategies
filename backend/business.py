@@ -635,7 +635,7 @@ def build_stock_news(azure_blob_account_name: str) -> Dict:
     stock_news = blob_service.get_blob_data_if_exists(blob_name)
     if stock_news is None:
         logging.info("%s blob does not exist", blob_name)
-        stock_news = stocks_news.getStockNews()
+        stock_news = stocks_news.get_stock_news()
         blob_service.upload_blob(stock_news, blob_name)
     return stock_news
 

@@ -31,7 +31,7 @@ class StockNewsScraper:
     BASE_URL = "https://www.moneycontrol.com/news/tags/recommendations.html"
 
     def __init__(self, back_days=0):
-        self.stock_news = {}
+        self.stock_news = []
         self.back_days = back_days
 
     def fetch_page(self, url):
@@ -151,25 +151,28 @@ class StockNewsScraper:
                 try:
                     article_info = future.result()
                     if article_info:
-                        self.stock_news[entry[2]] = {
-                            "published_date": entry[0],
-                            "jump_page": entry[1],
-                            "broker": entry[2].split(":")[-1],
-                            "recommendation": entry[2].split(":")[0].split(" ")[0],
-                            "stock_name": " ".join(
-                                entry[2].split(";")[0].split(" ")[1:]
-                            ),
-                            **article_info,
-                        }
+                        self.stock_news.append(
+                            {
+                                "published_date": entry[0],
+                                "url": entry[1],
+                                "broker": entry[2].split(":")[-1],
+                                "recommendation": entry[2].split(":")[0].split(" ")[0],
+                                "stock": " ".join(
+                                    entry[2].split(";")[0].split(" ")[1:]
+                                ),
+                            }
+                        )
                 except Exception as error:  # pylint: disable=broad-except
                     logging.error("Error processing entry %s: %s", entry, error)
 
         return self.stock_news
 
-def getStockNews(back_days=1):
+
+def get_stock_news(back_days=1):
     """Get stock news from MoneyControl."""
     scraper = StockNewsScraper(back_days)
     return scraper.scrape()
+
 
 def main(back_days):
     """Main entry point of the script."""
@@ -186,20 +189,26 @@ def main(back_days):
     with open("stock_news.csv", "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(
-            ["Stock Name", "Broker", "Recommendation", "Target Price", "Published Date", "URL"]
+            [
+                "Stock Name",
+                "Broker",
+                "Recommendation",
+                "Target Price",
+                "Published Date",
+                "URL",
+            ]
         )
-        for news_item in news.values():
+        for news_item in news:
             writer.writerow(
                 [
-                    news_item["stock_name"],
+                    news_item["stock"],
                     news_item["broker"],
                     news_item["recommendation"],
                     news_item["target_price"],
                     news_item["published_date"],
-                    news_item["jump_page"],
+                    news_item["url"],
                 ]
             )
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
