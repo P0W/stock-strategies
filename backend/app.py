@@ -279,6 +279,20 @@ def scorecard(datestr=None):
         return jsonify(json_result), 200
     return jsonify({"error": "No score card data found"}), 400
 
+@app.route("/stocknews/<datestr>", methods=["GET"])
+@login_required
+def stocknews(datestr=None):
+    """
+    Returns the stock news as a JSON object.
+    """
+    validate_date(datestr)
+
+    json_result = business.get_stock_news(
+        azure_blob_account_name="stockstrategies", request_date=datestr
+    )
+    if json_result:
+        return jsonify(json_result), 200
+    return jsonify({"error": "No stock news data found"}), 400
 
 @cache_results
 def get_connection_string():
@@ -306,6 +320,8 @@ def generate_portfolio():
     logging.info("Momentum strategy portfolio successfully built!")
     business.build_score_card(azure_blob_account_name="stockstrategies")
     logging.info("Score card successfully built!")
+    business.build_stock_news(azure_blob_account_name="stockstrategies")
+    logging.info("Stock news successfully built!")
 
 
 def validate_date(datestr):

@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import get_stocks as strategy
 import scorecard
+import stocks_news
 from BlobService import BlobService
 
 logging = logging.getLogger(__name__)
@@ -627,6 +628,17 @@ def build_score_card(azure_blob_account_name: str) -> Dict:
         blob_service.upload_blob(score_card, blob_name)
     return score_card
 
+def build_stock_news(azure_blob_account_name: str) -> Dict:
+    container_name = "stock-news"
+    blob_service = BlobService(azure_blob_account_name, container_name)
+    blob_name = strategy.get_file_name("stock-news")
+    stock_news = blob_service.get_blob_data_if_exists(blob_name)
+    if stock_news is None:
+        logging.info("%s blob does not exist", blob_name)
+        stock_news = stocks_news.getStockNews()
+        blob_service.upload_blob(stock_news, blob_name)
+    return stock_news
+
 
 def get_score_card(azure_blob_account_name: str, request_date: str = None) -> Dict:
     container_name = "nifty-scorecards"
@@ -639,4 +651,17 @@ def get_score_card(azure_blob_account_name: str, request_date: str = None) -> Di
     scorecard = blob_service.get_blob_data_if_exists(blob_name)
     if scorecard:
         return scorecard
+    return None
+
+def get_stock_news(azure_blob_account_name: str, request_date: str = None) -> Dict:
+    container_name = "stock-news"
+    blob_service = BlobService(azure_blob_account_name, container_name)
+    if request_date:
+        blob_name = f"stock-news-{request_date}.json"
+    else:
+        blob_name = strategy.get_file_name("stock-news")
+    logging.info("Stock News blob name: %s", blob_name)
+    stock_news = blob_service.get_blob_data_if_exists(blob_name)
+    if stock_news:
+        return stock_news
     return None

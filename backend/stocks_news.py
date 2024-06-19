@@ -166,6 +166,10 @@ class StockNewsScraper:
 
         return self.stock_news
 
+def getStockNews(back_days=1):
+    """Get stock news from MoneyControl."""
+    scraper = StockNewsScraper(back_days)
+    return scraper.scrape()
 
 def main(back_days):
     """Main entry point of the script."""
