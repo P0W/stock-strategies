@@ -217,21 +217,22 @@ def getStockList(
                         logging.info(
                             f"Again will retry {sTag.text} {retries[s]} time(s)"
                         )
-
-            score, ret, v, rsi = composite_score(returns, current_price)
-
-            results.append(
-                {
-                    "stock": aTag.text,
-                    "symbol": sTag.text,
-                    "returns": returns,
-                    "price": current_price,
-                    "composite_score": score,
-                    "normalized_returns": ret,
-                    "normalized_vwap": v,
-                    "normalized_rsi": rsi,
-                }
-            )
+            
+            ## if all duration shows up in returns
+            if "1y" in returns and "1mo" in returns and "1w" in returns:
+                score, ret, v, rsi = composite_score(returns, current_price)
+                results.append(
+                    {
+                        "stock": aTag.text,
+                        "symbol": sTag.text,
+                        "returns": returns,
+                        "price": current_price,
+                        "composite_score": score,
+                        "normalized_returns": ret,
+                        "normalized_vwap": v,
+                        "normalized_rsi": rsi,
+                    }
+                )
 
         # Use ThreadPoolExecutor for concurrent fetching
         with concurrent.futures.ThreadPoolExecutor() as executor:
