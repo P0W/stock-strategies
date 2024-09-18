@@ -122,9 +122,24 @@ const useData = (
   return { rebalanceData, capitalIncurred, currentPrices, loading };
 };
 
+const getTodayDateString = () => {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+  const istTime = new Date(now.getTime() + istOffset);
+  const istHours = istTime.getUTCHours();
+
+  if (istHours < 9) {
+    // If before 9 AM IST, use the previous day
+    istTime.setDate(istTime.getDate() - 1);
+  }
+
+  return istTime.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
 export const App = () => {
-  const [fromDateString, setFromDateString] = React.useState<string>("");
-  const [toDateString, setToDateString] = React.useState<string>("");
+  const todayDateString = getTodayDateString();
+  const [fromDateString, setFromDateString] = React.useState<string>(todayDateString);
+  const [toDateString, setToDateString] = React.useState<string>(todayDateString);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -148,6 +163,7 @@ export const App = () => {
       cleanup();
     });
   };
+
 
   React.useEffect(() => {
     setNumStocks(user?.num_stocks ?? 15);
