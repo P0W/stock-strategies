@@ -206,6 +206,8 @@ def getStockList(
                             retries[s] = 0
                     else:
                         logging.info(f"Reponse failed to get data for {apiTicker}")
+                except ValueError as e:
+                    loggin.error(f"Failed to get data for {apiTicker} : {e}")
                 except Exception as e:
                     logging.error(e)
                     logging.error(f"Failed to get data for {apiTicker}")
