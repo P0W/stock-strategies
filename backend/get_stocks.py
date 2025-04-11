@@ -6,11 +6,22 @@ import sys
 import pathlib
 import datetime
 import concurrent.futures
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
 import requests
 from bs4 import BeautifulSoup
 
-logging.basicConfig(level=logging.INFO)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 
 
 class TickerRequest:
@@ -88,22 +99,27 @@ def calculate_vwap(data_points):
 # @param data: list of data points
 # @return normalized data
 def z_score_normalize(data):
+    if not data:
+        return []
+
     mean = sum(data) / len(data)
-    std_dev = (sum((x - mean) ** 2 for x in data) / len(data)) ** 0.5
+
+    # Calculate standard deviation - handle case where all values are identical
+    squared_diffs = [(x - mean) ** 2 for x in data]
+    std_dev = (sum(squared_diffs) / len(data)) ** 0.5
+
+    # Avoid division by zero if standard deviation is zero
+    if std_dev == 0:
+        return [0] * len(data)
+
     return [(x - mean) / std_dev for x in data]
 
 
-## @brief Method to calculate composite score
-## @param returns: list of returns
-## @return composite_score: calculated composite score
-## @return normalized_returns: normalized returns
-## @return normalized_vwap: normalized vwap
-## @return normalized_rsi: normalized rsi
 def composite_score(returns, price):
     # Define weights for each metric
-    weight_returns = 0.3  ## weighing 30%  for returns
-    weight_vwap = 0.2  ## weighing 20% for vwap
-    weight_rsi = 0.5  ## weighing 50% for rsi
+    weight_returns = 0.4  # Increased from 0.3
+    weight_vwap = 0.3  # Increased from 0.2
+    weight_rsi = 0.3  # Decreased from 0.5
 
     normalized_returns = [
         returns["1y"]["return"],
@@ -120,16 +136,25 @@ def composite_score(returns, price):
 
     normalized_rsi = [returns["1y"]["rsi"], returns["1mo"]["rsi"], returns["1w"]["rsi"]]
 
-    # Calculate the composite score
+    # Calculate time-weighted components (more weight to recent periods)
+    time_weights = [0.2, 0.3, 0.5]  # 1y, 1mo, 1w
+
+    returns_component = sum(r * w for r, w in zip(normalized_returns, time_weights))
+    vwap_component = sum(v * w for v, w in zip(normalized_vwap, time_weights))
+    rsi_component = sum(r * w for r, w in zip(normalized_rsi, time_weights))
+
+    # Calculate the composite score with revised weights
     composite_score_result = (
-        weight_returns * sum(normalized_returns)
-        + weight_vwap * sum(normalized_vwap)
-        + weight_rsi * sum(normalized_rsi)
+        weight_returns * returns_component
+        + weight_vwap * vwap_component
+        + weight_rsi * rsi_component
     )
 
     return composite_score_result, normalized_returns, normalized_vwap, normalized_rsi
 
 
+## @brief Method to fetch nifty 200 data
+## @return result: nifty 200 data
 def fetch_nifty_200_data():
     apiTicker = ".NIFTY200"
     base_api_url = f"https://api.tickertape.in/stocks/charts/inter/{apiTicker}"
@@ -177,7 +202,7 @@ def getStockList(
         ## display number of stocks
         logging.info(f"Number of stocks: {len(subTables)}")
 
-        def fetch_stock_data(s, retry=False):
+        def fetch_stock_data(s):
             aTag = s.find("a", href=True)
             sTag = s.find("span", {"class": "typography-caption-medium"})
             apiTicker = aTag["href"].split("-")[-1]
@@ -186,41 +211,52 @@ def getStockList(
             returns = {}
             current_price = -1.0
 
-            for duration in ["1y", "1mo", "1w"]:
+            # Define fetch function with retries
+            @retry(
+                stop=stop_after_attempt(4),  # Stop after 4 attempts
+                wait=wait_exponential(
+                    multiplier=1, min=1, max=10
+                ),  # Wait 1, 2, 4, 8 seconds between retries
+                retry=retry_if_exception_type(
+                    (requests.exceptions.RequestException, ValueError)
+                ),
+                before_sleep=lambda retry_state: logging.info(
+                    f"Retrying {sTag.text} after {retry_state.outcome.exception()} - "
+                    f"Attempt {retry_state.attempt_number}"
+                ),
+            )
+            def fetch_duration_data(duration):
                 apiUrl = f"{base_api_url}?duration={duration}"
                 logging.info(f"Fetching data for {sTag.text} last {duration}")
+
+                res = tickerRequest.get(apiUrl)
+                if not res.ok:
+                    raise requests.exceptions.RequestException(
+                        f"Failed with status {res.status_code}"
+                    )
+
+                res_json = res.json()
+                result = {"return": res_json["data"][0]["r"]}
+                data_points = res_json["data"][0]["points"]
+                result["vwap"] = calculate_vwap(data_points)
+                result["rsi"] = calculate_rsi(data_points)
+
+                return result, data_points[-1]["lp"] if duration == "1w" else None
+
+            # Fetch data for each duration
+            for duration in ["1y", "1mo", "1w"]:
                 try:
-                    res = tickerRequest.get(apiUrl)
-
-                    if res.ok:
-                        res_json = res.json()
-                        returns[duration] = {"return": res_json["data"][0]["r"]}
-                        data_points = res_json["data"][0]["points"]
-                        returns[duration]["vwap"] = calculate_vwap(data_points)
-                        returns[duration]["rsi"] = calculate_rsi(data_points)
-
-                        if duration == "1w":
-                            current_price = data_points[-1]["lp"]
-                        if retry:
-                            logging.info(f"Success Retrying {sTag.text} {duration}")
-                            retries[s] = 0
-                    else:
-                        logging.info(f"Reponse failed to get data for {apiTicker}")
-                except ValueError as e:
-                    loggin.error(f"Failed to get data for {apiTicker} : {e}")
+                    result, price = fetch_duration_data(duration)
+                    returns[duration] = result
+                    if price is not None:
+                        current_price = price
                 except Exception as e:
-                    logging.error(e)
-                    logging.error(f"Failed to get data for {apiTicker}")
-                    ## add to retry queue
-                    if not retry:
-                        retries[s] = 3
-                    else:
-                        retries[s] -= 1
-                        logging.info(
-                            f"Again will retry {sTag.text} {retries[s]} time(s)"
-                        )
-            
-            ## if all duration shows up in returns
+                    logging.error(
+                        f"Failed to get data for {sTag.text} {duration} after all retries: {e}"
+                    )
+                    continue
+
+            # If all durations were successfully fetched
             if "1y" in returns and "1mo" in returns and "1w" in returns:
                 score, ret, v, rsi = composite_score(returns, current_price)
                 results.append(
@@ -243,11 +279,11 @@ def getStockList(
         #    fetch_stock_data(s)
 
         ## retry failed requests
-        for s in retries:
-            if retries[s] > 0:
-                fetch_stock_data(s, retry=True)
-            else:
-                logging.info(f"Failed to fetch data for {s.text} after 3 retries")
+        # for s in retries:
+        #     if retries[s] > 0:
+        #         fetch_stock_data(s, retry=True)
+        #     else:
+        #         logging.info(f"Failed to fetch data for {s.text} after 3 retries")
 
         results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
     else:
@@ -442,8 +478,38 @@ def rebalance_portfolio(
     return result
 
 
+## Get the stcok-nifty-200-YYYY-MM-DD.json file from the tickertape
+## and calculate the normalized returns, vwap and rsi for each stock
+## and then calculate the composite score for each stock
+def regenrate_stock_list(fileName):
+    with open(fileName, "r") as fh:
+        nifty200_symbols = json.load(fh)
+
+    ## calculate the composite score for each stock
+    for stock in nifty200_symbols:
+        (
+            stock["composite_score"],
+            stock["normalized_returns"],
+            stock["normalized_vwap"],
+            stock["normalized_rsi"],
+        ) = composite_score(stock["returns"], stock["price"])
+    ## sort the stocks based on the composite score
+    nifty200_symbols = sorted(
+        nifty200_symbols, key=lambda x: x["composite_score"], reverse=True
+    )
+    with open("nifty200-symbols-regenrated.json", "w") as fh:
+        json.dump(nifty200_symbols, fh, indent=2)
+    return nifty200_symbols
+
+
 ## General testing and simulation
 if __name__ == "__main__":
+    # fileName = "stocks-nifty-200-2025-04-11.json"
+
+    ## Regenerate the stock list
+    # regenrate_stock_list(fileName)
+    # sys.exit(0)
+
     date_provided = len(sys.argv) == 2
     if date_provided:
         logging.info(f"Date provided: {sys.argv[1]}")
