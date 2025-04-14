@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -171,12 +172,6 @@ class StockNewsScraper:
         return self.stock_news
 
 
-def get_stock_news(back_days=1):
-    """Get stock news from MoneyControl."""
-    scraper = StockNewsScraper(back_days)
-    return scraper.scrape()
-
-
 def main(back_days):
     """Main entry point of the script."""
     scraper = StockNewsScraper(back_days)
@@ -214,13 +209,94 @@ def main(back_days):
             )
 
 
+def test():
+    # Target URL (Moneycontrol news section)
+    url = "https://www.moneycontrol.com/news/tags/recommendations.html"
+
+    # Set headers to mimic a browser request
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+
+    try:
+        # Send HTTP request
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Check for request errors
+
+        # Parse HTML content
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Find news items
+        news_items = soup.find_all("li", class_="clearfix")
+
+        # Extract data
+        data = []
+        for item in news_items:
+            title_tag = item.find("h2")
+            if title_tag and title_tag.find("a"):
+                title = title_tag.text.strip()
+                link = title_tag.find("a")["href"]
+
+                # Parse title: "Buy/Hold/Sell/Neutral Stock; target of Rs XXXX: Broker"
+                title_match = re.match(
+                    r"(Buy|Hold|Sell|Neutral)\s+([^;]+);\s*target\s+of\s+Rs\s*(\d+(?:\.\d+)?)\s*:\s*(.+)",
+                    title,
+                )
+                if not title_match:
+                    continue  # Skip if title doesn't match expected format
+
+                recommendation, stock, target_price, broker = title_match.groups()
+                target_price = float(target_price)
+
+                # Get description for date
+                desc_tag = item.find("p")
+                description = desc_tag.text.strip() if desc_tag else ""
+                date_match = re.search(
+                    r"dated\s([A-Za-z]+)\s(\d{1,2}),\s(\d{4})", description
+                )
+                published_date = (
+                    f"{date_match.group(1)} {date_match.group(2)}, {date_match.group(3)}"
+                    if date_match
+                    else ""
+                )
+
+                # Build output
+                data.append(
+                    {
+                        "published_date": published_date,
+                        "url": link,
+                        "broker": broker.strip(),
+                        "recommendation": recommendation,
+                        "stock": stock.strip(),
+                        "target_price": target_price,
+                    }
+                )
+
+        # Convert to DataFrame for easy handling
+        return data
+
+        # Optionally save to CSV    df.to_csv("stock_news.csv", index=False)
+
+    except requests.RequestException as e:
+        print(f"Error fetching data: {e}")
+
+
+def get_stock_news(back_days=1):
+    """Get stock news from MoneyControl."""
+    # scraper = StockNewsScraper(back_days)
+    # return scraper.scrape()
+
+    return test()
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--back-days",
-        type=int,
-        default=1,
-        help="Number of days to go back to fetch the news",
-    )
-    args = parser.parse_args()
-    main(args.back_days)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--back-days",
+    #     type=int,
+    #     default=1,
+    #     help="Number of days to go back to fetch the news",
+    # )
+    # args = parser.parse_args()
+    # main(args.back_days)
+    test()
