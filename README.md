@@ -25,6 +25,10 @@ Stock Score Card (Stock Balls View)
 -----------------------------------
 ![**Sample Stock Balls**](resources/StockBalls.png)
 
+Stock Score Card (Stock Recommendations View)
+----------------------------------------------
+![**Sample Recommendation**](resources/Stock-Recomm.png)
+
 Usage
 -----
 
