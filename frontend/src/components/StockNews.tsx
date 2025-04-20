@@ -33,7 +33,22 @@ export const StockNews: React.FC = React.memo(() => {
         ]);
         // use the first successful response
         const data = (await res).find((response) => response.ok);
-        setStockNews(await data?.json());
+        let stockNews: IStockNews[] = [];
+        if (data) {
+          stockNews = await data.json();
+          // sort the news by stock then by published_date
+          stockNews.sort((a, b) => {
+            if (a.stock < b.stock) {
+              return -1;
+            } else if (a.stock > b.stock) {
+              return 1;
+            } else {
+              return new Date(b.published_date).getTime() -
+                new Date(a.published_date).getTime();
+            }
+          });
+          setStockNews(stockNews);
+        }
       } catch (error) {
         console.error("Error fetching stock news", error);
       }

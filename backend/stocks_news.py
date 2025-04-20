@@ -272,7 +272,8 @@ def test():
                     }
                 )
 
-        # Convert to DataFrame for easy handling
+        # Sort by stock name, then by published date
+        data.sort(key=lambda x: (x["stock"], x["published_date"]))
         return data
 
         # Optionally save to CSV    df.to_csv("stock_news.csv", index=False)
