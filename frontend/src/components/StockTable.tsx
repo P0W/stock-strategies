@@ -26,7 +26,7 @@ export const StockTable: React.FC<IStockTable> = ({ headers, stockData }): React
 
                 <TableBody>
                     {stockData?.map((stock, index) => (
-                        <SymbolRow key={`${index}-${stock.symbol}`} item={stock} rank={index + 1} headers={headers} />
+                        <SymbolRow key={index} item={stock} rank={index + 1} headers={headers} />
                     ))}
                 </TableBody>
             </Table>

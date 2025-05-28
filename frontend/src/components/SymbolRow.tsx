@@ -9,13 +9,21 @@ export const SymbolRow: React.FC<ISymbolRow> = ({ item, rank, headers }): React.
 
             {headers?.map((header, index) => {
                 const value = item[header.key];
-                const key = `${index}-${header.display}`;
+                const key = `${rank}-${index}-${header.display}`;
                 if (header.key === 'rank') {
-                    return <TableCell key ={key} >
+                    return <TableCell key={key} >
                         {rank}
                     </TableCell>
                 }
-                return header.cellTemplate?.(item[header.key], item) ?? <TableCell key={key}>{value}</TableCell>
+                
+                if (header.cellTemplate) {
+                    const templateResult = header.cellTemplate(item[header.key], item);
+                    if (templateResult) {
+                        return React.cloneElement(templateResult, { key });
+                    }
+                }
+                
+                return <TableCell key={key}>{value}</TableCell>
             })}
         </TableRow>
     );
