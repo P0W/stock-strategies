@@ -37,10 +37,24 @@ import SearchIcon from "@mui/icons-material/Search";
 import SortIcon from "@mui/icons-material/Sort";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { blue, grey, green, red, yellow } from "@mui/material/colors";
+import { DatePickerComponent } from "./StockDatePicker";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import GroupIcon from "@mui/icons-material/Group";
+import StarIcon from "@mui/icons-material/Star";
 
 // Create memoized table row component
 const NewsRow = React.memo(
-  ({ news, index }: { news: IStockNews; index: number }) => {
+  ({
+    news,
+    index,
+    stockCounts,
+    isMultipleBrokers,
+  }: {
+    news: IStockNews;
+    index: number;
+    stockCounts: Record<string, number>;
+    isMultipleBrokers: boolean;
+  }) => {
     const getRecommendationColor = (recommendation: string) => {
       switch (recommendation) {
         case "BUY":
@@ -60,28 +74,85 @@ const NewsRow = React.memo(
       }
     };
 
+    const brokerCount = stockCounts[news.stock] || 1;
+
     return (
-      <TableRow hover>
+      <TableRow
+        hover
+        sx={{
+          backgroundColor: isMultipleBrokers
+            ? "rgba(255, 193, 7, 0.1)"
+            : "inherit",
+          borderLeft: isMultipleBrokers ? "4px solid #ffc107" : "none",
+          "&:hover": {
+            backgroundColor: isMultipleBrokers
+              ? "rgba(255, 193, 7, 0.15)"
+              : "rgba(0, 0, 0, 0.04)",
+          },
+        }}
+      >
         <TableCell align="center">{index + 1}</TableCell>
         <TableCell align="center">
-          <Link
-            href={news.url}
-            target="_blank"
-            rel="noreferrer"
-            underline="hover"
+          <Box
             sx={{
-              fontWeight: "bold",
-              "&:hover": {
-                color: "primary.main",
-                transform: "scale(1.05)",
-                transition: "transform 0.2s",
-              },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
             }}
           >
-            <Typography variant="h6" component="span">
-              {news.stock}
-            </Typography>
-          </Link>
+            <Link
+              href={news.url}
+              target="_blank"
+              rel="noreferrer"
+              underline="hover"
+              sx={{
+                fontWeight: "bold",
+                "&:hover": {
+                  color: "primary.main",
+                  transform: "scale(1.05)",
+                  transition: "transform 0.2s",
+                },
+              }}
+            >
+              <Typography variant="h6" component="span">
+                {news.stock}
+              </Typography>
+            </Link>
+            {isMultipleBrokers && (
+              <Tooltip
+                title={`${brokerCount} brokers recommend this stock`}
+                arrow
+              >
+                <Chip
+                  icon={<GroupIcon />}
+                  label={brokerCount}
+                  color="warning"
+                  size="small"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "0.75rem",
+                    height: "24px",
+                    "& .MuiChip-icon": {
+                      fontSize: "16px",
+                    },
+                    animation: "pulse 2s infinite",
+                    "@keyframes pulse": {
+                      "0%": {
+                        transform: "scale(1)",
+                      },
+                      "50%": {
+                        transform: "scale(1.05)",
+                      },
+                      "100%": {
+                        transform: "scale(1)",
+                      },
+                    },
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
         </TableCell>
         <TableCell align="center">
           <Chip
@@ -133,6 +204,10 @@ export const StockNews: React.FC = React.memo(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Add date picker states
+  const [selectedDate, setSelectedDate] = useState("");
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+
   // Add debounce effect for search term
   useEffect(() => {
     setIsSearching(true);
@@ -151,37 +226,60 @@ export const StockNews: React.FC = React.memo(() => {
       setIsLoading(true);
       setError(null);
       try {
-        const todaysDate = new Date().toISOString().split("T")[0];
-        const previousDate = new Date();
-        previousDate.setDate(previousDate.getDate() - 1);
-        const preDateStr = previousDate.toISOString().split("T")[0];
-
-        const res = Promise.all([
-          fetch(`/stocknews/${todaysDate}`),
-          fetch(`/stocknews/${preDateStr}`),
-        ]);
-
-        const responses = await res;
-        const data = responses.find((response) => response.ok);
-
-        if (!data) {
-          throw new Error("Unable to fetch stock news data");
-        }
-
-        let stockNews: IStockNews[] = await data.json();
-        stockNews.sort((a, b) => {
-          if (a.stock < b.stock) {
-            return -1;
-          } else if (a.stock > b.stock) {
-            return 1;
-          } else {
-            return (
-              new Date(b.published_date).getTime() -
-              new Date(a.published_date).getTime()
-            );
+        // If a specific date is selected, only fetch for that date
+        if (selectedDate) {
+          const res = await fetch(`/stocknews/${selectedDate}`);
+          if (!res.ok) {
+            throw new Error(`No data available for ${selectedDate}`);
           }
-        });
-        setStockNews(stockNews);
+          let stockNews: IStockNews[] = await res.json();
+          stockNews.sort((a, b) => {
+            if (a.stock < b.stock) {
+              return -1;
+            } else if (a.stock > b.stock) {
+              return 1;
+            } else {
+              return (
+                new Date(b.published_date).getTime() -
+                new Date(a.published_date).getTime()
+              );
+            }
+          });
+          setStockNews(stockNews);
+        } else {
+          // Default behavior - fetch today and yesterday
+          const todaysDate = new Date().toISOString().split("T")[0];
+          const previousDate = new Date();
+          previousDate.setDate(previousDate.getDate() - 1);
+          const preDateStr = previousDate.toISOString().split("T")[0];
+
+          const res = Promise.all([
+            fetch(`/stocknews/${todaysDate}`),
+            fetch(`/stocknews/${preDateStr}`),
+          ]);
+
+          const responses = await res;
+          const data = responses.find((response) => response.ok);
+
+          if (!data) {
+            throw new Error("Unable to fetch stock news data");
+          }
+
+          let stockNews: IStockNews[] = await data.json();
+          stockNews.sort((a, b) => {
+            if (a.stock < b.stock) {
+              return -1;
+            } else if (a.stock > b.stock) {
+              return 1;
+            } else {
+              return (
+                new Date(b.published_date).getTime() -
+                new Date(a.published_date).getTime()
+              );
+            }
+          });
+          setStockNews(stockNews);
+        }
       } catch (error) {
         console.error("Error fetching stock news", error);
         setError("Failed to load stock news. Please try again later.");
@@ -190,6 +288,26 @@ export const StockNews: React.FC = React.memo(() => {
       }
     };
     fetchData();
+  }, [selectedDate]);
+
+  // Fetch available dates on component mount
+  useEffect(() => {
+    const fetchAvailableDates = async () => {
+      try {
+        // Generate dates for the last 30 days
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          dates.push(date.toISOString().split("T")[0]);
+        }
+        setAvailableDates(dates);
+      } catch (error) {
+        console.warn("Could not fetch available dates");
+      }
+    };
+    fetchAvailableDates();
   }, []);
 
   // Pre-compute lowercase stocks for faster filtering
@@ -267,6 +385,23 @@ export const StockNews: React.FC = React.memo(() => {
     return sortedStockNews;
   }, [sortedStockNews, debouncedSearchTerm]);
 
+  // Calculate stock recommendation counts
+  const stockRecommendationCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    stockNewsWithLowerStocks?.forEach((news) => {
+      counts[news.stock] = (counts[news.stock] || 0) + 1;
+    });
+    return counts;
+  }, [stockNewsWithLowerStocks]);
+
+  // Get stocks with multiple broker recommendations
+  const stocksWithMultipleBrokers = useMemo(() => {
+    return Object.entries(stockRecommendationCounts)
+      .filter(([_, count]) => count > 1)
+      .map(([stock, count]) => ({ stock, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [stockRecommendationCounts]);
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
       <Card
@@ -293,6 +428,96 @@ export const StockNews: React.FC = React.memo(() => {
           </Typography>
         </Box>
         <CardContent>
+          {/* Date Picker Section */}
+          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              color="primary"
+            >
+              📅 Select Recommendations Date
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Choose a specific date to view recommendations (leave empty for latest available)
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <DatePickerComponent
+                fromDateString={selectedDate}
+                toDateString="" // We only need one date for news
+                setFromDateString={setSelectedDate}
+                setToDateString={() => {}} // No-op for to date
+                singleDateMode={true} // Add this prop to DatePickerComponent if needed
+              />
+              {selectedDate && (
+                <Chip
+                  label="Clear Date"
+                  onClick={() => setSelectedDate("")}
+                  onDelete={() => setSelectedDate("")}
+                  color="secondary"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+            {selectedDate && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Showing recommendations for: {new Date(selectedDate).toLocaleDateString()}
+              </Typography>
+            )}
+          </Paper>
+
+          {/* Multiple Brokers Highlight Section */}
+          {stocksWithMultipleBrokers.length > 0 && (
+            <Paper
+              elevation={2}
+              sx={{
+                p: 3,
+                mb: 3,
+                background: "linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)",
+                border: "2px solid #ffc107",
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <StarIcon sx={{ color: "#f39c12", mr: 1 }} />
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  color="#e67e22"
+                >
+                  🔥 Hot Picks - Multiple Broker Consensus
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Stocks with recommendations from multiple brokers are highlighted below
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {stocksWithMultipleBrokers.slice(0, 10).map(({ stock, count }) => (
+                  <Chip
+                    key={stock}
+                    icon={<TrendingUpIcon />}
+                    label={`${stock} (${count})`}
+                    color="warning"
+                    variant="filled"
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "0.875rem",
+                      "& .MuiChip-icon": {
+                        color: "#e67e22",
+                      },
+                    }}
+                  />
+                ))}
+                {stocksWithMultipleBrokers.length > 10 && (
+                  <Chip
+                    label={`+${stocksWithMultipleBrokers.length - 10} more`}
+                    color="default"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            </Paper>
+          )}
+
           <Grid container spacing={3} alignItems="center" mb={3}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -424,12 +649,32 @@ export const StockNews: React.FC = React.memo(() => {
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontWeight: "bold" }}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 1,
+                          }}
                         >
-                          Stock
-                        </Typography>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            Stock
+                          </Typography>
+                          <Tooltip
+                            title="Stocks with multiple broker recommendations are highlighted in yellow"
+                            arrow
+                          >
+                            <GroupIcon
+                              sx={{
+                                fontSize: 16,
+                                color: "text.secondary",
+                              }}
+                            />
+                          </Tooltip>
+                        </Box>
                       </TableCell>
                       <TableCell align="center">
                         <Typography
@@ -467,13 +712,18 @@ export const StockNews: React.FC = React.memo(() => {
                   </TableHead>
                   <TableBody>
                     {!isSearching &&
-                      chunkedStockNews?.map((news, index) => (
-                        <NewsRow
-                          key={`${news.stock}-${news.broker}-${index}`}
-                          news={news}
-                          index={index}
-                        />
-                      ))}
+                      chunkedStockNews?.map((news, index) => {
+                        const isMultipleBrokers = stockRecommendationCounts[news.stock] > 1;
+                        return (
+                          <NewsRow
+                            key={`${news.stock}-${news.broker}-${index}`}
+                            news={news}
+                            index={index}
+                            stockCounts={stockRecommendationCounts}
+                            isMultipleBrokers={isMultipleBrokers}
+                          />
+                        );
+                      })}
                   </TableBody>
                 </Table>
 
