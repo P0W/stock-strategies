@@ -41,6 +41,10 @@ import { DatePickerComponent } from "./StockDatePicker";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import GroupIcon from "@mui/icons-material/Group";
 import StarIcon from "@mui/icons-material/Star";
+import InsightsIcon from "@mui/icons-material/Insights";
+import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 
 // Create memoized table row component
 const NewsRow = React.memo(
@@ -208,6 +212,12 @@ export const StockNews: React.FC = React.memo(() => {
   const [selectedDate, setSelectedDate] = useState("");
   const [availableDates, setAvailableDates] = useState<string[]>([]);
 
+  // Add analytics state with caching
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsCache, setAnalyticsCache] = useState<any>(null);
+  const [analyticsCacheTimestamp, setAnalyticsCacheTimestamp] = useState<number | null>(null);
+
   // Add debounce effect for search term
   useEffect(() => {
     setIsSearching(true);
@@ -309,6 +319,90 @@ export const StockNews: React.FC = React.memo(() => {
     };
     fetchAvailableDates();
   }, []);
+
+  // Fetch 15-day analytics when no date is selected with caching
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (selectedDate) return; // Only fetch when no specific date is selected
+      
+      // Check if we have valid cached data (less than 15 minutes old)
+      const cacheValidityDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
+      const now = Date.now();
+      
+      if (analyticsCache && analyticsCacheTimestamp && 
+          (now - analyticsCacheTimestamp) < cacheValidityDuration) {
+        console.log('Using cached analytics data');
+        setAnalyticsData(analyticsCache);
+        return;
+      }
+      
+      setAnalyticsLoading(true);
+      try {
+        console.log('Fetching fresh analytics data...');
+        const today = new Date();
+        const promises = [];
+        
+        // Fetch last 15 days of data
+        for (let i = 0; i < 15; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dateStr = date.toISOString().split('T')[0];
+          promises.push(
+            fetch(`/stocknews/${dateStr}`)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => [])
+          );
+        }
+
+        const allResults = await Promise.all(promises);
+        const combinedData = allResults.flat();
+        
+        // Analyze the data
+        const stockCounts: Record<string, number> = {};
+        const brokerCounts: Record<string, number> = {};
+        const recommendationCounts: Record<string, number> = {};
+        
+        combinedData.forEach((news: IStockNews) => {
+          stockCounts[news.stock] = (stockCounts[news.stock] || 0) + 1;
+          brokerCounts[news.broker] = (brokerCounts[news.broker] || 0) + 1;
+          recommendationCounts[news.recommendation] = (recommendationCounts[news.recommendation] || 0) + 1;
+        });
+
+        const multipleRecommendations = Object.entries(stockCounts)
+          .filter(([_, count]) => count >= 3)
+          .sort(([, a], [, b]) => b - a);
+
+        const topBrokers = Object.entries(brokerCounts)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3);
+
+        const topRecommendation = Object.entries(recommendationCounts)
+          .sort(([, a], [, b]) => b - a)[0];
+
+        const analyticsResult = {
+          totalRecommendations: combinedData.length,
+          uniqueStocks: Object.keys(stockCounts).length,
+          multipleRecommendations,
+          topBrokers,
+          topRecommendation,
+          avgRecommendationsPerDay: Math.round(combinedData.length / 15),
+        };
+
+        // Cache the results
+        setAnalyticsCache(analyticsResult);
+        setAnalyticsCacheTimestamp(now);
+        setAnalyticsData(analyticsResult);
+        
+        console.log('Analytics data cached successfully');
+      } catch (error) {
+        console.warn('Failed to fetch analytics data');
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [selectedDate, analyticsCache, analyticsCacheTimestamp]);
 
   // Pre-compute lowercase stocks for faster filtering
   const stockNewsWithLowerStocks = useMemo(() => {
@@ -466,7 +560,175 @@ export const StockNews: React.FC = React.memo(() => {
             )}
           </Paper>
 
-          {/* Multiple Brokers Highlight Section */}
+          {/* Analytics Banner - Only show when no specific date is selected */}
+          {!selectedDate && analyticsData && !analyticsLoading && (
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                mb: 3,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                color: "white",
+                borderRadius: 3,
+                position: "relative",
+                overflow: "hidden",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"80\" cy=\"40\" r=\"1\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"40\" cy=\"80\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/></svg>')",
+                  pointerEvents: "none",
+                },
+              }}
+            >
+              <Box sx={{ position: "relative", zIndex: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <LightbulbIcon sx={{ mr: 1, fontSize: 28 }} />
+                  <Typography variant="h5" fontWeight="bold">
+                    💡 Did You Know? - Last 15 Days Insights
+                  </Typography>
+                  {analyticsCacheTimestamp && (
+                    <Chip
+                      label="Cached"
+                      size="small"
+                      sx={{
+                        ml: 2,
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        color: "white",
+                        fontSize: "0.7rem",
+                      }}
+                    />
+                  )}
+                </Box>
+                
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={4}>
+                    <Box sx={{ textAlign: "center" }}>
+                      <AnalyticsIcon sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
+                      <Typography variant="h3" fontWeight="bold">
+                        {analyticsData.totalRecommendations}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                        Total Recommendations
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                        ~{analyticsData.avgRecommendationsPerDay} per day
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={4}>
+                    <Box sx={{ textAlign: "center" }}>
+                      <InsightsIcon sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
+                      <Typography variant="h3" fontWeight="bold">
+                        {analyticsData.uniqueStocks}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                        Unique Stocks Covered
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                        Across all brokers
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={4}>
+                    <Box sx={{ textAlign: "center" }}>
+                      <StarIcon sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
+                      <Typography variant="h3" fontWeight="bold">
+                        {analyticsData.multipleRecommendations.length}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                        Consensus Picks
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                        3+ broker recommendations
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+                {analyticsData.multipleRecommendations.length > 0 && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      🔥 Hot Consensus Picks (3+ Brokers):
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {analyticsData.multipleRecommendations.slice(0, 6).map(([stock, count]: [string, number]) => (
+                        <Chip
+                          key={stock}
+                          label={`${stock} (${count})`}
+                          sx={{
+                            backgroundColor: "rgba(255, 255, 255, 0.2)",
+                            color: "white",
+                            fontWeight: "bold",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                            },
+                          }}
+                        />
+                      ))}
+                      {analyticsData.multipleRecommendations.length > 6 && (
+                        <Chip
+                          label={`+${analyticsData.multipleRecommendations.length - 6} more`}
+                          sx={{
+                            backgroundColor: "rgba(255, 255, 255, 0.1)",
+                            color: "white",
+                            border: "1px solid rgba(255, 255, 255, 0.3)",
+                          }}
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                )}
+
+                <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+                  <Box>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      Most Active Broker:
+                    </Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      {analyticsData.topBrokers[0]?.[0]} ({analyticsData.topBrokers[0]?.[1]} recommendations)
+                    </Typography>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      Most Common Recommendation:
+                    </Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      {analyticsData.topRecommendation?.[0]} ({analyticsData.topRecommendation?.[1]} times)
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ mt: 2, textAlign: "center" }}>
+                  <Typography variant="caption" sx={{ opacity: 0.7, fontStyle: "italic" }}>
+                    💡 Tip: Stocks with multiple broker consensus often show stronger momentum
+                    {analyticsCacheTimestamp && (
+                      <span> • Data refreshes every 15 minutes</span>
+                    )}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          )}
+
+          {/* Loading state for analytics - show different message for cached vs fresh */}
+          {!selectedDate && analyticsLoading && (
+            <Paper elevation={2} sx={{ p: 3, mb: 3, textAlign: "center" }}>
+              <CircularProgress size={24} sx={{ mr: 2 }} />
+              <Typography variant="body1" component="span">
+                {analyticsCache ? "Refreshing analytics..." : "Analyzing last 15 days of recommendations..."}
+              </Typography>
+            </Paper>
+          )}
+
+          {/* Multiple Brokers Highlight Section - Only for current day */}
           {stocksWithMultipleBrokers.length > 0 && (
             <Paper
               elevation={2}
@@ -484,11 +746,11 @@ export const StockNews: React.FC = React.memo(() => {
                   fontWeight="bold"
                   color="#e67e22"
                 >
-                  🔥 Hot Picks - Multiple Broker Consensus
+                  🔥 Today's Hot Picks - Multiple Broker Consensus
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Stocks with recommendations from multiple brokers are highlighted below
+                {selectedDate ? `Stocks with multiple recommendations for ${new Date(selectedDate).toLocaleDateString()}` : "Today's stocks with recommendations from multiple brokers are highlighted below"}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {stocksWithMultipleBrokers.slice(0, 10).map(({ stock, count }) => (
