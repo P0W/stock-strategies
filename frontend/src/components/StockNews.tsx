@@ -218,6 +218,12 @@ export const StockNews: React.FC = React.memo(() => {
   const [analyticsCache, setAnalyticsCache] = useState<any>(null);
   const [analyticsCacheTimestamp, setAnalyticsCacheTimestamp] = useState<number | null>(null);
 
+  // Add 15-day data for comprehensive search
+  const [fifteenDayData, setFifteenDayData] = useState<IStockNews[]>([]);
+  const [fifteenDayDataCache, setFifteenDayDataCache] = useState<IStockNews[]>([]);
+  const [fifteenDayDataTimestamp, setFifteenDayDataTimestamp] = useState<number | null>(null);
+  const [isLoadingFifteenDayData, setIsLoadingFifteenDayData] = useState(false);
+
   // Add debounce effect for search term
   useEffect(() => {
     setIsSearching(true);
@@ -243,6 +249,17 @@ export const StockNews: React.FC = React.memo(() => {
             throw new Error(`No data available for ${selectedDate}`);
           }
           let stockNews: IStockNews[] = await res.json();
+          
+          // Remove duplicates based on stock, broker, target_price, and published_date
+          const uniqueMap = new Map();
+          stockNews.forEach((news: IStockNews) => {
+            const key = `${news.stock}-${news.broker}-${news.target_price}-${news.published_date}`;
+            if (!uniqueMap.has(key)) {
+              uniqueMap.set(key, news);
+            }
+          });
+          stockNews = Array.from(uniqueMap.values());
+          
           stockNews.sort((a, b) => {
             if (a.stock < b.stock) {
               return -1;
@@ -276,6 +293,17 @@ export const StockNews: React.FC = React.memo(() => {
           }
 
           let stockNews: IStockNews[] = await data.json();
+          
+          // Remove duplicates based on stock, broker, target_price, and published_date
+          const uniqueMap = new Map();
+          stockNews.forEach((news: IStockNews) => {
+            const key = `${news.stock}-${news.broker}-${news.target_price}-${news.published_date}`;
+            if (!uniqueMap.has(key)) {
+              uniqueMap.set(key, news);
+            }
+          });
+          stockNews = Array.from(uniqueMap.values());
+          
           stockNews.sort((a, b) => {
             if (a.stock < b.stock) {
               return -1;
@@ -355,7 +383,17 @@ export const StockNews: React.FC = React.memo(() => {
         }
 
         const allResults = await Promise.all(promises);
-        const combinedData = allResults.flat();
+        let combinedData = allResults.flat();
+        
+        // Remove duplicates based on stock, broker, target_price, and published_date
+        const uniqueMap = new Map();
+        combinedData.forEach((news: IStockNews) => {
+          const key = `${news.stock}-${news.broker}-${news.target_price}-${news.published_date}`;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, news);
+          }
+        });
+        combinedData = Array.from(uniqueMap.values());
         
         // Analyze the data
         const stockCounts: Record<string, number> = {};
@@ -404,13 +442,82 @@ export const StockNews: React.FC = React.memo(() => {
     fetchAnalytics();
   }, [selectedDate, analyticsCache, analyticsCacheTimestamp]);
 
-  // Pre-compute lowercase stocks for faster filtering
+  // Fetch 15-day data for comprehensive search with caching
+  useEffect(() => {
+    const fetchFifteenDayData = async () => {
+      // Check if we have valid cached data (less than 30 minutes old)
+      const cacheValidityDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
+      const now = Date.now();
+      
+      if (fifteenDayDataCache.length > 0 && fifteenDayDataTimestamp && 
+          (now - fifteenDayDataTimestamp) < cacheValidityDuration) {
+        console.log('Using cached 15-day data for search');
+        setFifteenDayData(fifteenDayDataCache);
+        return;
+      }
+      
+      setIsLoadingFifteenDayData(true);
+      try {
+        console.log('Fetching fresh 15-day data for search...');
+        const today = new Date();
+        const promises = [];
+        
+        // Fetch last 15 days of data
+        for (let i = 0; i < 15; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dateStr = date.toISOString().split('T')[0];
+          promises.push(
+            fetch(`/stocknews/${dateStr}`)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => [])
+          );
+        }
+
+        const allResults = await Promise.all(promises);
+        let combinedData = allResults.flat();
+        
+        // Remove duplicates based on stock, broker, target_price, and published_date
+        const uniqueMap = new Map();
+        combinedData.forEach((news: IStockNews) => {
+          const key = `${news.stock}-${news.broker}-${news.target_price}-${news.published_date}`;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, news);
+          }
+        });
+        combinedData = Array.from(uniqueMap.values());
+        
+        // Sort by date (newest first) and then by stock name
+        combinedData.sort((a, b) => {
+          const dateComparison = new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
+          if (dateComparison !== 0) return dateComparison;
+          return a.stock.localeCompare(b.stock);
+        });
+
+        // Cache the results
+        setFifteenDayDataCache(combinedData);
+        setFifteenDayDataTimestamp(now);
+        setFifteenDayData(combinedData);
+        
+        console.log(`Cached ${combinedData.length} unique recommendations from last 15 days`);
+      } catch (error) {
+        console.warn('Failed to fetch 15-day data for search');
+      } finally {
+        setIsLoadingFifteenDayData(false);
+      }
+    };
+
+    fetchFifteenDayData();
+  }, [fifteenDayDataCache.length, fifteenDayDataTimestamp]);
+
+  // Pre-compute lowercase stocks for faster filtering - use appropriate dataset
   const stockNewsWithLowerStocks = useMemo(() => {
-    return stockNews?.map((news) => ({
+    const dataToUse = debouncedSearchTerm && debouncedSearchTerm.length > 2 ? fifteenDayData : stockNews;
+    return dataToUse?.map((news) => ({
       ...news,
       lowerStock: news.stock.toLowerCase(),
     }));
-  }, [stockNews]);
+  }, [stockNews, fifteenDayData, debouncedSearchTerm]);
 
   // Optimize filtering with memoization and debounced search
   const filteredStockNews = useMemo(() => {
@@ -419,9 +526,12 @@ export const StockNews: React.FC = React.memo(() => {
     }
 
     const searchLower = debouncedSearchTerm.toLowerCase();
-    return stockNewsWithLowerStocks?.filter((news) =>
+    const filtered = stockNewsWithLowerStocks?.filter((news) =>
       news.lowerStock.includes(searchLower)
     );
+
+    // Limit to 100 results for performance
+    return filtered?.slice(0, 100);
   }, [debouncedSearchTerm, stockNewsWithLowerStocks]);
 
   // Handle search input change
@@ -783,11 +893,11 @@ export const StockNews: React.FC = React.memo(() => {
           <Grid container spacing={3} alignItems="center" mb={3}>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Search Stocks"
+                label="Search Stocks (Last 15 Days)"
                 variant="outlined"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Enter stock name to search..."
+                placeholder="Enter stock name to search across 15 days..."
                 fullWidth
                 InputProps={{
                   startAdornment: (
@@ -800,13 +910,38 @@ export const StockNews: React.FC = React.memo(() => {
                 }}
               />
               {debouncedSearchTerm && filteredStockNews && (
-                <Typography
-                  variant="body2"
-                  sx={{ mt: 1, color: "text.secondary" }}
-                >
-                  Found {filteredStockNews.length} matches for "
-                  {debouncedSearchTerm}"
-                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary" }}
+                  >
+                    Found {filteredStockNews.length} matches for "{debouncedSearchTerm}"
+                    {debouncedSearchTerm.length > 2 && (
+                      <span style={{ color: theme.palette.primary.main, fontWeight: 'bold' }}>
+                        {" "}across last 15 days
+                      </span>
+                    )}
+                    {filteredStockNews.length === 100 && (
+                      <span style={{ color: theme.palette.warning.main }}>
+                        {" "}(showing first 100 results)
+                      </span>
+                    )}
+                  </Typography>
+                  {isLoadingFifteenDayData && debouncedSearchTerm.length > 2 && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Loading comprehensive data...
+                      </Typography>
+                    </Box>
+                  )}
+                  {fifteenDayDataTimestamp && debouncedSearchTerm.length > 2 && (
+                    <Typography variant="caption" sx={{ color: "text.secondary", display: 'block', mt: 0.5 }}>
+                      💡 Searching through {fifteenDayData.length} recommendations from last 15 days
+                      {" "}(data refreshes every 30 min)
+                    </Typography>
+                  )}
+                </Box>
               )}
             </Grid>
             <Grid item xs={12} md={6}>
