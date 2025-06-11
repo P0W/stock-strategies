@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Rebalance Analyzer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .upload-area h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .dashboard {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .metrics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metrics-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .metrics-subtitle {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .positive {
+            color: #059669;
+        }
+
+        .negative {
+            color: #dc2626;
+        }
+
+        .neutral {
+            color: #1e40af;
+        }
+
+        .chart-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-tab {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .chart-tab.active {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+
+        .chart-tab:hover:not(.active) {
+            background: #e2e8f0;
+        }
+
+        .chart-area {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .analysis-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-right: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading p {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+            border: 1px solid #fecaca;
+            font-size: 0.9rem;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .key-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .key-metric {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .key-metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .key-metric-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* D3.js Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 16px;
+            }
+
+            .key-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Portfolio Rebalance Analyzer</h1>
+            <p>Professional analysis of your stock rotation strategy</p>
+            <div class="metrics-subtitle">Upload your portfolio data for comprehensive performance analytics</div>
+        </div>
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <h3>Upload Portfolio Data</h3>
+                <p>Select or drag and drop your p=mv.json file</p>
+                <input type="file" id="fileInput" accept=".json" />
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing portfolio data...</p>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="metrics-header">
+                <div>
+                    <div class="metrics-title">Portfolio Performance Overview</div>
+                    <div class="metrics-subtitle">Key metrics from your rebalancing strategy</div>
+                </div>
+                <div class="actions-bar">
+                    <button class="btn" onclick="downloadReport()">📄 Export Report</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+                </div>
+            </div>
+
+            <!-- Key Metrics Row -->
+            <div class="key-metrics">
+                <div class="key-metric">
+                    <div class="key-metric-value positive" id="totalProfit">₹0</div>
+                    <div class="key-metric-label">Net Cash Flow</div>
+                </div>
+                <div class="key-metric">
+                    <div class="key-metric-value neutral" id="cagr">0%</div>
+                    <div class="key-metric-label">CAGR</div>
+                </div>
+                <div class="key-metric">
+                    <div class="key-metric-value neutral" id="winRate">0%</div>
+                    <div class="key-metric-label">Win Rate</div>
+                </div>
+                <div class="key-metric">
+                    <div class="key-metric-value neutral" id="totalRebalances">0</div>
+                    <div class="key-metric-label">Rebalances</div>
+                </div>
+            </div>
+
+            <!-- Detailed Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value positive" id="avgGain">₹0</div>
+                    <div class="metric-label">Avg Gain per Win</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value negative" id="avgLoss">₹0</div>
+                    <div class="metric-label">Avg Loss per Loss</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value neutral" id="maxDrawdown">₹0</div>
+                    <div class="metric-label">Max Cash Injection</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value neutral" id="sharpeRatio">0</div>
+                    <div class="metric-label">Sharpe Ratio</div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container" id="chartContainer" style="display: none;">
+            <div class="chart-controls">
+                <div class="chart-title">📈 Portfolio Performance</div>
+                <div class="chart-tabs">
+                    <div class="chart-tab active" onclick="switchChart('line')">Line Chart</div>
+                    <div class="chart-tab" onclick="switchChart('bar')">Bar Chart</div>
+                    <div class="chart-tab" onclick="switchChart('cumulative')">Cumulative</div>
+                    <div class="chart-tab" onclick="switchChart('monthly')">Monthly</div>
+                </div>
+            </div>
+            <div class="chart-area">
+                <svg class="chart-svg" id="chartSvg"></svg>
+            </div>
+        </div>
+
+        <div class="analysis-section" id="analysisSection" style="display: none;">
+            <div class="section-title">
+                📋 Detailed Analysis
+            </div>
+            <table class="summary-table" id="summaryTable">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        let portfolioData = null;
+        let processedData = null;
+        let currentChart = 'line';
+
+        // Chart dimensions
+        const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+        const width = 800 - margin.left - margin.right;
+        const height = 350 - margin.top - margin.bottom;        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.querySelector('.upload-area');
+        const loading = document.getElementById('loading');
+        const dashboard = document.getElementById('dashboard');
+        const errorMessage = document.getElementById('errorMessage');        // Window resize handler for responsive charts
+        window.addEventListener('resize', function () {
+            if (processedData && document.getElementById('chartContainer').style.display !== 'none') {
+                // Debounce resize events
+                clearTimeout(window.resizeTimeout);
+                window.resizeTimeout = setTimeout(() => {
+                    createChart(currentChart);
+                }, 250);
+            }
+        });
+
+        // Window load event to ensure proper initial sizing
+        window.addEventListener('load', function () {
+            if (processedData && document.getElementById('chartContainer').style.display !== 'none') {
+                setTimeout(() => {
+                    createChart(currentChart);
+                }, 100);
+            }
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showError('Please upload a valid JSON file');
+                return;
+            }
+
+            loading.style.display = 'block';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    portfolioData = data;
+                    analyzePortfolio(data);
+                } catch (error) {
+                    showError('Error parsing JSON file: ' + error.message);
+                    loading.style.display = 'none';
+                }
+            };
+            reader.readAsText(file);
+        } 
+        
+        function analyzePortfolio(data) {
+            try {
+                // Process the data
+                processedData = processPortfolioData(data);
+
+                // Calculate metrics
+                const metrics = calculateMetrics(processedData);
+
+                // Update dashboard
+                updateDashboard(metrics);
+
+                // Show sections first to ensure containers are rendered
+                dashboard.style.display = 'block';
+                document.getElementById('chartContainer').style.display = 'block';
+                document.getElementById('analysisSection').style.display = 'block';
+
+                // Wait for DOM to update and containers to be properly sized
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        initializeChart();
+                        createChart(currentChart);
+
+                        // Set up intersection observer to re-render chart when container becomes visible
+                        const chartContainer = document.getElementById('chartContainer');
+                        const observer = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isIntersecting && processedData) {
+                                    setTimeout(() => createChart(currentChart), 100);
+                                }
+                            });
+                        }, { threshold: 0.1 });
+
+                        observer.observe(chartContainer);
+                    }, 150);
+                });
+
+                // Create summary table
+                createSummaryTable(metrics);
+
+                loading.style.display = 'none';
+            } catch (error) {
+                showError('Error analyzing portfolio: ' + error.message);
+                loading.style.display = 'none';
+            }
+        } 
+        
+        function processPortfolioData(data) {
+            // Sort data by date in ascending order (oldest first)
+            const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const processed = [];
+            let cumulativeProfit = 0;
+
+            const initialInvestment = sortedData[0].buyAmount;
+
+            sortedData.forEach((item, index) => {
+                // For stock rotation rebalancing:
+                // profit = sellAmount - buyAmount represents the net cash flow
+                // Positive: Stocks sold had higher value than stocks bought (portfolio grew)
+                // Negative: Had to add cash to buy more expensive stocks (drawdown from external source)
+                const profit = item.sellAmount - item.buyAmount;
+                if (index === 0) {
+                    cumulativeProfit += initialInvestment;
+                }
+                cumulativeProfit += profit; // Cumulative profit includes initial investment
+
+                // The sellAmount represents the market value after rebalancing
+                // This should be close to 5L but varies due to share quantities
+
+                processed.push({
+                    date: new Date(item.date),
+                    profit: profit,
+                    cumulativeProfit: cumulativeProfit,
+                    sellAmount: item.sellAmount,
+                    buyAmount: item.buyAmount,
+                    portfolioValue: item.buyAmount, // Market value after rebalance
+                    isInitial: index === 0
+                });
+            });
+
+            return processed;
+        }
+
+        function calculateMetrics(data) {
+            if (data.length === 0) {
+                return {
+                    totalProfit: 0, cagr: 0, winRate: 0, avgGain: 0, avgLoss: 0,
+                    totalRebalances: 0, maxDrawdown: 0, sharpeRatio: 0, wins: 0,
+                    losses: 0, totalDays: 0, initialAmount: 500000, finalAmount: 500000,
+                    bestDay: 0, worstDay: 0, avgRebalance: 0
+                };
+            }
+
+            // Use all data including initial investment
+            const startDate = data[0].date; // Dec 18, 2023 - initial investment
+            const endDate = data[data.length - 1].date;
+            const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+
+            // Initial portfolio value and final portfolio value
+            const initialPortfolioValue = data[0].portfolioValue; // First entry value
+            const finalPortfolioValue = data[data.length - 1].portfolioValue; // Last entry value
+
+            // For rebalancing data (excluding initial investment)
+            const rebalanceData = data.slice(1);
+
+            // Total profit = net cash flow from all rebalances
+            const totalProfit = rebalanceData.reduce((sum, d) => sum + d.profit, 0);            // CAGR calculation based on initial investment + cumulative profits
+            const years = totalDays / 365.25;
+            let cagr = 0;
+
+            if (years > 0 && initialPortfolioValue > 0) {
+                // Final value = initial investment + all profits from rebalancing
+                const finalValue = initialPortfolioValue + totalProfit;
+                cagr = (Math.pow(finalValue / initialPortfolioValue, 1 / years) - 1) * 100;
+            }
+
+            // Win/Loss analysis - for rebalances only
+            const wins = rebalanceData.filter(d => d.profit > 0);
+            const losses = rebalanceData.filter(d => d.profit <= 0);
+            const winRate = rebalanceData.length > 0 ? (wins.length / rebalanceData.length) * 100 : 0;
+
+            const avgGain = wins.length > 0 ? wins.reduce((sum, w) => sum + w.profit, 0) / wins.length : 0;
+            const avgLoss = losses.length > 0 ? losses.reduce((sum, l) => sum + l.profit, 0) / losses.length : 0;
+
+            // Max drawdown - maximum negative cash injection needed
+            const maxDrawdown = rebalanceData.length > 0 ? Math.abs(Math.min(...rebalanceData.map(d => d.profit), 0)) : 0;
+
+            // Sharpe ratio calculation based on rebalance profits
+            const returns = rebalanceData.map(d => d.profit / initialPortfolioValue);
+            const avgReturn = returns.length > 0 ? returns.reduce((sum, r) => sum + r, 0) / returns.length : 0;
+            const returnStd = returns.length > 1 ? Math.sqrt(returns.reduce((sum, r) => sum + (r - avgReturn) ** 2, 0) / (returns.length - 1)) : 0;
+            const sharpeRatio = returnStd !== 0 ? (avgReturn / returnStd) * Math.sqrt(252) : 0;
+
+            // Additional metrics
+            const totalCashInjected = Math.abs(rebalanceData.filter(d => d.profit < 0).reduce((sum, d) => sum + d.profit, 0));
+            const totalCashExtracted = rebalanceData.filter(d => d.profit > 0).reduce((sum, d) => sum + d.profit, 0);
+
+            // Debug logging
+            console.log('Portfolio Rebalance Analysis Debug:', {
+                totalDays,
+                years,
+                initialPortfolioValue,
+                finalPortfolioValue,
+                totalProfit,
+                totalCashInjected,
+                totalCashExtracted,
+                maxDrawdown,
+                cagr,
+                winRate
+            });
+
+            return {
+                totalProfit: totalProfit,
+                cagr: isNaN(cagr) || !isFinite(cagr) ? 0 : cagr,
+                winRate: winRate,
+                avgGain: avgGain,
+                avgLoss: avgLoss,
+                totalRebalances: rebalanceData.length,
+                maxDrawdown: maxDrawdown, // Now in rupees, not percentage
+                sharpeRatio: sharpeRatio,
+                wins: wins.length,
+                losses: losses.length,
+                totalDays: Math.round(totalDays),
+                initialAmount: initialPortfolioValue,
+                finalAmount: finalPortfolioValue,
+                bestDay: rebalanceData.length > 0 ? Math.max(...rebalanceData.map(d => d.profit)) : 0,
+                worstDay: rebalanceData.length > 0 ? Math.min(...rebalanceData.map(d => d.profit)) : 0,
+                avgRebalance: rebalanceData.length > 0 ? rebalanceData.reduce((sum, d) => sum + d.profit, 0) / rebalanceData.length : 0,
+                totalCashInjected: totalCashInjected,
+                totalCashExtracted: totalCashExtracted
+            };
+        } 
+        
+        function updateDashboard(metrics) {
+            document.getElementById('totalProfit').textContent = formatCurrency(metrics.totalProfit);
+            document.getElementById('totalProfit').className = `key-metric-value ${metrics.totalProfit >= 0 ? 'positive' : 'negative'}`;
+
+            document.getElementById('cagr').textContent = metrics.cagr.toFixed(2) + '%';
+            document.getElementById('cagr').className = `key-metric-value ${metrics.cagr >= 0 ? 'positive' : 'negative'}`;
+
+            document.getElementById('winRate').textContent = metrics.winRate.toFixed(1) + '%';
+            document.getElementById('avgGain').textContent = formatCurrency(metrics.avgGain);
+            document.getElementById('avgLoss').textContent = formatCurrency(metrics.avgLoss);
+            document.getElementById('totalRebalances').textContent = metrics.totalRebalances;
+            document.getElementById('maxDrawdown').textContent = formatCurrency(metrics.maxDrawdown);
+            document.getElementById('sharpeRatio').textContent = metrics.sharpeRatio.toFixed(2);
+        }        // D3.js Chart Functions
+        
+        function initializeChart() {
+            const svg = d3.select('#chartSvg');
+            svg.selectAll('*').remove(); // Clear previous chart
+
+            // Set initial responsive attributes
+            svg.attr('viewBox', '0 0 800 400')
+                .attr('preserveAspectRatio', 'xMidYMid meet')
+                .style('width', '100%')
+                .style('height', '100%');
+        }
+
+        function switchChart(type) {
+            currentChart = type;
+
+            // Update tab active state with smooth transition
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.transition = 'all 0.3s ease';
+            });
+            event.target.classList.add('active');
+
+            // Add fade transition
+            const svg = d3.select('#chartSvg');
+            svg.transition()
+                .duration(200)
+                .style('opacity', 0)
+                .on('end', function () {
+                    // Create new chart after fade out
+                    createChart(type);
+                    // Fade back in
+                    svg.transition()
+                        .duration(300)
+                        .style('opacity', 1);
+                });
+        }
+        function createChart(type) {
+            if (!processedData) return;
+
+            // Wait for chart container to be visible and rendered
+            setTimeout(() => {
+                // Get fresh container dimensions after ensuring visibility
+                const chartArea = document.querySelector('.chart-area');
+                if (!chartArea) return;
+
+                const containerWidth = chartArea.clientWidth || 800;
+                const containerHeight = 400;
+
+                // Update SVG dimensions to fill container
+                const svg = d3.select('#chartSvg');
+                svg.attr('width', containerWidth)
+                    .attr('height', containerHeight)
+                    .attr('viewBox', `0 0 ${containerWidth} ${containerHeight}`)
+                    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+                switch (type) {
+                    case 'line':
+                        createLineChart(containerWidth, containerHeight);
+                        break;
+                    case 'bar':
+                        createBarChart(containerWidth, containerHeight);
+                        break;
+                    case 'cumulative':
+                        createCumulativeChart(containerWidth, containerHeight);
+                        break;
+                    case 'monthly':
+                        createMonthlyChart(containerWidth, containerHeight);
+                        break;
+                }
+            }, 50);
+        }
+
+        function createLineChart(containerWidth, containerHeight) {
+            const svg = d3.select('#chartSvg');
+            svg.selectAll('*').remove();
+
+            const margin = { top: 20, right: 30, bottom: 40, left: 70 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Use rebalance data only (skip initial investment)
+            const rebalanceData = processedData.slice(1);
+            const sortedData = [...rebalanceData].sort((a, b) => a.date - b.date);
+
+            // Scales
+            const xScale = d3.scaleTime()
+                .domain(d3.extent(sortedData, d => d.date))
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain(d3.extent(sortedData, d => d.profit))
+                .nice()
+                .range([height, 0]);
+
+            // Line generator
+            const line = d3.line()
+                .x(d => xScale(d.date))
+                .y(d => yScale(d.profit))
+                .curve(d3.curveMonotoneX);
+
+            // Add axes with animation
+            const xAxis = g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .style('opacity', 0);
+
+            xAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat('%b %d')));
+
+            const yAxis = g.append('g')
+                .style('opacity', 0);
+
+            yAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisLeft(yScale).tickFormat(d => `₹${d.toLocaleString()}`));
+
+            // Add axis labels
+            g.append('text')
+                .attr('transform', `translate(${width / 2}, ${height + 35})`)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Date')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 0 - margin.left)
+                .attr('x', 0 - (height / 2))
+                .attr('dy', '1em')
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Profit/Loss (₹)')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+
+            // Add line with animation
+            const path = g.append('path')
+                .datum(sortedData)
+                .attr('fill', 'none')
+                .attr('stroke', '#1e40af')
+                .attr('stroke-width', 2)
+                .attr('d', line)
+                .attr('stroke-dasharray', function (d) {
+                    const length = this.getTotalLength();
+                    return length + ' ' + length;
+                })
+                .attr('stroke-dashoffset', function (d) {
+                    return this.getTotalLength();
+                });
+
+            path.transition()
+                .duration(1000)
+                .ease(d3.easeLinear)
+                .attr('stroke-dashoffset', 0);
+
+            // Add dots with staggered animation
+            g.selectAll('.dot')
+                .data(sortedData)
+                .enter().append('circle')
+                .attr('class', 'dot')
+                .attr('cx', d => xScale(d.date))
+                .attr('cy', d => yScale(d.profit))
+                .attr('r', 0)
+                .attr('fill', d => d.profit >= 0 ? '#059669' : '#dc2626')
+                .transition()
+                .duration(300)
+                .delay((d, i) => i * 50)
+                .attr('r', 3)
+                .on('end', function () {
+                    // Add hover effects after animation
+                    d3.select(this)
+                        .on('mouseover', function (event, d) {
+                            d3.select(this).transition().duration(150).attr('r', 5);
+                            const tooltip = d3.select('body').append('div')
+                                .attr('class', 'tooltip')
+                                .style('opacity', 0);
+
+                            tooltip.html(`Date: ${d.date.toLocaleDateString()}<br/>P&L: ₹${d.profit.toLocaleString()}`)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 28) + 'px')
+                                .transition()
+                                .duration(200)
+                                .style('opacity', 1);
+                        })
+                        .on('mouseout', function () {
+                            d3.select(this).transition().duration(150).attr('r', 3);
+                            d3.selectAll('.tooltip').transition().duration(200).style('opacity', 0).remove();
+                        });
+                });
+        }
+
+        function createBarChart(containerWidth, containerHeight) {
+            const svg = d3.select('#chartSvg');
+            svg.selectAll('*').remove();
+
+            const margin = { top: 20, right: 30, bottom: 40, left: 70 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Use rebalance data only
+            const rebalanceData = processedData.slice(1);
+            const sortedData = [...rebalanceData].sort((a, b) => a.date - b.date);
+
+            // Scales
+            const xScale = d3.scaleBand()
+                .domain(sortedData.map((d, i) => i))
+                .range([0, width])
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain(d3.extent(sortedData, d => d.profit))
+                .nice()
+                .range([height, 0]);
+
+            // Add axes with animation
+            const xAxis = g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .style('opacity', 0);
+
+            xAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisBottom(xScale).tickFormat((d, i) => sortedData[i].date.toLocaleDateString().substring(0, 5)));
+
+            const yAxis = g.append('g')
+                .style('opacity', 0);
+
+            yAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisLeft(yScale).tickFormat(d => `₹${d.toLocaleString()}`));
+
+            // Add zero line
+            g.append('line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', yScale(0))
+                .attr('y2', yScale(0))
+                .attr('stroke', '#666')
+                .attr('stroke-dasharray', '3,3')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+
+            // Add bars with animation
+            g.selectAll('.bar')
+                .data(sortedData)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', (d, i) => xScale(i))
+                .attr('width', xScale.bandwidth())
+                .attr('y', yScale(0))
+                .attr('height', 0)
+                .attr('fill', d => d.profit >= 0 ? '#059669' : '#dc2626')
+                .transition()
+                .duration(800)
+                .delay((d, i) => i * 30)
+                .attr('y', d => d.profit >= 0 ? yScale(d.profit) : yScale(0))
+                .attr('height', d => Math.abs(yScale(d.profit) - yScale(0)))
+                .on('end', function () {
+                    // Add hover effects after animation
+                    d3.select(this)
+                        .on('mouseover', function (event, d) {
+                            d3.select(this).transition().duration(150).style('opacity', 0.8);
+                            const tooltip = d3.select('body').append('div')
+                                .attr('class', 'tooltip')
+                                .style('opacity', 0);
+
+                            tooltip.html(`Date: ${d.date.toLocaleDateString()}<br/>P&L: ₹${d.profit.toLocaleString()}`)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 28) + 'px')
+                                .transition()
+                                .duration(200)
+                                .style('opacity', 1);
+                        })
+                        .on('mouseout', function () {
+                            d3.select(this).transition().duration(150).style('opacity', 1);
+                            d3.selectAll('.tooltip').transition().duration(200).style('opacity', 0).remove();
+                        });
+                });
+
+            // Add axis labels
+            g.append('text')
+                .attr('transform', `translate(${width / 2}, ${height + 35})`)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Rebalance Events')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 0 - margin.left)
+                .attr('x', 0 - (height / 2))
+                .attr('dy', '1em')
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Profit/Loss (₹)')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+        }
+
+        function createCumulativeChart(containerWidth, containerHeight) {
+            const svg = d3.select('#chartSvg');
+            svg.selectAll('*').remove();
+
+            const margin = { top: 20, right: 30, bottom: 40, left: 70 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Use rebalance data only and calculate cumulative
+            const rebalanceData = processedData.slice(1);
+            const sortedData = [...rebalanceData].sort((a, b) => a.date - b.date);
+
+            let cumulative = 0;
+            const cumulativeData = sortedData.map(d => {
+                cumulative += d.profit;
+                return {
+                    date: d.date,
+                    cumulative: cumulative
+                };
+            });
+
+            // Scales
+            const xScale = d3.scaleTime()
+                .domain(d3.extent(cumulativeData, d => d.date))
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain(d3.extent(cumulativeData, d => d.cumulative))
+                .nice()
+                .range([height, 0]);
+
+            // Line generator
+            const line = d3.line()
+                .x(d => xScale(d.date))
+                .y(d => yScale(d.cumulative))
+                .curve(d3.curveMonotoneX);
+
+            // Area generator
+            const area = d3.area()
+                .x(d => xScale(d.date))
+                .y0(yScale(0))
+                .y1(d => yScale(d.cumulative))
+                .curve(d3.curveMonotoneX);
+
+            // Add axes with animation
+            const xAxis = g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .style('opacity', 0);
+
+            xAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat('%b %d')));
+
+            const yAxis = g.append('g')
+                .style('opacity', 0);
+
+            yAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisLeft(yScale).tickFormat(d => `₹${d.toLocaleString()}`));
+
+            // Add area fill with animation
+            const areaPath = g.append('path')
+                .datum(cumulativeData)
+                .attr('fill', 'rgba(30, 64, 175, 0.1)')
+                .attr('d', area)
+                .style('opacity', 0);
+
+            areaPath.transition()
+                .duration(800)
+                .style('opacity', 1);
+
+            // Add line with animation
+            const path = g.append('path')
+                .datum(cumulativeData)
+                .attr('fill', 'none')
+                .attr('stroke', '#1e40af')
+                .attr('stroke-width', 2)
+                .attr('d', line)
+                .attr('stroke-dasharray', function (d) {
+                    const length = this.getTotalLength();
+                    return length + ' ' + length;
+                })
+                .attr('stroke-dashoffset', function (d) {
+                    return this.getTotalLength();
+                });
+
+            path.transition()
+                .duration(1200)
+                .ease(d3.easeLinear)
+                .attr('stroke-dashoffset', 0);
+
+            // Add axis labels
+            g.append('text')
+                .attr('transform', `translate(${width / 2}, ${height + 35})`)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Date')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 0 - margin.left)
+                .attr('x', 0 - (height / 2))
+                .attr('dy', '1em')
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Cumulative Profit (₹)')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+        }
+
+        function createMonthlyChart(containerWidth, containerHeight) {
+            const svg = d3.select('#chartSvg');
+            svg.selectAll('*').remove();
+
+            const margin = { top: 20, right: 30, bottom: 40, left: 70 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Group data by month
+            const rebalanceData = processedData.slice(1);
+            const monthlyData = {};
+
+            rebalanceData.forEach(d => {
+                const monthKey = d.date.getFullYear() + '-' + (d.date.getMonth() + 1).toString().padStart(2, '0');
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = 0;
+                }
+                monthlyData[monthKey] += d.profit;
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const monthlyArray = sortedMonths.map(month => ({
+                month: month,
+                profit: monthlyData[month]
+            }));
+
+            // Scales
+            const xScale = d3.scaleBand()
+                .domain(sortedMonths)
+                .range([0, width])
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain(d3.extent(monthlyArray, d => d.profit))
+                .nice()
+                .range([height, 0]);
+
+            // Add axes with animation
+            const xAxis = g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .style('opacity', 0);
+
+            xAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisBottom(xScale));
+
+            const yAxis = g.append('g')
+                .style('opacity', 0);
+
+            yAxis.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .call(d3.axisLeft(yScale).tickFormat(d => `₹${d.toLocaleString()}`));
+
+            // Add zero line
+            g.append('line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', yScale(0))
+                .attr('y2', yScale(0))
+                .attr('stroke', '#666')
+                .attr('stroke-dasharray', '3,3')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+
+            // Add bars with animation
+            g.selectAll('.bar')
+                .data(monthlyArray)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.month))
+                .attr('width', xScale.bandwidth())
+                .attr('y', yScale(0))
+                .attr('height', 0)
+                .attr('fill', d => d.profit >= 0 ? '#059669' : '#dc2626')
+                .transition()
+                .duration(800)
+                .delay((d, i) => i * 100)
+                .attr('y', d => d.profit >= 0 ? yScale(d.profit) : yScale(0))
+                .attr('height', d => Math.abs(yScale(d.profit) - yScale(0)))
+                .on('end', function () {
+                    // Add hover effects after animation
+                    d3.select(this)
+                        .on('mouseover', function (event, d) {
+                            d3.select(this).transition().duration(150).style('opacity', 0.8);
+                            const tooltip = d3.select('body').append('div')
+                                .attr('class', 'tooltip')
+                                .style('opacity', 0);
+
+                            tooltip.html(`Month: ${d.month}<br/>P&L: ₹${d.profit.toLocaleString()}`)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 28) + 'px')
+                                .transition()
+                                .duration(200)
+                                .style('opacity', 1);
+                        })
+                        .on('mouseout', function () {
+                            d3.select(this).transition().duration(150).style('opacity', 1);
+                            d3.selectAll('.tooltip').transition().duration(200).style('opacity', 0).remove();
+                        });
+                });
+
+            // Add axis labels
+            g.append('text')
+                .attr('transform', `translate(${width / 2}, ${height + 35})`)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Month')
+                .transition()
+                .duration(700)
+                .style('opacity', 1);
+
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 0 - margin.left)
+                .attr('x', 0 - (height / 2))
+                .attr('dy', '1em')
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('opacity', 0)
+                .text('Monthly P&L (₹)').transition()
+                .duration(700)
+                .style('opacity', 1);
+        }
+
+        function createSummaryTable(metrics) {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+            const summaryData = [
+                ['Net Cash Flow', formatCurrency(metrics.totalProfit), 'Total cash extracted/injected from rebalancing (+ = extracted, - = injected)'],
+                ['Portfolio CAGR', metrics.cagr.toFixed(2) + '%', 'Portfolio value growth rate from ' + formatCurrency(metrics.initialAmount) + ' to ' + formatCurrency(metrics.finalAmount)],
+                ['Win Rate', metrics.winRate.toFixed(1) + '%', 'Percentage of rebalances that generated positive cash flow'],
+                ['Total Rebalances', metrics.totalRebalances, 'Number of portfolio rebalancing events'],
+                ['Profitable Rebalances', metrics.wins, 'Number of rebalances with positive cash flow'],
+                ['Cash Injection Rebalances', metrics.losses, 'Number of rebalances requiring cash injection'],
+                ['Average Cash per Win', formatCurrency(metrics.avgGain), 'Average cash extracted per profitable rebalance'],
+                ['Average Cash per Loss', formatCurrency(metrics.avgLoss), 'Average cash injected per loss-making rebalance'],
+                ['Best Single Rebalance', formatCurrency(metrics.bestDay), 'Highest single rebalance cash extraction'],
+                ['Worst Single Rebalance', formatCurrency(metrics.worstDay), 'Highest single rebalance cash injection required'],
+                ['Average per Rebalance', formatCurrency(metrics.avgRebalance), 'Average cash flow per rebalance'],
+                ['Max Cash Injection', formatCurrency(metrics.maxDrawdown), 'Maximum single cash injection required for rebalancing'],
+                ['Sharpe Ratio', metrics.sharpeRatio.toFixed(2), 'Risk-adjusted return measure'],
+                ['Total Days', metrics.totalDays, 'Portfolio duration since Dec 18, 2023'],
+                ['Initial Portfolio Value', formatCurrency(metrics.initialAmount), 'Starting portfolio value (Dec 18, 2023)'],
+                ['Final Portfolio Value', formatCurrency(metrics.finalAmount), 'Current portfolio market value'],
+                ['Total Cash Extracted', formatCurrency(metrics.totalCashExtracted), 'Total cash taken out from profitable rebalances'],
+                ['Total Cash Injected', formatCurrency(metrics.totalCashInjected), 'Total cash added for rebalancing needs']
+            ];
+
+            summaryData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${row[0]}</strong></td>
+                    <td>${row[1]}</td>
+                    <td>${row[2]}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function formatCurrency(amount) {
+            return '₹' + amount.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        }
+
+        function downloadReport() {
+            if (!portfolioData) return;
+
+            const report = {
+                timestamp: new Date().toISOString(),
+                summary: 'Portfolio Rebalance Analysis Report',
+                data: portfolioData,
+                metrics: calculateMetrics(processPortfolioData(portfolioData))
+            };
+
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'portfolio-analysis-report.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>
