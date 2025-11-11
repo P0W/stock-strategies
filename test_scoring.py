@@ -191,7 +191,7 @@ def run_comparison(days_back=365, num_stocks=12, rebalance_days=90):
     print(f"\n🧪 Testing scoring methods...")
     print("-"*80)
 
-    results = {"old": [], "new": []}
+    results = {"old": [], "new": [], "overlaps": [], "old_stocks": [], "new_stocks": []}
     tested = 0
 
     for idx, (start_date, end_date) in enumerate(test_pairs, 1):
@@ -215,21 +215,29 @@ def run_comparison(days_back=365, num_stocks=12, rebalance_days=90):
         old_return = calculate_return(old_scored, end_prices)
         new_return = calculate_return(new_scored, end_prices)
 
+        # Track stock selections
+        old_symbols = set(s["symbol"] for s in old_scored)
+        new_symbols = set(s["symbol"] for s in new_scored)
+        overlap = len(old_symbols & new_symbols)
+
         results["old"].append(old_return)
         results["new"].append(new_return)
+        results["overlaps"].append(overlap)
+        results["old_stocks"].append(old_symbols)
+        results["new_stocks"].append(new_symbols)
 
         # Show progress
         if tested % 5 == 1 or tested == len(test_pairs):
             print(f"Period {tested}: {start_date} → {end_date}")
-            print(f"  OLD: {old_return:+.2f}%  |  NEW: {new_return:+.2f}%")
+            print(f"  OLD: {old_return:+.2f}%  |  NEW: {new_return:+.2f}%  |  Overlap: {overlap}/{num_stocks} stocks")
 
     if tested == 0:
         print("\n❌ No data available - check API access")
         return None
 
-    # Analysis
+    # Detailed Analysis
     print("\n" + "="*80)
-    print("RESULTS")
+    print("DETAILED METRICS")
     print("="*80)
 
     for name, returns in [("OLD (Production Bug)", results["old"]),
@@ -239,34 +247,111 @@ def run_comparison(days_back=365, num_stocks=12, rebalance_days=90):
         wins = sum(1 for r in returns if r > 0)
         win_rate = wins / len(returns) * 100
 
+        # Calculate additional metrics
+        std_dev = (sum((r - avg) ** 2 for r in returns) / len(returns)) ** 0.5
+        sharpe = (avg / std_dev) if std_dev > 0 else 0
+        max_return = max(returns)
+        min_return = min(returns)
+        max_drawdown = min_return  # Worst single period loss
+
+        # Median
+        sorted_returns = sorted(returns)
+        median = sorted_returns[len(sorted_returns) // 2]
+
+        # Consecutive wins/losses
+        consecutive_wins = 0
+        consecutive_losses = 0
+        current_streak = 0
+        for r in returns:
+            if r > 0:
+                current_streak = current_streak + 1 if current_streak > 0 else 1
+                consecutive_wins = max(consecutive_wins, current_streak)
+            else:
+                current_streak = current_streak - 1 if current_streak < 0 else -1
+                consecutive_losses = max(consecutive_losses, abs(current_streak))
+
         print(f"\n{name}:")
         print(f"  Average return/period:  {avg:+7.2f}%")
+        print(f"  Median return:          {median:+7.2f}%")
         print(f"  Total return:           {total:+7.2f}%")
-        print(f"  Win rate:               {win_rate:7.1f}% ({wins}/{len(returns)})")
-        print(f"  Best:  {max(returns):+.2f}%  |  Worst: {min(returns):+.2f}%")
+        print(f"  Win rate:               {win_rate:7.1f}% ({wins}/{len(returns)} periods)")
+        print(f"  Volatility (StdDev):    {std_dev:7.2f}%")
+        print(f"  Sharpe ratio:           {sharpe:7.2f}  (return/risk)")
+        print(f"  Best period:            {max_return:+7.2f}%")
+        print(f"  Worst period:           {min_return:+7.2f}%")
+        print(f"  Max drawdown:           {max_drawdown:+7.2f}%")
+        print(f"  Longest win streak:     {consecutive_wins} periods")
+        print(f"  Longest loss streak:    {consecutive_losses} periods")
 
-    # Head-to-head
+    # Head-to-head comparison
     print("\n" + "="*80)
-    print("COMPARISON")
+    print("HEAD-TO-HEAD COMPARISON")
     print("="*80)
 
     old_avg = sum(results["old"]) / len(results["old"])
     new_avg = sum(results["new"]) / len(results["new"])
     diff = new_avg - old_avg
 
+    old_std = (sum((r - old_avg) ** 2 for r in results["old"]) / len(results["old"])) ** 0.5
+    new_std = (sum((r - new_avg) ** 2 for r in results["new"]) / len(results["new"])) ** 0.5
+
+    old_sharpe = (old_avg / old_std) if old_std > 0 else 0
+    new_sharpe = (new_avg / new_std) if new_std > 0 else 0
+
     new_wins = sum(1 for i in range(len(results["old"]))
                    if results["new"][i] > results["old"][i])
 
-    print(f"\n📊 NEW vs OLD:")
-    if abs(diff) < 0.3:
-        print(f"   ≈ SIMILAR performance ({diff:+.2f}%)")
-    elif diff > 0:
-        print(f"   ✅ NEW WINS by {diff:+.2f}% per period")
-        print(f"      Annualized: {diff * (365/rebalance_days):+.2f}%")
-    else:
-        print(f"   ❌ OLD WINS by {abs(diff):+.2f}% per period")
+    avg_overlap = sum(results["overlaps"]) / len(results["overlaps"])
 
-    print(f"\n   Head-to-head: NEW wins {new_wins}/{len(results['old'])} times ({new_wins/len(results['old'])*100:.1f}%)")
+    print(f"\n📊 Return Comparison:")
+    print(f"   Average return:   OLD {old_avg:+.2f}%  vs  NEW {new_avg:+.2f}%")
+    print(f"   Difference:       {diff:+.2f}% per period")
+    if abs(diff) >= 0.3:
+        print(f"   Annualized:       {diff * (365/rebalance_days):+.2f}%")
+
+    print(f"\n📉 Risk Comparison:")
+    print(f"   Volatility:       OLD {old_std:.2f}%  vs  NEW {new_std:.2f}%")
+    print(f"   Sharpe Ratio:     OLD {old_sharpe:.2f}  vs  NEW {new_sharpe:.2f}")
+
+    if new_sharpe > old_sharpe:
+        print(f"   ✅ NEW has better risk-adjusted returns")
+    elif abs(new_sharpe - old_sharpe) < 0.1:
+        print(f"   ≈ Similar risk-adjusted returns")
+    else:
+        print(f"   ⚠️  OLD has better risk-adjusted returns")
+
+    print(f"\n🎯 Consistency:")
+    print(f"   Head-to-head:     NEW wins {new_wins}/{len(results['old'])} times ({new_wins/len(results['old'])*100:.1f}%)")
+    print(f"   Avg stock overlap: {avg_overlap:.1f}/{num_stocks} stocks ({avg_overlap/num_stocks*100:.1f}%)")
+
+    # Correlation
+    if len(results["old"]) > 2:
+        old_mean = sum(results["old"]) / len(results["old"])
+        new_mean = sum(results["new"]) / len(results["new"])
+
+        numerator = sum((results["old"][i] - old_mean) * (results["new"][i] - new_mean)
+                       for i in range(len(results["old"])))
+        old_var = sum((r - old_mean) ** 2 for r in results["old"])
+        new_var = sum((r - new_mean) ** 2 for r in results["new"])
+
+        if old_var > 0 and new_var > 0:
+            correlation = numerator / ((old_var * new_var) ** 0.5)
+            print(f"   Return correlation: {correlation:.2f}  (1.0 = identical, 0 = uncorrelated)")
+
+    # Which stocks differ most
+    only_old = set()
+    only_new = set()
+    for i in range(len(results["old_stocks"])):
+        only_old.update(results["old_stocks"][i] - results["new_stocks"][i])
+        only_new.update(results["new_stocks"][i] - results["old_stocks"][i])
+
+    print(f"\n🔄 Portfolio Differences:")
+    print(f"   Unique to OLD: {len(only_old)} stocks")
+    print(f"   Unique to NEW: {len(only_new)} stocks")
+    if len(only_old) <= 10:
+        print(f"   OLD picks: {', '.join(sorted(only_old))}")
+    if len(only_new) <= 10:
+        print(f"   NEW picks: {', '.join(sorted(only_new))}")
 
     # Recommendation
     print("\n" + "="*80)
