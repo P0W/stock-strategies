@@ -117,42 +117,120 @@ def z_score_normalize(data):
     return [(x - mean) / std_dev for x in data]
 
 
-def composite_score(returns, price):
-    # Define weights for each metric
-    weight_returns = 0.4  # Increased from 0.3
-    weight_vwap = 0.3  # Increased from 0.2
-    weight_rsi = 0.3  # Decreased from 0.5
+def _rsi_tent(rsi):
+    """Tent function: rewards healthy uptrend RSI (50-65), penalizes overbought (>75).
+    Returns ~[-1, 1] range centered around 0."""
+    if rsi <= 30:
+        return -1.0 + (rsi / 30.0) * 0.5
+    elif rsi <= 50:
+        return -0.5 + (rsi - 30) / 20.0 * 0.5
+    elif rsi <= 65:
+        return (rsi - 50) / 15.0
+    elif rsi <= 80:
+        return 1.0 - (rsi - 65) / 15.0 * 1.5
+    else:
+        return -0.5 - (rsi - 80) / 20.0 * 0.5
 
-    normalized_returns = [
+
+def _raw_components(returns, price):
+    """Compute raw time-weighted components for a single stock.
+    Bug fixes applied:
+    1. VWAP: single time-weight (no double-weighting)
+    2. Returns: raw %, NOT annualized for 1w/1mo
+    3. RSI: tent function (rewards 50-65, penalizes >75)
+    4. Time weights: 1w reduced from 0.50 to 0.25
+    """
+    time_weights = [0.35, 0.40, 0.25]  # 1y, 1mo, 1w
+
+    raw_returns = [
         returns["1y"]["return"],
-        100.0 * ((1 + returns["1mo"]["return"] / 100.0) ** 12 - 1),
-        100.0 * ((1 + returns["1w"]["return"] / 100.0) ** 52 - 1),
-    ]
-    ## weighing the recent value more, difference from current price
-    weighted_vwap = [0.2, 0.3, 0.5]
-    normalized_vwap = [
-        (price - returns["1y"]["vwap"]) * weighted_vwap[0] / price,
-        (price - returns["1mo"]["vwap"]) * weighted_vwap[1] / price,
-        (price - returns["1w"]["vwap"]) * weighted_vwap[2] / price,
+        returns["1mo"]["return"],
+        returns["1w"]["return"],
     ]
 
-    normalized_rsi = [returns["1y"]["rsi"], returns["1mo"]["rsi"], returns["1w"]["rsi"]]
+    pct_off_vwap = [
+        (price - returns["1y"]["vwap"]) / price * 100.0,
+        (price - returns["1mo"]["vwap"]) / price * 100.0,
+        (price - returns["1w"]["vwap"]) / price * 100.0,
+    ]
 
-    # Calculate time-weighted components (more weight to recent periods)
-    time_weights = [0.2, 0.3, 0.5]  # 1y, 1mo, 1w
+    rsi_tented = [
+        _rsi_tent(returns["1y"]["rsi"]),
+        _rsi_tent(returns["1mo"]["rsi"]),
+        _rsi_tent(returns["1w"]["rsi"]),
+    ]
 
-    returns_component = sum(r * w for r, w in zip(normalized_returns, time_weights))
-    vwap_component = sum(v * w for v, w in zip(normalized_vwap, time_weights))
-    rsi_component = sum(r * w for r, w in zip(normalized_rsi, time_weights))
+    r = sum(x * w for x, w in zip(raw_returns, time_weights))
+    v = sum(x * w for x, w in zip(pct_off_vwap, time_weights))
+    s = sum(x * w for x, w in zip(rsi_tented, time_weights))
+    return r, v, s, raw_returns, pct_off_vwap, rsi_tented
 
-    # Calculate the composite score with revised weights
-    composite_score_result = (
-        weight_returns * returns_component
-        + weight_vwap * vwap_component
-        + weight_rsi * rsi_component
-    )
 
-    return composite_score_result, normalized_returns, normalized_vwap, normalized_rsi
+def compute_composite_scores(results):
+    """Cross-sectional z-score normalization across the universe,
+    then blend with 0.4/0.3/0.3 weights so the labels mean what they say."""
+    weight_returns = 0.4
+    weight_vwap = 0.3
+    weight_rsi = 0.3
+
+    # Phase 1: compute raw components for each stock
+    components = []
+    for s in results:
+        try:
+            r, v, rs, raw_ret, raw_vwap, raw_rsi = _raw_components(
+                s["returns"], s["price"]
+            )
+            components.append((r, v, rs))
+            s["_raw"] = (r, v, rs)
+            s["normalized_returns"] = raw_ret
+            s["normalized_vwap"] = raw_vwap
+            s["normalized_rsi"] = raw_rsi
+        except Exception:
+            components.append(None)
+            s["_raw"] = None
+
+    # Phase 2: z-score normalize across the universe
+    valid = [c for c in components if c is not None]
+    if not valid:
+        for s in results:
+            s["composite_score"] = 0
+        return
+
+    r_vals = [c[0] for c in valid]
+    v_vals = [c[1] for c in valid]
+    s_vals = [c[2] for c in valid]
+
+    def _stats(vals):
+        m = sum(vals) / len(vals)
+        sd = (sum((x - m) ** 2 for x in vals) / len(vals)) ** 0.5
+        return m, sd if sd > 0 else 1.0
+
+    mr, sdr = _stats(r_vals)
+    mv, sdv = _stats(v_vals)
+    ms, sds = _stats(s_vals)
+
+    for s in results:
+        raw = s.pop("_raw", None)
+        if raw is None:
+            s["composite_score"] = 0
+            continue
+        zr = (raw[0] - mr) / sdr
+        zv = (raw[1] - mv) / sdv
+        zs = (raw[2] - ms) / sds
+        s["composite_score"] = weight_returns * zr + weight_vwap * zv + weight_rsi * zs
+
+
+def composite_score(returns, price):
+    """Legacy per-stock scoring (used by regenrate_stock_list).
+    Applies bug fixes but without cross-sectional z-score normalization."""
+    r, v, rs, raw_ret, raw_vwap, raw_rsi = _raw_components(returns, price)
+
+    weight_returns = 0.4
+    weight_vwap = 0.3
+    weight_rsi = 0.3
+
+    score = weight_returns * r + weight_vwap * v + weight_rsi * rs
+    return score, raw_ret, raw_vwap, raw_rsi
 
 
 ## @brief Method to fetch nifty 200 data
@@ -260,32 +338,21 @@ def getStockList(
 
             # If all durations were successfully fetched
             if "1y" in returns and "1mo" in returns and "1w" in returns:
-                score, ret, v, rsi = composite_score(returns, current_price)
                 results.append(
                     {
                         "stock": aTag.text,
                         "symbol": sTag.text,
                         "returns": returns,
                         "price": current_price,
-                        "composite_score": score,
-                        "normalized_returns": ret,
-                        "normalized_vwap": v,
-                        "normalized_rsi": rsi,
                     }
                 )
 
         # Use ThreadPoolExecutor for concurrent fetching
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(fetch_stock_data, subTables)
-        # for s in subTables:
-        #    fetch_stock_data(s)
 
-        ## retry failed requests
-        # for s in retries:
-        #     if retries[s] > 0:
-        #         fetch_stock_data(s, retry=True)
-        #     else:
-        #         logging.info(f"Failed to fetch data for {s.text} after 3 retries")
+        # Cross-sectional z-score normalization across the universe
+        compute_composite_scores(results)
 
         results = sorted(results, key=lambda x: x["composite_score"], reverse=True)
     else:
@@ -487,14 +554,9 @@ def regenrate_stock_list(fileName):
     with open(fileName, "r") as fh:
         nifty200_symbols = json.load(fh)
 
-    ## calculate the composite score for each stock
-    for stock in nifty200_symbols:
-        (
-            stock["composite_score"],
-            stock["normalized_returns"],
-            stock["normalized_vwap"],
-            stock["normalized_rsi"],
-        ) = composite_score(stock["returns"], stock["price"])
+    ## cross-sectional z-score normalization across the universe
+    compute_composite_scores(nifty200_symbols)
+
     ## sort the stocks based on the composite score
     nifty200_symbols = sorted(
         nifty200_symbols, key=lambda x: x["composite_score"], reverse=True
