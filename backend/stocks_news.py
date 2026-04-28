@@ -215,71 +215,72 @@ def test():
 
     # Set headers to mimic a browser request
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     }
 
     try:
         # Send HTTP request
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Check for request errors
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
 
         # Parse HTML content
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Find news items
-        news_items = soup.find_all("li", class_="clearfix")
+        # Find news items inside #cagetory
+        news_items = soup.select("#cagetory li.clearfix")
 
         # Extract data
         data = []
         for item in news_items:
-            title_tag = item.find("h2")
-            if title_tag and title_tag.find("a"):
-                title = title_tag.text.strip()
-                link = title_tag.find("a")["href"]
+            # Title and link are on the first <a> tag (h2 is nested inside it)
+            a_tag = item.select_one("a[title]")
+            if not a_tag:
+                continue
 
-                # Parse title: "Buy/Hold/Sell/Neutral Stock; target of Rs XXXX: Broker"
-                title_match = re.match(
-                    r"(Buy|Hold|Sell|Neutral)\s+([^;]+);\s*target\s+of\s+Rs\s*(\d+(?:\.\d+)?)\s*:\s*(.+)",
-                    title,
-                )
-                if not title_match:
-                    continue  # Skip if title doesn't match expected format
+            title = a_tag.get("title", "").strip()
+            link = a_tag.get("href", "")
 
-                recommendation, stock, target_price, broker = title_match.groups()
-                target_price = float(target_price)
+            # Parse title: "Buy/Hold/Sell/Neutral Stock; target of Rs XXXX: Broker"
+            title_match = re.match(
+                r"(Buy|Hold|Sell|Neutral)\s+([^;]+);\s*target\s+of\s+Rs\s*(\d+(?:\.\d+)?)\s*:\s*(.+)",
+                title,
+            )
+            if not title_match:
+                continue
 
-                # Get description for date
-                desc_tag = item.find("p")
-                description = desc_tag.text.strip() if desc_tag else ""
+            recommendation, stock, target_price, broker = title_match.groups()
+            target_price = float(target_price)
+
+            # Date is in the <p> description text: "...dated April 27, 2026..."
+            published_date = ""
+            desc_tag = item.select_one("p")
+            if desc_tag:
                 date_match = re.search(
-                    r"dated\s([A-Za-z]+)\s(\d{1,2}),\s(\d{4})", description
+                    r"dated\s([A-Za-z]+)\s(\d{1,2}),\s(\d{4})", desc_tag.text
                 )
-                published_date = (
-                    f"{date_match.group(1)} {date_match.group(2)}, {date_match.group(3)}"
-                    if date_match
-                    else ""
-                )
+                if date_match:
+                    published_date = (
+                        f"{date_match.group(1)} {date_match.group(2)}, {date_match.group(3)}"
+                    )
 
-                # Build output
-                data.append(
-                    {
-                        "published_date": published_date,
-                        "url": link,
-                        "broker": broker.strip(),
-                        "recommendation": recommendation,
-                        "stock": stock.strip(),
-                        "target_price": target_price,
-                    }
-                )
+            data.append(
+                {
+                    "published_date": published_date,
+                    "url": link,
+                    "broker": broker.strip(),
+                    "recommendation": recommendation,
+                    "stock": stock.strip(),
+                    "target_price": target_price,
+                }
+            )
 
         # Sort by stock name, then by published date
         data.sort(key=lambda x: (x["stock"], x["published_date"]))
         return data
 
-        # Optionally save to CSV    df.to_csv("stock_news.csv", index=False)
-
     except requests.RequestException as e:
-        print(f"Error fetching data: {e}")
+        logging.error("Error fetching data: %s", e)
+        return []
 
 
 def get_stock_news(back_days=1):
