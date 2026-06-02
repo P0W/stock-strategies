@@ -105,7 +105,36 @@ export interface IStockBalls {
     };
     link: string;
     composite_score: number;
+    price?: number;
 };
+
+export type RebalanceAction = "BUY" | "SELL" | "HOLD" | "REVIEW" | "ADD" | "TRIM";
+
+export interface IHolding {
+    stock: string;
+    symbol: string;
+    shares: number;
+    currentPrice: number;
+    avgPrice: number;
+    returns: number;
+    weight: number;
+}
+
+export interface IRebalanceRow {
+    symbol: string;
+    stock: string;
+    action: RebalanceAction;
+    rank: number | null;
+    composite_score: number | null;
+    score_card: { [key: string]: string } | null;
+    link: string | null;
+    shares: number;
+    price: number | null;
+    value: number;
+    targetShares: number;
+    deltaShares: number;
+    deltaAmount: number;
+}
 
 
 export interface IStockNews {

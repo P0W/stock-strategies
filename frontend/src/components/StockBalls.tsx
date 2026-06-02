@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { IStockBalls } from "./StockDataTypes";
+import { PortfolioRebalance } from "./PortfolioRebalance";
 import {
   Avatar,
   Box,
@@ -546,6 +547,10 @@ export const StockBalls: React.FC = React.memo(() => {
           )}
         </CardContent>
       </Card>
+
+      {!isLoading && !error && stockBalls.length > 0 && (
+        <PortfolioRebalance stockBalls={stockBalls} />
+      )}
     </Container>
   );
 });
