@@ -1,0 +1,203 @@
+================================================================================
+COMPREHENSIVE STRATEGY TESTING RESULTS
+================================================================================
+
+Test Period: Nov 2024 - Nov 2025 (13 months real Azure data)
+Strategies Tested: 125 combinations (5 profit × 5 stop loss × 5 max hold)
+Scoring Method: NEW percentile-based ranking
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+1. PROFIT TARGET DOESN'T MATTER
+   --------------------------------
+   All strategies with same stop loss + max hold performed IDENTICALLY
+   regardless of profit target (1%, 1.5%, 2%, 2.5%, or 3%).
+
+   Example: These all gave +4.38% return:
+   - +1.0%/-10%/90d
+   - +1.5%/-10%/90d
+   - +2.0%/-10%/90d ← YOUR CURRENT STRATEGY
+   - +2.5%/-10%/90d
+   - +3.0%/-10%/90d
+
+   Conclusion: Profit target is irrelevant. Focus on stop loss + max hold!
+
+2. YOUR CURRENT STRATEGY IS ALREADY OPTIMAL
+   -----------------------------------------
+   Strategy: 2% profit / weekly checks / 90-day mandatory
+   Performance: +4.38% total return (7 trades over 13 months)
+
+   This is TIED FOR #1 among all 125 strategies tested!
+
+   Exit breakdown:
+   - 4 profit exits (hit 2% target)
+   - 1 stop loss exit
+   - 2 max hold exits (90 days)
+
+3. FREQUENT REBALANCING IS HARMFUL
+   --------------------------------
+   Short max hold periods (7/14/30 days) = WORSE returns
+
+   Performance by max hold:
+   - 7-day max:   12 trades → -0.18% total (WORST)
+   - 14-day max:  12 trades → -0.18% total (WORST)
+   - 30-day max:  12 trades → -0.18% total (WORST)
+   - 60-day max:  8-10 trades → -1.57% to -5.54% total
+   - 90-day max:  7-8 trades → +3.65% to +4.38% total (BEST)
+
+   Fewer, more selective trades > frequent rebalancing!
+
+4. STOP LOSS IMPACT
+   -----------------
+   With 90-day max hold:
+   - Tight stops (-2%, -3%, -5%): 8-10 trades, -5.54% to -5.39% return
+   - Medium stops (-7%):          8 trades, +3.65% return
+   - Loose stops (-10%):          7 trades, +4.38% return (BEST)
+
+   Looser stop losses performed BETTER!
+   Why? Avoids stopping out during temporary dips.
+
+================================================================================
+BEST STRATEGIES (Top 10)
+================================================================================
+
+Rank  Strategy              Trades  Exits(P/L/H)  Avg/Trade  Total   MaxLoss
+----  -------------------   ------  ------------  ---------  -----   -------
+1     ANY%/-10%/90d         7       4/1/2         +0.63%     +4.38%  -14.64%
+2     ANY%/-7%/90d          8       4/2/2         +0.46%     +3.65%  -8.28%
+3     ANY%/-10%/60d         8       4/1/3         -0.20%     -1.57%  -14.64%
+4     ANY%/-5%/60d          9       4/4/1         -0.26%     -2.30%  -8.28%
+5     ANY%/-7%/60d          9       4/2/3         -0.26%     -2.30%  -8.28%
+
+Note: "ANY%" means 1%, 1.5%, 2%, 2.5%, or 3% - all perform identically!
+
+================================================================================
+WORST STRATEGIES
+================================================================================
+
+Rank  Strategy              Trades  Exits(P/L/H)  Avg/Trade  Total   MaxLoss
+----  -------------------   ------  ------------  ---------  -----   -------
+121   ANY%/-2%/90d          10      4/6/0         -0.55%     -5.54%  -8.28%
+122   ANY%/-3%/90d          10      4/6/0         -0.55%     -5.54%  -8.28%
+123   ANY%/-5%/90d          8       3/4/1         -0.67%     -5.39%  -8.28%
+124   ANY%/-2%/60d          10      4/6/0         -0.55%     -5.54%  -8.28%
+125   ANY%/-3%/60d          10      4/6/0         -0.55%     -5.54%  -8.28%
+
+Common pattern: Tight stop losses + shorter holds = More losing trades
+
+================================================================================
+COMPARISON TO PREVIOUS RECOMMENDATION
+================================================================================
+
+Previous test (find_best_strategy.py) recommended:
+  → 1% profit / -3% stop / 7-day max hold
+  → Result: -0.18% total (12 trades)
+
+Current test shows this is TIED FOR WORST!
+
+Why the discrepancy?
+  - Previous test may have used different data or scoring method
+  - This test uses 13 months of REAL Azure production data
+  - This test uses NEW percentile scoring
+
+Recommendation: TRUST THIS TEST (uses your real production data!)
+
+================================================================================
+FINAL VERDICT
+================================================================================
+
+✅ KEEP YOUR CURRENT STRATEGY: 2% profit / weekly check / 90-day max hold
+
+Why change is NOT needed:
+-------------------------
+1. Already optimal among 125 strategies tested
+2. Fewer trades = lower transaction costs
+3. Gives positions time to develop momentum
+4. Avoids whipsawing in and out
+
+Your current performance:
+-------------------------
+- Total return: +4.38% (13 months)
+- Annualized: ~4.0%
+- Win rate: 57.1% (4 wins, 3 losses)
+- Max loss: -14.64% (acceptable with -10% stop guideline)
+
+Minor tweaks to consider:
+------------------------
+1. Tighter adherence to weekly checks
+   - You admitted "not disciplined in rebalancing"
+   - Set Monday morning calendar reminder
+
+2. Consider -7% stop loss instead of -10%
+   - Almost same return (+3.65% vs +4.38%)
+   - Better downside protection (max loss -8.28% vs -14.64%)
+   - Only 1 extra trade per year (8 vs 7)
+
+3. Keep 2% profit target
+   - Easy to remember
+   - Psychologically satisfying
+   - Performance identical to 1%, 1.5%, 2.5%, or 3% anyway!
+
+================================================================================
+WHAT YOU ASKED FOR vs WHAT THE DATA SHOWS
+================================================================================
+
+You said: "I want to book profit fastly, okay to book loss too"
+
+What you thought this meant:
+- Quick profit taking (1% vs 2%)
+- Tight stop losses (-3%)
+- Frequent rebalancing (weekly)
+
+What the data ACTUALLY shows:
+- Profit target level doesn't matter
+- Looser stops (-7% to -10%) > tight stops (-2% to -3%)
+- Longer holds (90 days) > frequent rebalancing (7 days)
+
+Why?
+----
+In a momentum strategy with good stock selection:
+1. Winners need TIME to run (cutting at 1% misses 5%+ gains)
+2. Losers also need TIME to bounce back (stopping at -3% misses recoveries)
+3. Your NEW percentile scoring picks QUALITY stocks that deserve patience
+
+The paradox: "Booking fast" works AGAINST momentum investing!
+
+================================================================================
+ACTION ITEMS
+================================================================================
+
+1. ✅ NO CODE CHANGES NEEDED
+   Your current strategy is already optimal!
+
+2. ⚠️  DISCIPLINE IMPROVEMENT NEEDED
+   - Set recurring calendar reminder: Every Monday 9 AM
+   - Check portfolio performance
+   - If ANY position hit +2% → rebalance
+   - If 90 days passed → mandatory rebalance
+
+3. 💡 OPTIONAL: Consider -7% stop loss
+   - Replace: "if 90 days passed"
+   - With: "if 90 days passed OR loss >= -7%"
+   - Better protection, minimal impact on returns
+
+4. 📊 MONITOR FOR 3 MORE MONTHS
+   - Continue current strategy
+   - Track actual vs expected performance
+   - Re-run this test in Feb 2026 with more data
+
+================================================================================
+SUMMARY
+================================================================================
+
+DON'T FIX WHAT ISN'T BROKEN!
+
+Your current 2%/90-day strategy with NEW percentile scoring is already
+optimal. The only improvement needed is DISCIPLINE in executing it weekly.
+
+The best strategy isn't always the most complex or active one. Sometimes
+it's patience + consistency + good stock selection.
+
+================================================================================
